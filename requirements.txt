@@ -1,0 +1,7 @@
+flask>=3.0.0
+requests>=2.31.0
+imageio-ffmpeg>=0.5.1
+yt-dlp>=2024.8.1
+edge-tts>=7.0.0
+Pillow>=10.0.0
+gunicorn>=21.2.0
