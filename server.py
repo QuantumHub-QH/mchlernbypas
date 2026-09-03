@@ -48,6 +48,12 @@ def init_db():
                     identifier TEXT PRIMARY KEY,
                     expiry_date TEXT
                  )''')
+    c.execute('''CREATE TABLE IF NOT EXISTS users (
+                    discord_id TEXT PRIMARY KEY,
+                    discord_username TEXT,
+                    discord_avatar TEXT,
+                    joined_at TEXT
+                 )''')
     conn.commit()
     conn.close()
 
@@ -179,10 +185,29 @@ def callback_discord():
     if not is_in_server:
         return redirect("/?error=not_in_server")
         
-    # Sukses
-    session['discord_user'] = user_data.get('username')
-    session['discord_id'] = user_data.get('id')
-    session['discord_avatar'] = f"https://cdn.discordapp.com/avatars/{user_data.get('id')}/{user_data.get('avatar')}.png"
+    # Sukses — simpan ke session
+    discord_id   = user_data.get('id')
+    username     = user_data.get('username')
+    avatar_hash  = user_data.get('avatar')
+    avatar_url   = f"https://cdn.discordapp.com/avatars/{discord_id}/{avatar_hash}.png" if avatar_hash else "https://cdn.discordapp.com/embed/avatars/0.png"
+
+    session['discord_user']   = username
+    session['discord_id']     = discord_id
+    session['discord_avatar'] = avatar_url
+
+    # Daftarkan user ke tabel users (INSERT OR IGNORE supaya tidak duplikat)
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+        c.execute(
+            "INSERT OR IGNORE INTO users (discord_id, discord_username, discord_avatar, joined_at) VALUES (?, ?, ?, ?)",
+            (discord_id, username, avatar_url, datetime.now().isoformat())
+        )
+        conn.commit()
+        conn.close()
+    except Exception:
+        pass
+
     return redirect("/?success=discord_ok")
 
 @app.route("/logout")
@@ -210,12 +235,17 @@ def get_total_users():
     try:
         conn = sqlite3.connect(DB_PATH)
         c = conn.cursor()
-        c.execute("SELECT COUNT(DISTINCT identifier) FROM usage")
+        c.execute("SELECT COUNT(*) FROM users")
         count = c.fetchone()[0]
         conn.close()
         return count
     except:
         return 0
+
+@app.route("/api/total-users")
+def api_total_users():
+    """Endpoint untuk polling realtime total pengguna di frontend"""
+    return jsonify({"total": get_total_users()})
 
 # ── HELPER: Resolve Roblox operation ID ───────────────────────────────────────
 def resolve_asset_id(api_key, operation_path, max_wait=90):
