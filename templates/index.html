@@ -6,58 +6,43 @@
 <title>MCHLERN TOOLS — Roblox Audio Uploader PRO</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@700;900&family=Anton&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@700;900&display=swap" rel="stylesheet">
 <!-- Google Identity Services for Login -->
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 * { box-sizing:border-box; margin:0; padding:0; }
 :root {
-  --bg-color: #060606;
-  --panel-bg: #0d0d0d;
-  --panel-border: rgba(255, 30, 60, 0.25);
-  --red: #ff1e3c;
-  --red-deep: #b3001b;
-  --white: #ffffff;
+  --bg-color: #05050a;
+  --panel-bg: rgba(20, 20, 35, 0.4);
+  --panel-border: rgba(255, 255, 255, 0.08);
+  --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  --cyan: #00e5ff;
+  --purple: #b347ff;
   --green: #00e676;
-  --text-muted: #9a9a9a;
+  --red: #ff3366;
+  --text: #ffffff;
+  --text-muted: #8a8a9f;
 }
 
 /* ── ANIMATED BACKGROUND ── */
 body {
   font-family: 'Inter', sans-serif;
   background-color: var(--bg-color);
-  color: var(--white);
+  color: var(--text);
   min-height: 100vh;
   overflow-x: hidden;
   position: relative;
 }
 .bg-animation {
-  position: fixed; inset: 0; z-index: -2;
-  background:
-    radial-gradient(circle at 15% 20%, rgba(255,30,60,0.14) 0%, transparent 45%),
-    radial-gradient(circle at 85% 80%, rgba(255,30,60,0.10) 0%, transparent 45%),
-    radial-gradient(circle at 60% 50%, rgba(255,255,255,0.03) 0%, transparent 60%);
-  animation: bgPulse 8s ease-in-out infinite alternate;
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1;
+  background: radial-gradient(circle at 20% 30%, rgba(0,229,255,0.08) 0%, transparent 40%),
+              radial-gradient(circle at 80% 70%, rgba(179,71,255,0.08) 0%, transparent 40%);
+  animation: bgMove 15s ease-in-out infinite alternate;
 }
-@keyframes bgPulse {
-  0%   { filter: brightness(1); transform: scale(1); }
-  100% { filter: brightness(1.35); transform: scale(1.06); }
+@keyframes bgMove {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.1); }
 }
-/* scanlines */
-body::after {
-  content:''; position:fixed; inset:0; z-index:9990; pointer-events:none;
-  background: repeating-linear-gradient(0deg, rgba(255,255,255,0.025) 0 1px, transparent 1px 3px);
-  mix-blend-mode: overlay;
-}
-/* top danger ticker */
-.top-ticker {
-  position: fixed; top:0; left:0; right:0; height:4px; z-index:9995;
-  background: repeating-linear-gradient(45deg, var(--red) 0 20px, #0a0a0a 20px 40px);
-  background-size: 56px 56px;
-  animation: tickerMove 1.2s linear infinite;
-  box-shadow: 0 0 18px rgba(255,30,60,0.8);
-}
-@keyframes tickerMove { to { background-position: 56px 0; } }
 
 /* ── LAYOUT ── */
 .app-container {
@@ -66,100 +51,90 @@ body::after {
   gap: 20px;
   max-width: 1400px;
   margin: 0 auto;
-  padding: 34px 24px 24px;
+  padding: 24px;
   min-height: 100vh;
 }
 @media(max-width: 900px) {
   .app-container { grid-template-columns: 1fr; }
 }
 
-/* ── BRUTAL PANELS ── */
+/* ── GLASS PANELS ── */
 .glass-panel {
-  background: linear-gradient(180deg, #111 0%, #0a0a0a 100%);
+  background: var(--panel-bg);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   border: 1px solid var(--panel-border);
-  border-radius: 6px;
+  border-radius: 16px;
   padding: 20px;
-  box-shadow: 6px 6px 0 rgba(255,30,60,0.18), 0 0 40px rgba(255,30,60,0.06) inset;
+  box-shadow: var(--glass-shadow);
   position: relative;
   overflow: hidden;
-  transition: box-shadow .25s, transform .25s;
-}
-.glass-panel:hover {
-  box-shadow: 8px 8px 0 rgba(255,30,60,0.30), 0 0 50px rgba(255,30,60,0.10) inset;
 }
 .glass-panel::before {
-  content:''; position:absolute; top:0; left:0; right:0; height:2px;
-  background: linear-gradient(90deg, transparent, var(--red), #fff, var(--red), transparent);
-  animation: topShine 3s linear infinite;
-  background-size: 200% 100%;
-}
-@keyframes topShine {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
 }
 
 /* ── HEADER / LOGO ── */
 .logo-title {
-  font-family: 'Anton', 'Outfit', sans-serif; font-size: 28px; font-weight: 900;
-  letter-spacing: 2px; color: var(--white);
-  text-shadow: 0 0 20px rgba(255,30,60,0.9), 3px 3px 0 var(--red-deep);
+  font-family: 'Outfit', sans-serif; font-size: 24px; font-weight: 900;
+  background: linear-gradient(90deg, var(--cyan), var(--purple));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
   margin-bottom: 4px;
 }
-.logo-sub { font-size: 11px; color: var(--red); text-transform: uppercase; letter-spacing: 3px; margin-bottom: 24px; font-weight: 700; }
+.logo-sub { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 24px; }
 
 /* ── SIDEBAR SECTIONS ── */
-.section-title { font-size: 13px; font-weight: 800; color: var(--white); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 1px; }
-.section-title i { color: var(--red); }
-.divider { height: 2px; background: linear-gradient(90deg, var(--red), transparent); margin: 20px 0; box-shadow: 0 0 8px rgba(255,30,60,0.5); }
+.section-title { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+.section-title i { color: var(--cyan); }
+.divider { height: 1px; background: var(--panel-border); margin: 20px 0; }
 
 /* ── INPUTS & BUTTONS ── */
 .input-group { margin-bottom: 12px; }
-.input-label { display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px; text-transform: uppercase; letter-spacing: .5px; }
+.input-label { display: block; font-size: 11px; color: var(--text-muted); margin-bottom: 4px; }
 .input-field {
-  width: 100%; background: #000; border: 1px solid rgba(255,255,255,0.12);
-  color: var(--white); padding: 10px 12px; border-radius: 4px; font-size: 12px; font-family: inherit;
+  width: 100%; background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1);
+  color: var(--text); padding: 10px 12px; border-radius: 8px; font-size: 12px; font-family: inherit;
   transition: all 0.2s; outline: none;
 }
-.input-field:focus { border-color: var(--red); box-shadow: 0 0 12px rgba(255,30,60,0.45); }
+.input-field:focus { border-color: var(--cyan); box-shadow: 0 0 10px rgba(0,229,255,0.2); }
 select.input-field { appearance: none; cursor: pointer; }
 
 .btn {
   display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-  padding: 10px 16px; border-radius: 4px; font-size: 12px; font-weight: 700;
-  border: none; cursor: pointer; transition: all 0.15s; white-space: nowrap;
-  text-transform: uppercase; letter-spacing: .5px;
+  padding: 10px 16px; border-radius: 8px; font-size: 12px; font-weight: 600;
+  border: none; cursor: pointer; transition: all 0.2s; white-space: nowrap;
 }
-.btn-cyan { background: var(--red); color: #fff; box-shadow: 3px 3px 0 rgba(179,0,27,0.9); }
-.btn-cyan:hover { box-shadow: 0 0 18px rgba(255,30,60,0.8), 3px 3px 0 rgba(179,0,27,0.9); transform: translate(-1px,-1px); }
-.btn-outline { background: transparent; border: 1px solid rgba(255,255,255,0.2); color: var(--white); }
-.btn-outline:hover { background: rgba(255,30,60,0.12); border-color: var(--red); color: #fff; box-shadow: 0 0 12px rgba(255,30,60,0.35); }
-.btn-red { background: rgba(255,30,60,0.12); border: 1px solid rgba(255,30,60,0.4); color: var(--red); }
-.btn-red:hover { background: rgba(255,30,60,0.25); box-shadow: 0 0 12px rgba(255,30,60,0.4); }
+.btn-cyan { background: var(--cyan); color: #000; }
+.btn-cyan:hover { box-shadow: 0 0 15px rgba(0,229,255,0.4); transform: translateY(-1px); }
+.btn-outline { background: transparent; border: 1px solid var(--panel-border); color: var(--text); }
+.btn-outline:hover { background: rgba(255,255,255,0.05); }
+.btn-red { background: rgba(255,51,102,0.1); border: 1px solid rgba(255,51,102,0.3); color: var(--red); }
+.btn-red:hover { background: rgba(255,51,102,0.2); }
 .btn-full { width: 100%; }
 
 /* ── QUOTA & LOGIN CARD ── */
 .quota-card {
-  background: #000; border-radius: 6px; padding: 16px; border: 1px solid rgba(255,30,60,0.3);
+  background: rgba(0,0,0,0.4); border-radius: 12px; padding: 16px; border: 1px solid rgba(255,255,255,0.05);
   margin-bottom: 16px; text-align: center;
-  box-shadow: 0 0 25px rgba(255,30,60,0.12) inset;
 }
-.quota-number { font-size: 30px; font-family: 'Anton', sans-serif; font-weight: 900; color: var(--red); text-shadow: 0 0 18px rgba(255,30,60,0.9); }
+.quota-number { font-size: 28px; font-family: 'Outfit', sans-serif; font-weight: 700; color: var(--cyan); }
 .quota-text { font-size: 11px; color: var(--text-muted); }
 .google-btn-wrapper { display: flex; justify-content: center; margin-top: 12px; }
 
 /* ── MODIFIERS ── */
 .slider-container { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
-.slider-label { font-size: 11px; color: var(--text-muted); width: 80px; flex-shrink: 0; text-transform: uppercase; }
-.slider-val { font-size: 12px; font-weight: 800; color: var(--red); width: 40px; text-align: right; text-shadow: 0 0 8px rgba(255,30,60,0.7); }
+.slider-label { font-size: 11px; color: var(--text-muted); width: 80px; flex-shrink: 0; }
+.slider-val { font-size: 12px; font-weight: 700; color: var(--cyan); width: 40px; text-align: right; }
 input[type=range] {
-  flex: 1; -webkit-appearance: none; height: 4px; border-radius: 2px; background: linear-gradient(90deg, var(--red), rgba(255,255,255,0.1)); outline: none; cursor: pointer;
+  flex: 1; -webkit-appearance: none; height: 4px; border-radius: 2px; background: rgba(255,255,255,0.1); outline: none; cursor: pointer;
 }
 input[type=range]::-webkit-slider-thumb {
-  -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; background: var(--red);
-  border: 2px solid #fff; box-shadow: 0 0 14px var(--red); cursor: pointer;
+  -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%; background: var(--cyan);
+  box-shadow: 0 0 10px var(--cyan); cursor: pointer;
 }
 .template-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 16px; }
-.rec-box { background: rgba(0,230,118,0.08); border: 1px solid rgba(0,230,118,0.25); color: var(--green); padding: 8px; border-radius: 4px; font-size: 11px; text-align: center; font-weight: 700; margin-top: 12px; letter-spacing: .5px; }
+.rec-box { background: rgba(0,230,118,0.1); border: 1px solid rgba(0,230,118,0.2); color: var(--green); padding: 8px; border-radius: 8px; font-size: 11px; text-align: center; font-weight: 600; margin-top: 12px; }
 
 /* ── UPLOAD AREA ── */
 .main-content { display: flex; flex-direction: column; gap: 20px; }
@@ -167,149 +142,113 @@ input[type=range]::-webkit-slider-thumb {
 @media(max-width: 1100px) { .upload-grid { grid-template-columns: 1fr; } }
 
 .dropzone {
-  border: 2px dashed rgba(255,30,60,0.3); border-radius: 6px; padding: 30px 20px;
+  border: 2px dashed rgba(255,255,255,0.15); border-radius: 12px; padding: 30px 20px;
   text-align: center; cursor: pointer; transition: all 0.2s; position: relative;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0,0,0,0.2);
 }
-.dropzone:hover, .dropzone.dragover { border-color: var(--red); background: rgba(255,30,60,0.06); box-shadow: 0 0 25px rgba(255,30,60,0.25); }
+.dropzone:hover, .dropzone.dragover { border-color: var(--cyan); background: rgba(0,229,255,0.05); }
 .dropzone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
-.dz-icon { font-size: 24px; margin-bottom: 8px; display: block; filter: drop-shadow(0 0 8px rgba(255,30,60,0.8)); }
+.dz-icon { font-size: 24px; margin-bottom: 8px; display: block; }
 .dz-text { font-size: 12px; color: var(--text-muted); }
 
 .file-list { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; max-height: 200px; overflow-y: auto; }
 .file-item {
-  background: #000; border: 1px solid rgba(255,255,255,0.08); border-radius: 4px;
+  background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.05); border-radius: 8px;
   padding: 8px 12px; display: flex; align-items: center; gap: 10px; font-size: 12px;
 }
 .file-item input {
   flex: 1; background: transparent; border: none; border-bottom: 1px solid rgba(255,255,255,0.2);
   color: #fff; padding: 4px; font-size: 11px; outline: none; transition: 0.2s;
 }
-.file-item input:focus { border-color: var(--red); }
+.file-item input:focus { border-color: var(--cyan); }
 
 .yt-card {
-  display: flex; align-items: center; gap: 12px; padding: 8px; background: #000;
-  border: 1px solid rgba(255,255,255,0.08); border-radius: 4px; margin-top: 8px;
+  display: flex; align-items: center; gap: 12px; padding: 8px; background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(255,255,255,0.05); border-radius: 8px; margin-top: 8px;
 }
-.yt-thumb { width: 60px; height: 40px; object-fit: cover; border-radius: 4px; }
+.yt-thumb { width: 60px; height: 40px; object-fit: cover; border-radius: 6px; }
 .yt-info { flex: 1; min-width: 0; }
 .yt-title { font-size: 10px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px; }
 
-.audio-preview { width: 100%; height: 35px; margin-top: 12px; border-radius: 6px; display: none; }
+.audio-preview { width: 100%; height: 35px; margin-top: 12px; border-radius: 8px; display: none; }
 .upload-btn {
-  margin-top: 16px; width: 100%; padding: 14px; font-size: 13px; font-weight: 900;
-  text-transform: uppercase; letter-spacing: 2px; border-radius: 6px;
+  margin-top: 16px; width: 100%; padding: 14px; font-size: 13px; font-weight: 800;
+  text-transform: uppercase; letter-spacing: 1px; border-radius: 12px;
 }
 .bypass-glow {
-  position: relative; background: linear-gradient(135deg, var(--red) 0%, #7a0012 100%);
-  color: #fff; border: 1px solid rgba(255,255,255,0.25);
-  box-shadow: 0 0 25px rgba(255,30,60,0.5), 4px 4px 0 rgba(0,0,0,0.9);
-  animation: btnPulse 2s ease-in-out infinite;
+  background: linear-gradient(135deg, var(--cyan), var(--purple));
+  color: #fff; border: none; box-shadow: 0 4px 15px rgba(0,229,255,0.3);
 }
-@keyframes btnPulse {
-  0%,100% { box-shadow: 0 0 18px rgba(255,30,60,0.45), 4px 4px 0 rgba(0,0,0,0.9); }
-  50%     { box-shadow: 0 0 40px rgba(255,30,60,0.85), 4px 4px 0 rgba(0,0,0,0.9); }
-}
-.bypass-glow:hover { transform: translateY(-2px) scale(1.01); filter: brightness(1.15); }
+.bypass-glow:hover { box-shadow: 0 6px 20px rgba(179,71,255,0.5); transform: translateY(-2px); }
 
 /* ── HISTORY TABLE ── */
 .history-panel { margin-top: 20px; }
 table { width: 100%; border-collapse: collapse; font-size: 11px; text-align: left; }
-th { padding: 12px; color: var(--red); border-bottom: 2px solid rgba(255,30,60,0.4); font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
-td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-tr:hover { background: rgba(255,30,60,0.05); }
-.status-badge { padding: 4px 8px; border-radius: 3px; font-weight: 700; font-size: 10px; letter-spacing: .5px; }
-.bg-green { background: rgba(0,230,118,0.12); color: var(--green); border: 1px solid rgba(0,230,118,0.3); }
-.bg-red { background: rgba(255,30,60,0.12); color: var(--red); border: 1px solid rgba(255,30,60,0.35); }
-.copy-badge { cursor: pointer; background: rgba(255,30,60,0.1); color: #fff; padding: 4px 8px; border-radius: 3px; border: 1px solid rgba(255,30,60,0.35); transition: 0.2s; }
-.copy-badge:hover { background: var(--red); box-shadow: 0 0 12px rgba(255,30,60,0.6); }
+th { padding: 12px; color: var(--text-muted); border-bottom: 1px solid var(--panel-border); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+td { padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.02); }
+tr:hover { background: rgba(255,255,255,0.02); }
+.status-badge { padding: 4px 8px; border-radius: 4px; font-weight: 600; font-size: 10px; }
+.bg-green { background: rgba(0,230,118,0.1); color: var(--green); }
+.bg-red { background: rgba(255,51,102,0.1); color: var(--red); }
+.copy-badge { cursor: pointer; background: rgba(0,229,255,0.1); color: var(--cyan); padding: 4px 8px; border-radius: 4px; border: 1px solid rgba(0,229,255,0.2); transition: 0.2s; }
+.copy-badge:hover { background: rgba(0,229,255,0.2); }
 
 /* ── SPINNER & STATUS ── */
-.spinner { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: var(--red); border-radius: 50%; animation: spin 0.6s linear infinite; }
+.spinner { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.6s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
-.status-bar { padding: 10px; border-radius: 4px; font-size: 11px; font-weight: 700; margin-top: 12px; display: none; text-align: center; background: rgba(255,30,60,0.08); border: 1px solid rgba(255,30,60,0.3); }
-
-/* ── SCROLLBAR ── */
-::-webkit-scrollbar { width: 8px; height: 8px; }
-::-webkit-scrollbar-track { background: #0a0a0a; }
-::-webkit-scrollbar-thumb { background: var(--red-deep); border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: var(--red); box-shadow: 0 0 8px rgba(255,30,60,0.8); }
+.status-bar { padding: 10px; border-radius: 8px; font-size: 11px; font-weight: 600; margin-top: 12px; display: none; text-align: center; }
 
 /* ── LANDING PAGE ── */
 .landing-page {
-  position: fixed; inset: 0; background: #050505; z-index: 9999;
+  position: fixed; inset: 0; background: var(--bg-color); z-index: 9999;
   display: flex; flex-direction: column; align-items: center; justify-content: center;
   padding: 20px; text-align: center; overflow-y: auto;
 }
-.landing-page::before {
-  content:''; position:absolute; inset:0; pointer-events:none;
-  background:
-    radial-gradient(circle at 50% 0%, rgba(255,30,60,0.18) 0%, transparent 55%),
-    repeating-linear-gradient(45deg, rgba(255,30,60,0.03) 0 2px, transparent 2px 24px);
-}
 .landing-content {
-  background: linear-gradient(180deg, #101010, #0a0a0a);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(255,30,60,0.35);
-  border-radius: 10px;
-  padding: 40px; max-width: 700px; width: 100%;
-  box-shadow: 0 0 60px rgba(255,30,60,0.18), 10px 10px 0 rgba(255,30,60,0.15);
+  background: var(--panel-bg); backdrop-filter: blur(16px);
+  border: 1px solid var(--panel-border); border-radius: 20px;
+  padding: 40px; max-width: 700px; width: 100%; box-shadow: var(--glass-shadow);
   animation: fadeIn 0.8s ease;
-  position: relative;
 }
-.landing-title {
-  font-size: 38px; font-family: 'Anton', sans-serif; font-weight: 900; letter-spacing: 3px;
-  color: #fff; margin-bottom: 10px; position: relative;
-  text-shadow: 0 0 30px rgba(255,30,60,0.9), 4px 4px 0 var(--red-deep);
-  animation: glitch 3.5s infinite;
-}
-@keyframes glitch {
-  0%, 91%, 94%, 98%, 100% { text-shadow: 0 0 30px rgba(255,30,60,0.9), 4px 4px 0 var(--red-deep); transform: translate(0); }
-  92% { text-shadow: -3px 0 #ff1e3c, 3px 0 #fff; transform: translate(2px,-1px); }
-  96% { text-shadow: 3px 0 #ff1e3c, -3px 0 #fff; transform: translate(-2px,1px); }
-}
-.landing-sub { color: var(--text-muted); margin-bottom: 30px; font-size: 14px; letter-spacing: 1px; }
+.landing-title { font-size: 32px; font-family: 'Outfit', sans-serif; font-weight: 900; background: linear-gradient(90deg, var(--cyan), var(--purple)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 10px; }
+.landing-sub { color: var(--text-muted); margin-bottom: 30px; font-size: 14px; }
 .steps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px; text-align: left; }
 @media(max-width: 600px) { .steps-grid { grid-template-columns: 1fr; } }
-.step-card { background: #000; border: 1px solid rgba(255,30,60,0.25); border-left: 4px solid var(--red); padding: 20px; border-radius: 6px; transition: .2s; }
-.step-card:hover { box-shadow: 0 0 25px rgba(255,30,60,0.3); transform: translateY(-3px); }
-.step-number { font-size: 26px; font-weight: 900; color: var(--red); margin-bottom: 8px; font-family: 'Anton', sans-serif; text-shadow: 0 0 14px rgba(255,30,60,0.8); }
-.step-title { font-size: 14px; font-weight: 800; color: #fff; margin-bottom: 6px; text-transform: uppercase; letter-spacing: .5px; }
+.step-card { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; }
+.step-number { font-size: 24px; font-weight: 900; color: var(--cyan); margin-bottom: 8px; font-family: 'Outfit', sans-serif; }
+.step-title { font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 6px; }
 .step-desc { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
 .btn-start {
-  position: relative; background: linear-gradient(135deg, var(--red), #7a0012); color: #fff;
-  border: 1px solid rgba(255,255,255,0.3); padding: 15px 40px; font-size: 16px; font-weight: 900;
-  border-radius: 6px; cursor: pointer; text-transform: uppercase; letter-spacing: 2px;
-  box-shadow: 0 0 30px rgba(255,30,60,0.5), 5px 5px 0 rgba(0,0,0,0.9); transition: 0.2s;
-  font-family: 'Anton', sans-serif;
+  background: linear-gradient(135deg, var(--cyan), var(--purple)); color: #fff;
+  border: none; padding: 15px 40px; font-size: 16px; font-weight: 800;
+  border-radius: 30px; cursor: pointer; text-transform: uppercase; letter-spacing: 1px;
+  box-shadow: 0 4px 20px rgba(0,229,255,0.4); transition: 0.3s;
 }
-.btn-start:hover { transform: scale(1.05) translateY(-2px); box-shadow: 0 0 55px rgba(255,30,60,0.85), 5px 5px 0 rgba(0,0,0,0.9); filter: brightness(1.15); }
+.btn-start:hover { transform: scale(1.05); box-shadow: 0 6px 30px rgba(179,71,255,0.6); }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
 </style>
-<base target="_blank">
 </head>
 <body>
 <div class="bg-animation"></div>
-<div class="top-ticker"></div>
 
 <!-- ── LANDING PAGE ── -->
 <div class="landing-page" id="landingPage">
   <div class="landing-content">
-    <img src="https://cdn.discordapp.com/attachments/1522140461081432126/1545132976227090582/ChatGPT_Image_Jul_20_2026_03_50_07_AM.png?ex=6a9b08b8&is=6a99b738&hm=c8eac40969dde5aa797a96bc42bbe0d0b78afa49f760ff982c4efcdbf67d646e" style="width:100px; height:100px; border-radius:50%; border:3px solid var(--red); box-shadow: 0 0 30px rgba(255,30,60,0.8); margin-bottom:20px; object-fit:cover;">
-    <h1 class="landing-title">MCHLERN TOOLS</h1>
+    <img src="https://cdn.discordapp.com/attachments/1522140461081432126/1545132976227090582/ChatGPT_Image_Jul_20_2026_03_50_07_AM.png?ex=6a9b08b8&is=6a99b738&hm=c8eac40969dde5aa797a96bc42bbe0d0b78afa49f760ff982c4efcdbf67d646e" style="width:100px; height:100px; border-radius:50%; border:3px solid #5865F2; box-shadow: 0 0 25px rgba(88,101,242,0.6); margin-bottom:20px; object-fit:cover;">
+    <h1 class="landing-title">Selamat Datang di MCHLERN TOOLS</h1>
     <p class="landing-sub">Sistem Bypass Audio Roblox Paling Canggih & Otomatis</p>
 
     {% if not discord_user %}
     <!-- ERROR MESSAGES -->
     {% set url_error = request.args.get('error','') %}
     {% if url_error == 'not_in_server' %}
-    <div style="background:rgba(255,30,60,0.12);border:1px solid rgba(255,30,60,0.45);border-left:4px solid var(--red);border-radius:6px;padding:14px;margin-bottom:20px;color:var(--red);font-size:13px;">
+    <div style="background:rgba(255,51,102,0.15);border:1px solid rgba(255,51,102,0.4);border-radius:10px;padding:14px;margin-bottom:20px;color:#ff3366;font-size:13px;">
       ❌ Kamu belum bergabung di Server Discord kami!<br>
-      <a href="https://discord.gg/YOUR_INVITE_CODE" target="_blank" style="color:#fff;font-weight:700;">👉 Klik di sini untuk Join Server</a>, lalu coba login lagi.
+      <a href="https://discord.gg/YOUR_INVITE_CODE" target="_blank" style="color:#5865F2;font-weight:700;">👉 Klik di sini untuk Join Server</a>, lalu coba login lagi.
     </div>
     {% elif url_error %}
-    <div style="background:rgba(255,30,60,0.1);border:1px solid rgba(255,30,60,0.35);border-radius:6px;padding:14px;margin-bottom:20px;color:var(--red);font-size:13px;">
+    <div style="background:rgba(255,51,102,0.1);border:1px solid rgba(255,51,102,0.3);border-radius:10px;padding:14px;margin-bottom:20px;color:#ff3366;font-size:13px;">
       ⚠️ Terjadi kesalahan saat login Discord. Coba lagi.
     </div>
     {% endif %}
@@ -317,17 +256,17 @@ tr:hover { background: rgba(255,30,60,0.05); }
 
     <div class="steps-grid">
       <div class="step-card">
-        <div class="step-number">01</div>
+        <div class="step-number">1</div>
         <div class="step-title">Login Discord</div>
         <div class="step-desc">Kamu wajib login dengan akun Discord dan sudah bergabung di server komunitas kami.</div>
       </div>
       <div class="step-card">
-        <div class="step-number">02</div>
+        <div class="step-number">2</div>
         <div class="step-title">Pilih Mode Upload</div>
         <div class="step-desc">Gunakan <b>Bypass Upload</b> untuk lolos dari filter, atau <b>Normal Upload</b> untuk audio tanpa editan.</div>
       </div>
       <div class="step-card">
-        <div class="step-number">03</div>
+        <div class="step-number">3</div>
         <div class="step-title">Upload & Copy ID</div>
         <div class="step-desc">Drag file musik atau paste link YouTube. ID otomatis muncul di History siap disalin!</div>
       </div>
@@ -335,13 +274,13 @@ tr:hover { background: rgba(255,30,60,0.05); }
 
     {% if discord_user %}
     <!-- SUDAH LOGIN DISCORD -->
-    <div style="display:flex;align-items:center;justify-content:center;gap:12px;background:rgba(255,30,60,0.08);border:1px solid rgba(255,30,60,0.35);border-radius:6px;padding:12px 20px;margin-bottom:20px;">
-      <img src="{{ discord_avatar }}" style="width:40px;height:40px;border-radius:50%;border:2px solid var(--red);box-shadow:0 0 12px rgba(255,30,60,0.7);">
+    <div style="display:flex;align-items:center;justify-content:center;gap:12px;background:rgba(88,101,242,0.1);border:1px solid rgba(88,101,242,0.3);border-radius:12px;padding:12px 20px;margin-bottom:20px;">
+      <img src="{{ discord_avatar }}" style="width:40px;height:40px;border-radius:50%;border:2px solid #5865F2;">
       <div style="text-align:left">
         <div style="font-weight:700;font-size:14px">{{ discord_user }}</div>
         <div style="font-size:11px;color:var(--text-muted)">✅ Terverifikasi Discord Member</div>
       </div>
-      <a href="/logout" style="margin-left:auto;font-size:11px;color:var(--red);text-decoration:none;border:1px solid rgba(255,30,60,0.4);padding:4px 10px;border-radius:4px;">Logout</a>
+      <a href="/logout" style="margin-left:auto;font-size:11px;color:var(--red);text-decoration:none;border:1px solid rgba(255,51,102,0.3);padding:4px 10px;border-radius:6px;">Logout</a>
     </div>
     <button class="btn-start" onclick="document.getElementById('landingPage').style.display='none'">🚀 Masuk ke Panel</button>
     {% else %}
@@ -354,15 +293,18 @@ tr:hover { background: rgba(255,30,60,0.05); }
   </div>
 </div>
 
-<div class="app-container" id="mainApp">
+  </div>
+</div>
 
+<div class="app-container" id="mainApp">
+  
   <!-- ── SIDEBAR ── -->
   <div class="sidebar">
     <div class="glass-panel" style="margin-bottom:20px; text-align:center;">
-      <img src="https://cdn.discordapp.com/attachments/1522140461081432126/1545132976227090582/ChatGPT_Image_Jul_20_2026_03_50_07_AM.png?ex=6a9b08b8&is=6a99b738&hm=c8eac40969dde5aa797a96bc42bbe0d0b78afa49f760ff982c4efcdbf67d646e" style="width: 90px; height: 90px; border-radius: 50%; border: 2px solid var(--red); margin-bottom: 12px; box-shadow: 0 0 25px rgba(255,30,60,0.8); object-fit: cover;">
+      <img src="https://cdn.discordapp.com/attachments/1522140461081432126/1545132976227090582/ChatGPT_Image_Jul_20_2026_03_50_07_AM.png?ex=6a9b08b8&is=6a99b738&hm=c8eac40969dde5aa797a96bc42bbe0d0b78afa49f760ff982c4efcdbf67d646e" style="width: 90px; height: 90px; border-radius: 50%; border: 2px solid #00e5ff; margin-bottom: 12px; box-shadow: 0 0 20px rgba(0, 229, 255, 0.5); object-fit: cover;">
       <div class="logo-title">MCHLERN TOOLS</div>
       <div class="logo-sub">Roblox Uploader Pro V2</div>
-
+      
       <!-- User / Quota Card -->
       <div class="quota-card">
         <div class="quota-text">Sisa Limit Harian</div>
@@ -430,14 +372,52 @@ tr:hover { background: rgba(255,30,60,0.05); }
 
   <!-- ── MAIN CONTENT ── -->
   <div class="main-content">
+    
+    <!-- TOP BAR -->
+    {% if discord_user %}
+    <div style="display:flex; justify-content:flex-end; align-items:center; gap:15px; margin-bottom: 20px; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 12px; border: 1px solid rgba(255,255,255,0.05);">
+      <div style="font-size: 13px; color: var(--cyan); font-weight: 700; display:flex; align-items:center; gap:5px;">
+        <svg width="16" height="16" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
+        Total Pengguna: {{ total_users }}
+      </div>
+      <button onclick="document.getElementById('premiumModal').style.display='flex'" style="background: linear-gradient(45deg, #ffd700, #ff8c00); color:#000; font-weight:800; border:none; padding:8px 15px; border-radius:20px; cursor:pointer; font-size:12px; box-shadow: 0 0 10px rgba(255,215,0,0.5);">💎 ADD PREMIUM</button>
+      <div style="display:flex; align-items:center; gap:10px; background: rgba(88,101,242,0.2); padding: 5px 15px 5px 5px; border-radius: 30px; border: 1px solid #5865F2;">
+        <img src="{{ discord_avatar }}" style="width:30px; height:30px; border-radius:50%; border:1px solid #5865F2;">
+        <span style="font-weight: 700; font-size: 13px; color: #fff;">{{ discord_user }}</span>
+      </div>
+    </div>
+    {% endif %}
+
+    <!-- PREMIUM MODAL -->
+    <div id="premiumModal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.8); z-index:99999; align-items:center; justify-content:center; padding:20px;">
+      <div style="background:var(--panel-bg); border:1px solid #ffd700; border-radius:15px; padding:30px; max-width:400px; width:100%; text-align:center; box-shadow: 0 0 30px rgba(255,215,0,0.3);">
+        <h2 style="color:#ffd700; margin-bottom:10px; font-family:'Outfit', sans-serif; font-weight:900;">👑 PREMIUM ACCESS</h2>
+        <p style="color:var(--text-muted); font-size:14px; margin-bottom:20px;">Dapatkan akses bypass tanpa batas dengan berlangganan premium!</p>
+        
+        <div style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:15px; margin-bottom:15px; text-align:left;">
+          <div style="font-weight:700; color:#fff; font-size:16px;">Rp 30.000</div>
+          <div style="font-size:13px; color:#00e5ff;">Unlimited Bypass (1 Minggu)</div>
+        </div>
+        
+        <div style="background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:10px; padding:15px; margin-bottom:25px; text-align:left;">
+          <div style="font-weight:700; color:#fff; font-size:16px;">Rp 50.000</div>
+          <div style="font-size:13px; color:#00e5ff;">Unlimited Bypass (1 Bulan)</div>
+        </div>
+        
+        <div style="display:flex; gap:10px; justify-content:center;">
+          <button onclick="document.getElementById('premiumModal').style.display='none'" style="background:transparent; border:1px solid #ff3366; color:#ff3366; padding:10px 20px; border-radius:8px; cursor:pointer; font-weight:700;">Tutup</button>
+          <a href="https://discord.com/users/1309112913331748915" target="_blank" style="background:#5865F2; color:#fff; padding:10px 20px; border-radius:8px; text-decoration:none; font-weight:700; border:none;">Pesan via Discord</a>
+        </div>
+      </div>
+    </div>
 
     <!-- Upload Area -->
     <div class="upload-grid">
       <!-- BYPASS -->
       <div class="glass-panel">
-        <div class="section-title" style="color:var(--red);font-size:15px">🚀 BYPASS UPLOAD</div>
+        <div class="section-title" style="color:var(--cyan);font-size:15px">🚀 BYPASS UPLOAD</div>
         <p style="font-size:11px;color:var(--text-muted);margin-bottom:16px">Speed & Pitch otomatis diterapkan</p>
-
+        
         <div class="dropzone" id="dzBypass" ondragover="onDragOver(event,'bypass')" ondragleave="onDragLeave('bypass')" ondrop="onDrop(event,'bypass')">
           <input type="file" multiple accept=".mp3,.ogg" onchange="onFileSelect(this,'bypass')">
           <span class="dz-icon">📁</span>
@@ -453,7 +433,7 @@ tr:hover { background: rgba(255,30,60,0.05); }
 
         <div class="status-bar" id="statusBypass"></div>
         <audio controls class="audio-preview" id="prevBypass"></audio>
-
+        
         <button class="btn btn-full upload-btn bypass-glow" onclick="startUpload('bypass')" id="upBypass">Mulai Bypass Upload</button>
       </div>
 
@@ -461,7 +441,7 @@ tr:hover { background: rgba(255,30,60,0.05); }
       <div class="glass-panel">
         <div class="section-title" style="font-size:15px">📄 NORMAL UPLOAD</div>
         <p style="font-size:11px;color:var(--text-muted);margin-bottom:16px">Audio original tanpa editan</p>
-
+        
         <div class="dropzone" id="dzNormal" ondragover="onDragOver(event,'normal')" ondragleave="onDragLeave('normal')" ondrop="onDrop(event,'normal')">
           <input type="file" multiple accept=".mp3,.ogg" onchange="onFileSelect(this,'normal')">
           <span class="dz-icon">🎵</span>
@@ -477,8 +457,8 @@ tr:hover { background: rgba(255,30,60,0.05); }
 
         <div class="status-bar" id="statusNormal"></div>
         <audio controls class="audio-preview" id="prevNormal"></audio>
-
-        <button class="btn btn-outline btn-full upload-btn" style="margin-top:16px;box-shadow:3px 3px 0 rgba(255,255,255,0.15)" onclick="startUpload('normal')" id="upNormal">Mulai Normal Upload</button>
+        
+        <button class="btn btn-outline btn-full upload-btn" style="margin-top:16px" onclick="startUpload('normal')" id="upNormal">Mulai Normal Upload</button>
       </div>
     </div>
 
@@ -568,7 +548,7 @@ function addFiles(files, m) {
   Array.from(files).forEach(f => {
     const id = 'f'+Date.now()+Math.floor(Math.random()*1000);
     state[m].files.push({id, file:f, title:f.name.replace(/\.[^.]+$/,'')});
-
+    
     const div = document.createElement('div'); div.className = 'file-item'; div.id = id;
     div.innerHTML = `
       <div style="overflow:hidden;text-overflow:ellipsis;width:80px;white-space:nowrap">${f.name}</div>
@@ -591,7 +571,7 @@ async function fetchYT(m) {
     if(d.error) throw new Error(d.error);
     const id = 'y'+Date.now();
     state[m].yt.push({id, ...d});
-
+    
     const div = document.createElement('div'); div.className = 'yt-card'; div.id = id;
     div.innerHTML = `
       <img src="${d.thumbnail}" class="yt-thumb">
@@ -638,7 +618,7 @@ async function startUpload(m) {
   const ci = document.getElementById('creatorId').value;
   const ct = document.getElementById('creatorType').value;
   // TODO: Send Google Auth token for limits
-  const token = window.googleToken || '';
+  const token = window.googleToken || ''; 
 
   if(!ak||!ci) { alert('Isi API Key & Creator ID di kiri!'); return; }
   const tasks = [
@@ -674,7 +654,7 @@ async function startUpload(m) {
       addHistory({time: new Date().toLocaleString(), title: t.title, mode: m, id: '-', status: 'Network Error', blocked: false});
     }
   }
-
+  
   st.style.display='none'; btn.disabled=false;
   document.getElementById('list'+cap(m)).innerHTML=''; document.getElementById('ytQueue'+cap(m)).innerHTML='';
   state[m].files=[]; state[m].yt=[];
@@ -693,7 +673,7 @@ function renderHistory() {
     <tr>
       <td style="color:var(--text-muted)">${h.time}</td>
       <td>${h.title}</td>
-      <td><span class="status-badge" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.15)">${h.mode.toUpperCase()}</span></td>
+      <td><span class="status-badge" style="background:rgba(255,255,255,0.1)">${h.mode.toUpperCase()}</span></td>
       <td><span class="status-badge ${h.blocked?'bg-red':(h.status==='Success'?'bg-green':'')}">${h.blocked?'BLOCKED':(h.status==='Success'?'SUCCESS':h.status.slice(0,20))}</span></td>
       <td>
         ${h.id!=='-' ? `<span class="copy-badge" onclick="navigator.clipboard.writeText('${h.id}');alert('Copied!')">${h.id} 📋</span>` : '-'}
@@ -703,7 +683,7 @@ function renderHistory() {
 }
 function copyAllIds() {
   const ids = state.history.filter(x=>x.id!=='-').map(x=>x.id);
-  if(ids.length) { navigator.clipboard.writeText(ids.join('\n')); alert(ids.length+' IDs copied!'); }
+  if(ids.length) { navigator.clipboard.writeText(ids.join('\\n')); alert(ids.length+' IDs copied!'); }
 }
 function clearHistory() { state.history=[]; localStorage.removeItem('mchl_hist'); renderHistory(); }
 
