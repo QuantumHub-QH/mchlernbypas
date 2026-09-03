@@ -1,0 +1,718 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MCHLERN TOOLS — Roblox Audio Uploader</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a12;--bg2:#111120;--bg3:#181830;--bg4:#1e1e3a;
+  --border:#2a2a4a;--border2:#3a3a5c;
+  --cyan:#00e5ff;--purple:#9c40ff;--green:#00e676;--red:#ff5252;--orange:#ff9800;
+  --text:#e8e8f0;--text2:#9090b0;--text3:#6060808;
+  --grad:linear-gradient(135deg,#00e5ff22,#9c40ff22);
+}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+
+/* ── HEADER ── */
+.header{background:linear-gradient(135deg,#0a0a1e,#13133a);border-bottom:1px solid var(--border);padding:16px 24px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:100;backdrop-filter:blur(10px)}
+.logo{font-size:20px;font-weight:800;background:linear-gradient(90deg,var(--cyan),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-0.5px}
+.header-sub{font-size:12px;color:var(--text2)}
+.header-right{margin-left:auto;display:flex;gap:10px;align-items:center}
+
+/* ── LAYOUT ── */
+.container{max-width:1100px;margin:0 auto;padding:24px 16px;display:flex;flex-direction:column;gap:20px}
+
+/* ── CARD ── */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+.card-header{padding:14px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,rgba(0,229,255,.04),rgba(156,64,255,.04))}
+.card-header h2{font-size:14px;font-weight:700;color:var(--text)}
+.card-body{padding:20px}
+
+/* ── ACCOUNT CARD ── */
+.account-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:640px){.account-grid{grid-template-columns:1fr}}
+.acc-name-row{display:flex;gap:8px;margin-bottom:12px;align-items:center;flex-wrap:wrap}
+.profile-badge{display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;margin-top:8px}
+.profile-badge img{width:40px;height:40px;border-radius:50%;border:2px solid var(--cyan)}
+.profile-name{font-weight:600;font-size:13px}
+.profile-link{font-size:11px;color:var(--cyan);text-decoration:none}
+.profile-link:hover{text-decoration:underline}
+
+/* ── MODIFIERS ── */
+.slider-row{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.slider-label{font-size:12px;color:var(--text2);width:110px;flex-shrink:0}
+.slider-val{font-size:13px;font-weight:700;color:var(--cyan);width:36px;text-align:right;flex-shrink:0}
+input[type=range]{flex:1;-webkit-appearance:none;height:4px;border-radius:2px;background:var(--border2);outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:var(--cyan);cursor:pointer;box-shadow:0 0 8px var(--cyan)}
+.template-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px}
+.rec-label{font-size:12px;color:var(--green);font-weight:600;text-align:center;padding:6px;background:rgba(0,230,118,.08);border-radius:8px;border:1px solid rgba(0,230,118,.2)}
+
+/* ── PANELS ── */
+.panels{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:700px){.panels{grid-template-columns:1fr}}
+.panel{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:16px}
+.panel-title{font-size:13px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:6px}
+.panel-title.cyan{color:var(--cyan)}
+.panel-title.gray{color:var(--text2)}
+
+/* ── DROPZONE ── */
+.dropzone{border:2px dashed var(--border2);border-radius:10px;padding:24px;text-align:center;cursor:pointer;transition:all .2s;color:var(--text2);font-size:13px;position:relative}
+.dropzone:hover,.dropzone.dragover{border-color:var(--cyan);background:rgba(0,229,255,.04);color:var(--cyan)}
+.dropzone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+
+/* ── FILE LIST ── */
+.file-list{display:flex;flex-direction:column;gap:6px;margin-top:10px;max-height:200px;overflow-y:auto}
+.file-item{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bg4);border:1px solid var(--border);border-radius:8px;font-size:12px}
+.file-name{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--text2)}
+.file-title-input{flex:1;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--text);font-size:11px;outline:none}
+.file-title-input:focus{border-color:var(--cyan)}
+
+/* ── YT CARD ── */
+.yt-card{display:flex;align-items:center;gap:10px;padding:8px 10px;background:var(--bg4);border:1px solid var(--border);border-radius:8px;margin-top:6px}
+.yt-thumb{width:60px;height:38px;object-fit:cover;border-radius:5px;flex-shrink:0}
+.yt-info{flex:1;min-width:0}
+.yt-orig-title{font-size:10px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.yt-title-input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:5px;padding:4px 6px;color:var(--text);font-size:11px;outline:none;margin-top:3px}
+.yt-title-input:focus{border-color:var(--cyan)}
+
+/* ── BUTTONS ── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:8px 14px;border-radius:8px;border:none;cursor:pointer;font-size:12px;font-weight:600;font-family:inherit;transition:all .15s;white-space:nowrap}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn-primary{background:linear-gradient(135deg,#00b4cc,#8a00e0);color:#fff}
+.btn-primary:hover:not(:disabled){filter:brightness(1.15)}
+.btn-green{background:var(--green);color:#000}
+.btn-green:hover:not(:disabled){filter:brightness(1.1)}
+.btn-red{background:var(--red);color:#fff}
+.btn-red:hover:not(:disabled){filter:brightness(1.1)}
+.btn-cyan{background:rgba(0,229,255,.15);color:var(--cyan);border:1px solid rgba(0,229,255,.3)}
+.btn-cyan:hover:not(:disabled){background:rgba(0,229,255,.25)}
+.btn-gray{background:var(--bg4);color:var(--text2);border:1px solid var(--border)}
+.btn-gray:hover:not(:disabled){background:var(--border);color:var(--text)}
+.btn-upload{width:100%;padding:12px;font-size:13px;border-radius:10px;margin-top:12px}
+.btn-sm{padding:5px 9px;font-size:11px;border-radius:6px}
+
+/* ── INPUT ── */
+.input{background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:8px 12px;color:var(--text);font-size:13px;font-family:inherit;outline:none;width:100%}
+.input:focus{border-color:var(--cyan)}
+.input-row{display:flex;gap:8px;align-items:center;margin-bottom:10px}
+.input-label{font-size:12px;color:var(--text2);flex-shrink:0;min-width:70px}
+.input-group{display:flex;gap:6px}
+.input-group .input{flex:1}
+.select{background:var(--bg);border:1px solid var(--border2);border-radius:8px;padding:8px 10px;color:var(--text);font-size:13px;font-family:inherit;outline:none;cursor:pointer}
+.select:focus{border-color:var(--cyan)}
+
+/* ── STATUS ── */
+.status-bar{padding:8px 12px;border-radius:8px;font-size:12px;font-weight:600;margin-top:10px;display:none}
+.status-bar.info{background:rgba(0,229,255,.1);color:var(--cyan);border:1px solid rgba(0,229,255,.2);display:block}
+.status-bar.success{background:rgba(0,230,118,.1);color:var(--green);border:1px solid rgba(0,230,118,.2);display:block}
+.status-bar.error{background:rgba(255,82,82,.1);color:var(--red);border:1px solid rgba(255,82,82,.2);display:block}
+.status-bar.loading{background:rgba(255,152,0,.1);color:var(--orange);border:1px solid rgba(255,152,0,.2);display:block}
+
+/* ── AUDIO PLAYER ── */
+.audio-preview{width:100%;margin-top:8px;border-radius:8px;outline:none;display:none}
+audio::-webkit-media-controls-panel{background:var(--bg3)}
+
+/* ── HISTORY ── */
+.history-table-wrap{overflow-x:auto;margin-top:10px}
+table{width:100%;border-collapse:collapse;font-size:12px}
+thead th{padding:8px 10px;text-align:left;color:var(--text2);border-bottom:1px solid var(--border);white-space:nowrap;background:var(--bg3)}
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s}
+tbody tr:hover{background:var(--bg3)}
+tbody tr.blocked{background:rgba(255,82,82,.08)}
+tbody tr.blocked td{color:var(--red)}
+tbody tr.success-row{background:rgba(0,230,118,.05)}
+tbody tr.success-row .asset-id-cell{color:var(--green)}
+td{padding:7px 10px;vertical-align:middle}
+.copy-id-btn{padding:3px 7px;font-size:10px;border-radius:5px;background:rgba(0,229,255,.15);color:var(--cyan);border:1px solid rgba(0,229,255,.3);cursor:pointer;white-space:nowrap}
+.copy-id-btn:hover{background:rgba(0,229,255,.25)}
+.blocked-badge{font-size:10px;padding:2px 6px;border-radius:4px;background:var(--red);color:#fff;margin-left:4px}
+.history-btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+
+/* ── PROFILE MODAL ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+.modal-overlay.open{opacity:1;pointer-events:all}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:16px;padding:28px;max-width:340px;width:90%;text-align:center;transform:scale(.95);transition:transform .2s}
+.modal-overlay.open .modal{transform:scale(1)}
+.modal img{width:80px;height:80px;border-radius:50%;border:3px solid var(--cyan);margin-bottom:12px}
+.modal h3{font-size:18px;font-weight:700;margin-bottom:4px}
+.modal p{font-size:12px;color:var(--text2);margin-bottom:16px}
+.modal-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+
+/* ── SPINNER ── */
+@keyframes spin{to{transform:rotate(360deg)}}
+.spinner{width:14px;height:14px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite;display:inline-block}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+
+/* ── GRADIENT DIVIDER ── */
+.divider{height:1px;background:linear-gradient(90deg,transparent,var(--border2),transparent);margin:16px 0}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="header">
+  <div>
+    <div class="logo">⚡ MCHLERN TOOLS</div>
+    <div class="header-sub">Roblox Audio Uploader PRO</div>
+  </div>
+  <div class="header-right">
+    <span id="headerStatus" style="font-size:12px;color:var(--text2)">Ready</span>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- ── ACCOUNT CARD ── -->
+<div class="card">
+  <div class="card-header">
+    <span>👤</span><h2>Account Manager</h2>
+  </div>
+  <div class="card-body">
+    <div class="account-grid">
+      <!-- Credentials -->
+      <div>
+        <div class="input-row"><span class="input-label">API Key</span>
+          <input type="password" class="input" id="apiKey" placeholder="Paste API Key kamu..." autocomplete="off">
+        </div>
+        <div class="input-row"><span class="input-label">Tipe</span>
+          <select class="select" id="creatorType" style="flex:1">
+            <option value="User">User (Akun Pribadi)</option>
+            <option value="Group">Group (Komunitas)</option>
+          </select>
+        </div>
+        <div class="input-row"><span class="input-label">Creator ID</span>
+          <div class="input-group" style="flex:1">
+            <input type="text" class="input" id="creatorId" placeholder="Isi ID angka..." autocomplete="off">
+            <button class="btn btn-cyan btn-sm" onclick="checkAccount()">🔍 Cek</button>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
+          <button class="btn btn-green btn-sm" onclick="saveAccount()">💾 Simpan</button>
+          <button class="btn btn-gray btn-sm" onclick="loadAccount()">📂 Muat Tersimpan</button>
+          <button class="btn btn-red btn-sm" onclick="clearAccount()">✕ Hapus</button>
+        </div>
+      </div>
+      <!-- Profile Badge -->
+      <div id="profileWrap" style="display:none">
+        <div class="profile-badge">
+          <img id="profileAvatar" src="" alt="avatar">
+          <div>
+            <div class="profile-name" id="profileName"></div>
+            <a class="profile-link" id="profileLink" href="#" target="_blank">Buka di Roblox →</a>
+          </div>
+        </div>
+        <div style="margin-top:8px;font-size:11px;color:var(--green)">✅ Terkoneksi</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODIFIERS CARD ── -->
+<div class="card">
+  <div class="card-header">
+    <span>🎛️</span><h2>Audio Modifiers <span style="color:var(--cyan);font-size:11px">(Bypass Mode)</span></h2>
+  </div>
+  <div class="card-body">
+    <div class="template-row">
+      <span style="font-size:12px;color:var(--text2);margin-right:4px">Template:</span>
+      <button class="btn btn-gray btn-sm" onclick="applyTemplate(1.5)">1.5x</button>
+      <button class="btn btn-gray btn-sm" onclick="applyTemplate(1.6)">1.6x</button>
+      <button class="btn btn-gray btn-sm" onclick="applyTemplate(2.3)">2.3x</button>
+      <button class="btn btn-gray btn-sm" onclick="applyTemplate(2.5)">2.5x</button>
+      <button class="btn btn-red btn-sm" onclick="applyTemplate(1.0)">Reset</button>
+    </div>
+    <div class="slider-row">
+      <span class="slider-label">Speed (Tempo)</span>
+      <input type="range" id="speedSlider" min="0.5" max="3.0" step="0.01" value="1.0" oninput="onSlide('speed',this.value)">
+      <span class="slider-val" id="speedVal">1.00</span>
+    </div>
+    <div class="slider-row">
+      <span class="slider-label">Pitch</span>
+      <input type="range" id="pitchSlider" min="0.5" max="3.0" step="0.01" value="1.0" oninput="onSlide('pitch',this.value)">
+      <span class="slider-val" id="pitchVal">1.00</span>
+    </div>
+    <div class="slider-row">
+      <span class="slider-label">Volume</span>
+      <input type="range" id="volSlider" min="0.1" max="3.0" step="0.01" value="1.0" oninput="onSlide('vol',this.value)">
+      <span class="slider-val" id="volVal">1.00</span>
+    </div>
+    <div class="rec-label" id="recLabel">Rec. In-Game PlaybackSpeed: 1.00</div>
+  </div>
+</div>
+
+<!-- ── UPLOAD PANELS ── -->
+<div class="panels">
+  <!-- BYPASS -->
+  <div class="panel">
+    <div class="panel-title cyan">🚀 BYPASS Upload <span style="font-size:10px;opacity:.7">(Speed/Pitch Applied)</span></div>
+    
+    <div style="font-size:11px;color:var(--text2);margin-bottom:8px">📁 Local Files</div>
+    <div class="dropzone" id="dropzoneBypass" ondragover="onDragOver(event,'bypass')" ondragleave="onDragLeave('bypass')" ondrop="onDrop(event,'bypass')">
+      <input type="file" multiple accept=".mp3,.ogg" onchange="onFileSelect(this,'bypass')">
+      🎵 Drag & drop .mp3 / .ogg atau klik di sini
+    </div>
+    <div class="file-list" id="fileListBypass"></div>
+
+    <div class="divider"></div>
+
+    <div style="font-size:11px;color:var(--text2);margin-bottom:8px">🎬 YouTube Queue</div>
+    <div style="display:flex;gap:6px;margin-bottom:8px">
+      <input type="text" class="input" id="ytInputBypass" placeholder="Paste link YouTube...">
+      <button class="btn btn-cyan btn-sm" onclick="fetchYT('bypass')" id="fetchBtnBypass">Fetch ▶</button>
+    </div>
+    <div id="ytQueueBypass"></div>
+    
+    <div class="status-bar" id="statusBypass">Ready</div>
+    <audio controls class="audio-preview" id="previewBypass"></audio>
+    <button class="btn btn-primary btn-upload" onclick="startUpload('bypass')" id="uploadBtnBypass">⬆ START BYPASS UPLOAD</button>
+  </div>
+
+  <!-- NORMAL -->
+  <div class="panel">
+    <div class="panel-title gray">📄 NORMAL Upload <span style="font-size:10px;opacity:.7">(No Processing)</span></div>
+
+    <div style="font-size:11px;color:var(--text2);margin-bottom:8px">📁 Local Files</div>
+    <div class="dropzone" id="dropzoneNormal" ondragover="onDragOver(event,'normal')" ondragleave="onDragLeave('normal')" ondrop="onDrop(event,'normal')">
+      <input type="file" multiple accept=".mp3,.ogg" onchange="onFileSelect(this,'normal')">
+      🎵 Drag & drop .mp3 / .ogg atau klik di sini
+    </div>
+    <div class="file-list" id="fileListNormal"></div>
+
+    <div class="divider"></div>
+
+    <div style="font-size:11px;color:var(--text2);margin-bottom:8px">🎬 YouTube Queue</div>
+    <div style="display:flex;gap:6px;margin-bottom:8px">
+      <input type="text" class="input" id="ytInputNormal" placeholder="Paste link YouTube...">
+      <button class="btn btn-cyan btn-sm" onclick="fetchYT('normal')" id="fetchBtnNormal">Fetch ▶</button>
+    </div>
+    <div id="ytQueueNormal"></div>
+
+    <div class="status-bar" id="statusNormal">Ready</div>
+    <audio controls class="audio-preview" id="previewNormal"></audio>
+    <button class="btn btn-gray btn-upload" onclick="startUpload('normal')" id="uploadBtnNormal">⬆ START NORMAL UPLOAD</button>
+  </div>
+</div>
+
+<!-- ── HISTORY CARD ── -->
+<div class="card">
+  <div class="card-header">
+    <span>📜</span><h2>Upload History</h2>
+    <div style="margin-left:auto">
+      <input type="text" class="input" id="historySearch" placeholder="🔍 Cari judul / ID..." style="width:200px;padding:6px 10px;font-size:12px" oninput="filterHistory()">
+    </div>
+  </div>
+  <div class="card-body">
+    <div class="history-table-wrap">
+      <table id="historyTable">
+        <thead>
+          <tr>
+            <th>Waktu</th><th>Judul</th><th>Mode</th><th>Asset ID</th><th>Status</th><th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="historyBody">
+          <tr><td colspan="6" style="text-align:center;color:var(--text2);padding:20px">Belum ada history upload</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="history-btns">
+      <button class="btn btn-cyan btn-sm" onclick="copyAllIds()">📋 Copy All IDs</button>
+      <button class="btn btn-gray btn-sm" onclick="clearHistory()">🗑 Clear History</button>
+    </div>
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<!-- ── PROFILE MODAL ── -->
+<div class="modal-overlay" id="profileModal" onclick="closeModal(event)">
+  <div class="modal">
+    <img id="modalAvatar" src="" alt="avatar" onerror="this.src='data:image/svg+xml,<svg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'><circle cx=\'50\' cy=\'50\' r=\'50\' fill=\'%23333\'/></svg>'">
+    <h3 id="modalName"></h3>
+    <p id="modalType"></p>
+    <div class="modal-btns">
+      <a id="modalLink" href="#" target="_blank" class="btn btn-cyan btn-sm">🌐 Buka di Web</a>
+      <button class="btn btn-red btn-sm" onclick="closeModal();clearAccount()">✕ Logout</button>
+      <button class="btn btn-gray btn-sm" onclick="closeModal()">Tutup</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── STATE ────────────────────────────────────────────────────────────────────
+const state = {
+  bypass: { files: [], ytQueue: [] },
+  normal: { files: [], ytQueue: [] },
+  history: JSON.parse(localStorage.getItem('mchlern_history') || '[]'),
+};
+
+// ── ACCOUNT ─────────────────────────────────────────────────────────────────
+function getAccount() {
+  return {
+    api_key: document.getElementById('apiKey').value.trim(),
+    creator_id: document.getElementById('creatorId').value.trim(),
+    creator_type: document.getElementById('creatorType').value,
+  };
+}
+function saveAccount() {
+  const a = getAccount();
+  if (!a.api_key || !a.creator_id) { alert('Isi API Key dan Creator ID dulu!'); return; }
+  localStorage.setItem('mchlern_account', JSON.stringify(a));
+  showStatus('bypass', '💾 Akun tersimpan di browser!', 'success');
+}
+function loadAccount() {
+  const saved = JSON.parse(localStorage.getItem('mchlern_account') || 'null');
+  if (!saved) { alert('Tidak ada akun tersimpan.'); return; }
+  document.getElementById('apiKey').value = saved.api_key;
+  document.getElementById('creatorId').value = saved.creator_id;
+  document.getElementById('creatorType').value = saved.creator_type;
+}
+function clearAccount() {
+  localStorage.removeItem('mchlern_account');
+  document.getElementById('apiKey').value = '';
+  document.getElementById('creatorId').value = '';
+  document.getElementById('profileWrap').style.display = 'none';
+}
+async function checkAccount() {
+  const {creator_id, creator_type} = getAccount();
+  if (!creator_id) { alert('Isi Creator ID dulu!'); return; }
+  showStatus('bypass', '🔍 Mengecek profil...', 'loading');
+  try {
+    const r = await fetch('/api/check-account', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({creator_id, creator_type})
+    });
+    const d = await r.json();
+    if (d.error) throw new Error(d.error);
+    // show badge
+    document.getElementById('profileAvatar').src = d.avatar || '';
+    document.getElementById('profileName').textContent = d.name;
+    document.getElementById('profileLink').href = d.url;
+    document.getElementById('profileWrap').style.display = 'block';
+    // show modal
+    document.getElementById('modalAvatar').src = d.avatar || '';
+    document.getElementById('modalName').textContent = d.name;
+    document.getElementById('modalType').textContent = creator_type === 'User' ? '👤 User Account' : '👥 Group/Komunitas';
+    document.getElementById('modalLink').href = d.url;
+    document.getElementById('profileModal').classList.add('open');
+    showStatus('bypass', `✅ Terkoneksi: ${d.name}`, 'success');
+  } catch(e) {
+    showStatus('bypass', `❌ ${e.message}`, 'error');
+  }
+}
+function closeModal(e) {
+  if (!e || e.target === document.getElementById('profileModal'))
+    document.getElementById('profileModal').classList.remove('open');
+}
+
+// ── SLIDERS ──────────────────────────────────────────────────────────────────
+function onSlide(type, val) {
+  val = parseFloat(val).toFixed(2);
+  document.getElementById(type+'Val').textContent = val;
+  updateRec();
+}
+function updateRec() {
+  const s = parseFloat(document.getElementById('speedSlider').value);
+  const p = parseFloat(document.getElementById('pitchSlider').value);
+  const rec = (1/s).toFixed(2);
+  const mismatch = Math.abs(s-p) > 0.01;
+  const el = document.getElementById('recLabel');
+  el.textContent = `Rec. In-Game PlaybackSpeed: ${rec}${mismatch?' ⚠ Pitch mismatch!':''}`;
+  el.style.color = mismatch ? '#ff9800' : '#00e676';
+}
+function applyTemplate(v) {
+  ['speed','pitch'].forEach(t => {
+    document.getElementById(t+'Slider').value = v;
+    document.getElementById(t+'Val').textContent = v.toFixed(2);
+  });
+  updateRec();
+}
+
+// ── FILE HANDLING ─────────────────────────────────────────────────────────────
+function onDragOver(e, mode) {
+  e.preventDefault();
+  document.getElementById('dropzone'+cap(mode)).classList.add('dragover');
+}
+function onDragLeave(mode) {
+  document.getElementById('dropzone'+cap(mode)).classList.remove('dragover');
+}
+function onDrop(e, mode) {
+  e.preventDefault();
+  document.getElementById('dropzone'+cap(mode)).classList.remove('dragover');
+  addFiles(e.dataTransfer.files, mode);
+}
+function onFileSelect(input, mode) {
+  addFiles(input.files, mode);
+  input.value = '';
+}
+function cap(s) { return s[0].toUpperCase()+s.slice(1); }
+function addFiles(files, mode) {
+  Array.from(files).forEach(f => {
+    const id = 'f_'+Date.now()+'_'+Math.random().toString(36).slice(2);
+    state[mode].files.push({ id, file: f, title: f.name.replace(/\.[^.]+$/,'') });
+    renderFileItem(mode, id, f.name);
+  });
+}
+function renderFileItem(mode, id, fname) {
+  const list = document.getElementById('fileList'+cap(mode));
+  const div = document.createElement('div');
+  div.className = 'file-item';
+  div.id = 'fi_'+id;
+  const shortName = fname.length>25 ? fname.slice(0,22)+'...' : fname;
+  div.innerHTML = `
+    <span class="file-name" title="${fname}">🎵 ${shortName}</span>
+    <input class="file-title-input" id="ft_${id}" value="${fname.replace(/\.[^.]+$/,'')}" placeholder="Judul Roblox">
+    <button class="btn btn-cyan btn-sm" onclick="previewFile('${id}','${mode}')">▶</button>
+    <button class="btn btn-red btn-sm" onclick="removeFile('${id}','${mode}')">✕</button>
+  `;
+  list.appendChild(div);
+}
+function removeFile(id, mode) {
+  state[mode].files = state[mode].files.filter(f=>f.id!==id);
+  document.getElementById('fi_'+id)?.remove();
+}
+
+// ── YT FETCH ──────────────────────────────────────────────────────────────────
+async function fetchYT(mode) {
+  const input = document.getElementById('ytInput'+cap(mode));
+  const url = input.value.trim();
+  if (!url) return;
+  const btn = document.getElementById('fetchBtn'+cap(mode));
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span>';
+  showStatus(mode, '⏳ Mendownload audio dari YouTube...', 'loading');
+  input.value = '';
+  try {
+    const r = await fetch('/api/fetch-yt', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({url})
+    });
+    const d = await r.json();
+    if (d.error) throw new Error(d.error);
+    addYTCard(mode, d);
+    showStatus(mode, `✅ Berhasil fetch: ${d.title.slice(0,40)}`, 'success');
+  } catch(e) {
+    showStatus(mode, `❌ ${e.message}`, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = 'Fetch ▶';
+  }
+}
+function addYTCard(mode, data) {
+  const id = 'yt_'+Date.now();
+  state[mode].ytQueue.push({ id, ...data });
+  const wrap = document.getElementById('ytQueue'+cap(mode));
+  const div = document.createElement('div');
+  div.className = 'yt-card';
+  div.id = id;
+  div.innerHTML = `
+    <img class="yt-thumb" src="${data.thumbnail}" onerror="this.style.display='none'" alt="thumb">
+    <div class="yt-info">
+      <div class="yt-orig-title" title="${data.title}">${data.title}</div>
+      <input class="yt-title-input" id="ytt_${id}" value="${data.title.slice(0,50)}" placeholder="Judul Roblox">
+    </div>
+    <button class="btn btn-cyan btn-sm" onclick="previewYT('${id}','${mode}','${data.file}')">▶</button>
+    <button class="btn btn-red btn-sm" onclick="removeYT('${id}','${mode}')">✕</button>
+  `;
+  wrap.appendChild(div);
+}
+function removeYT(id, mode) {
+  state[mode].ytQueue = state[mode].ytQueue.filter(y=>y.id!==id);
+  document.getElementById(id)?.remove();
+}
+
+// ── PREVIEW ───────────────────────────────────────────────────────────────────
+async function previewFile(fileId, mode) {
+  const entry = state[mode].files.find(f=>f.id===fileId);
+  if (!entry) return;
+  await doPreview(mode, null, entry.file);
+}
+async function previewYT(cardId, mode, ytFile) {
+  await doPreview(mode, ytFile, null);
+}
+async function doPreview(mode, ytFile, file) {
+  const player = document.getElementById('preview'+cap(mode));
+  showStatus(mode, '⏳ Merender preview...', 'loading');
+  const fd = new FormData();
+  fd.append('speed', document.getElementById('speedSlider').value);
+  fd.append('pitch', document.getElementById('pitchSlider').value);
+  fd.append('vol', document.getElementById('volSlider').value);
+  if (ytFile) fd.append('yt_file', ytFile);
+  else if (file) fd.append('file', file);
+  try {
+    const r = await fetch('/api/preview', {method:'POST', body:fd});
+    const d = await r.json();
+    if (d.error) throw new Error(d.error);
+    player.src = d.preview_url + '?t=' + Date.now();
+    player.style.display = 'block';
+    player.play();
+    showStatus(mode, '▶ Preview sedang diputar (15 detik pertama + intro)', 'success');
+  } catch(e) {
+    showStatus(mode, `❌ Preview gagal: ${e.message}`, 'error');
+  }
+}
+
+// ── UPLOAD ───────────────────────────────────────────────────────────────────
+async function startUpload(mode) {
+  const acc = getAccount();
+  if (!acc.api_key || !acc.creator_id) {
+    alert('Isi API Key dan Creator ID dulu!'); return;
+  }
+  const tasks = [];
+  state[mode].files.forEach(f => {
+    tasks.push({type:'local', file:f.file, title: document.getElementById('ft_'+f.id)?.value || f.title});
+  });
+  state[mode].ytQueue.forEach(y => {
+    tasks.push({type:'yt', yt_file:y.file, title: document.getElementById('ytt_'+y.id)?.value || y.title, source:y.source});
+  });
+  if (!tasks.length) { alert('Tidak ada file/YouTube yang di-queue!'); return; }
+
+  const btn = document.getElementById('uploadBtn'+cap(mode));
+  btn.disabled = true;
+  const bypass = mode === 'bypass';
+
+  for (let i=0; i<tasks.length; i++) {
+    const t = tasks[i];
+    showStatus(mode, `⏳ [${i+1}/${tasks.length}] Upload: ${t.title.slice(0,30)}...`, 'loading');
+    const fd = new FormData();
+    fd.append('api_key', acc.api_key);
+    fd.append('creator_id', acc.creator_id);
+    fd.append('creator_type', acc.creator_type);
+    fd.append('title', t.title);
+    fd.append('bypass', bypass ? 'true' : 'false');
+    fd.append('speed', document.getElementById('speedSlider').value);
+    fd.append('pitch', document.getElementById('pitchSlider').value);
+    fd.append('vol', document.getElementById('volSlider').value);
+    if (t.type === 'local') fd.append('file', t.file);
+    else fd.append('yt_file', t.yt_file);
+
+    try {
+      const r = await fetch('/api/upload', {method:'POST', body:fd});
+      const d = await r.json();
+      addHistory({
+        time: d.time || new Date().toLocaleString(),
+        title: d.title || t.title,
+        mode: bypass ? 'Bypass' : 'Normal',
+        asset_id: d.asset_id || '-',
+        status: d.success ? 'Success' : (d.error || 'Fail'),
+        blocked: d.blocked || false,
+        source: t.source || '',
+      });
+      if (d.success) {
+        showStatus(mode, `✅ [${i+1}/${tasks.length}] ID: ${d.asset_id} — ${t.title.slice(0,25)}`, 'success');
+        // Auto-copy last ID
+        navigator.clipboard?.writeText(d.asset_id).catch(()=>{});
+      } else {
+        showStatus(mode, `❌ [${i+1}/${tasks.length}] ${d.error || 'Gagal'}`, 'error');
+      }
+    } catch(e) {
+      showStatus(mode, `❌ Error: ${e.message}`, 'error');
+      addHistory({time: new Date().toLocaleString(), title:t.title, mode: bypass?'Bypass':'Normal', asset_id:'-', status:`Error: ${e.message}`, blocked:false, source:''});
+    }
+  }
+
+  // Auto-clear queue
+  clearQueue(mode);
+  btn.disabled = false;
+  showStatus(mode, '🎉 Semua upload selesai! Queue dibersihkan.', 'success');
+}
+
+function clearQueue(mode) {
+  state[mode].files = [];
+  state[mode].ytQueue = [];
+  document.getElementById('fileList'+cap(mode)).innerHTML = '';
+  document.getElementById('ytQueue'+cap(mode)).innerHTML = '';
+}
+
+// ── HISTORY ───────────────────────────────────────────────────────────────────
+function addHistory(h) {
+  state.history.unshift(h);
+  localStorage.setItem('mchlern_history', JSON.stringify(state.history.slice(0,500)));
+  renderHistory();
+}
+function renderHistory(filter='') {
+  const tbody = document.getElementById('historyBody');
+  const filtered = state.history.filter(h =>
+    h.title.toLowerCase().includes(filter) ||
+    String(h.asset_id).includes(filter)
+  );
+  if (!filtered.length) {
+    tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--text2);padding:20px">Belum ada history</td></tr>';
+    return;
+  }
+  tbody.innerHTML = filtered.map(h => {
+    const rowClass = h.blocked ? 'blocked' : (h.status==='Success' ? 'success-row' : '');
+    const idText = h.blocked ? `${h.asset_id} <span class="blocked-badge">BLOCKED</span>` : `<span class="asset-id-cell">${h.asset_id}</span>`;
+    const copyBtn = h.asset_id && h.asset_id !== '-'
+      ? `<button class="copy-id-btn" onclick="copyId('${h.asset_id}')">📋 Copy</button>`
+      : '';
+    return `<tr class="${rowClass}">
+      <td style="color:var(--text2);white-space:nowrap;font-size:11px">${h.time}</td>
+      <td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${h.title}">${h.title}</td>
+      <td><span style="font-size:10px;padding:2px 6px;border-radius:4px;background:${h.mode==='Bypass'?'rgba(0,229,255,.15)':'rgba(100,100,100,.2)'}; color:${h.mode==='Bypass'?'var(--cyan)':'var(--text2)'}">${h.mode}</span></td>
+      <td class="asset-id-cell">${idText}</td>
+      <td style="font-size:11px;color:${h.status==='Success'?'var(--green)':h.blocked?'var(--red)':'var(--orange)'}">${h.status==='Success'?'✅ Sukses':h.status.slice(0,30)}</td>
+      <td>${copyBtn}</td>
+    </tr>`;
+  }).join('');
+}
+function filterHistory() {
+  renderHistory(document.getElementById('historySearch').value.toLowerCase());
+}
+function copyId(id) {
+  navigator.clipboard?.writeText(id)
+    .then(()=>{ showToast(`ID ${id} disalin!`); })
+    .catch(()=>{ prompt('Copy manual:', id); });
+}
+function copyAllIds() {
+  const ids = state.history.filter(h=>h.asset_id&&h.asset_id!=='-').map(h=>h.asset_id);
+  if (!ids.length) { alert('Tidak ada ID.'); return; }
+  navigator.clipboard?.writeText(ids.join('\n'))
+    .then(()=>{ showToast(`${ids.length} ID berhasil dicopy!`); })
+    .catch(()=>{ prompt('Copy manual:', ids.join('\n')); });
+}
+function clearHistory() {
+  if (!confirm('Hapus semua history?')) return;
+  state.history = [];
+  localStorage.removeItem('mchlern_history');
+  renderHistory();
+}
+
+// ── STATUS BAR ────────────────────────────────────────────────────────────────
+function showStatus(mode, msg, type) {
+  const el = document.getElementById('status'+cap(mode));
+  el.textContent = msg;
+  el.className = 'status-bar ' + type;
+  document.getElementById('headerStatus').textContent = msg.slice(0,60);
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.createElement('div');
+  t.textContent = msg;
+  Object.assign(t.style, {
+    position:'fixed',bottom:'24px',right:'24px',background:'var(--bg3)',
+    border:'1px solid var(--green)',color:'var(--green)',padding:'10px 16px',
+    borderRadius:'10px',fontSize:'13px',fontWeight:'600',zIndex:'999',
+    animation:'fadeIn .2s ease'
+  });
+  document.body.appendChild(t);
+  setTimeout(()=>t.remove(), 2500);
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  loadAccount();
+  renderHistory();
+});
+</script>
+</body>
+</html>
