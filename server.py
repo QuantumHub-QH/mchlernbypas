@@ -466,7 +466,7 @@ def upload():
     api_key    = request.form.get("api_key", "").strip()
     creator_id = request.form.get("creator_id", "").strip()
     creator_type = request.form.get("creator_type", "User")
-    title      = request.form.get("title", "Audio")[:50]
+    title      = request.form.get("title", "Audio")[:40]
     speed      = float(request.form.get("speed", 1.0))
     pitch      = float(request.form.get("pitch", 1.0))
     vol        = float(request.form.get("vol", 1.0))
