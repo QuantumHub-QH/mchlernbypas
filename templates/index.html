@@ -349,7 +349,19 @@ tr:hover { background: rgba(255,255,255,0.02); }
           <input type="text" class="input-field" id="creatorId" placeholder="ID Angka">
         </div>
       </div>
-      <button class="btn btn-outline btn-full" onclick="saveAccount()" style="margin-top:4px">💾 Simpan Akun (Lokal)</button>
+      
+      <div id="robloxProfile" style="display:none; align-items:center; gap:10px; margin-bottom:10px; padding:10px; background:rgba(0,0,0,0.3); border-radius:8px; border:1px solid rgba(0,229,255,0.3);">
+        <img id="robloxAvatar" src="" style="width:40px; height:40px; border-radius:50%; border:2px solid #00e5ff;">
+        <div style="text-align:left; flex:1; overflow:hidden;">
+          <div id="robloxName" style="font-weight:700; font-size:14px; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Username</div>
+          <div style="font-size:11px; color:var(--green)">✅ Akun Terkoneksi</div>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:8px; margin-top:4px">
+        <button class="btn btn-cyan btn-full" onclick="checkAccount()" id="btnCheckAcc">🔍 Konek Akun</button>
+        <button class="btn btn-outline btn-full" onclick="saveAccount()">💾 Simpan</button>
+      </div>
 
       <div class="divider"></div>
 
@@ -512,15 +524,50 @@ function loadAccount() {
     document.getElementById('apiKey').value = saved.api_key || '';
     document.getElementById('creatorId').value = saved.creator_id || '';
     document.getElementById('creatorType').value = saved.creator_type || 'User';
+    if(saved.name && saved.thumb) {
+      document.getElementById('robloxName').textContent = saved.name;
+      document.getElementById('robloxAvatar').src = saved.thumb;
+      document.getElementById('robloxProfile').style.display = 'flex';
+    }
   }
 }
 function saveAccount() {
   localStorage.setItem('mchlern_account', JSON.stringify({
     api_key: document.getElementById('apiKey').value,
     creator_id: document.getElementById('creatorId').value,
-    creator_type: document.getElementById('creatorType').value
+    creator_type: document.getElementById('creatorType').value,
+    name: document.getElementById('robloxName').textContent,
+    thumb: document.getElementById('robloxAvatar').src
   }));
   alert('Tersimpan di browser!');
+}
+
+async function checkAccount() {
+  const ak = document.getElementById('apiKey').value;
+  const ci = document.getElementById('creatorId').value;
+  const ct = document.getElementById('creatorType').value;
+  if(!ak || !ci) { alert('Isi API Key & Creator ID dulu!'); return; }
+  
+  const btn = document.getElementById('btnCheckAcc');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
+  try {
+    const r = await fetch('/api/check-account', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({api_key: ak, creator_id: ci, creator_type: ct})
+    });
+    const d = await r.json();
+    if(d.error) throw new Error(d.error);
+    
+    document.getElementById('robloxName').textContent = d.name;
+    document.getElementById('robloxAvatar').src = d.thumbnail;
+    document.getElementById('robloxProfile').style.display = 'flex';
+    saveAccount();
+  } catch(e) {
+    alert(e.message);
+    document.getElementById('robloxProfile').style.display = 'none';
+  } finally {
+    btn.disabled = false; btn.innerHTML = '🔍 Konek Akun';
+  }
 }
 
 // --- SLIDERS ---
