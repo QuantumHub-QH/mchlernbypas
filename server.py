@@ -26,7 +26,7 @@ GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", "")
 DISCORD_CLIENT_ID = os.environ.get("DISCORD_CLIENT_ID", "")
 DISCORD_CLIENT_SECRET = os.environ.get("DISCORD_CLIENT_SECRET", "")
 DISCORD_GUILD_ID = os.environ.get("DISCORD_GUILD_ID", "")
-DISCORD_REDIRECT_URI = "https://mchlernbypas-production.up.railway.app/callback/discord"
+DISCORD_REDIRECT_URI = os.environ.get("DISCORD_REDIRECT_URI", "https://mchlernbypas-production.up.railway.app/callback/discord")
 
 FFMPEG = imageio_ffmpeg.get_ffmpeg_exe()
 INTRO_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "intro.mp3")
