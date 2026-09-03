@@ -44,6 +44,10 @@ def init_db():
                     count INTEGER,
                     PRIMARY KEY (identifier, upload_date)
                  )''')
+    c.execute('''CREATE TABLE IF NOT EXISTS premium (
+                    identifier TEXT PRIMARY KEY,
+                    expiry_date TEXT
+                 )''')
     conn.commit()
     conn.close()
 
@@ -87,6 +91,18 @@ def check_limits(token, client_ip):
     else:
         identifier = f"ip_{client_ip}"
         max_limit = 2
+        
+    # Cek Premium
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("SELECT expiry_date FROM premium WHERE identifier=?", (identifier,))
+    row = c.fetchone()
+    conn.close()
+    
+    if row:
+        expiry = datetime.fromisoformat(row[0])
+        if datetime.now() <= expiry:
+            max_limit = 999999  # UNLIMITED
         
     current = get_usage(identifier)
     return identifier, current, max_limit
@@ -399,14 +415,102 @@ def upload():
             return jsonify({"success": True, "asset_id": asset_id, "title": title, "blocked": False})
         else:
             blocked = resp.status_code in (403, 401)
-            increment_usage(identifier)
-            return jsonify({"success": False, "asset_id": "-", "title": title, "blocked": blocked, "error": f"Fail {resp.status_code}"})
-    except Exception as e: return jsonify({"success": False, "error": str(e), "asset_id": "-", "blocked": False})
+            err = resp.json().get("errors", [{}])[0].get("message", resp.text)
+            return jsonify({"success": False, "error": f"Roblox API: {err}", "blocked": blocked})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
     finally:
-        for fp in [temp_out]:
-            if fp and os.path.exists(fp):
-                try: os.remove(fp)
-                except: pass
+        if temp_out and os.path.exists(temp_out):
+            try: os.remove(temp_out)
+            except: pass
+
+@app.route("/admin-panel-rahasia", methods=["GET", "POST"])
+def admin_panel():
+    if request.method == "POST":
+        if request.form.get("password") == "rikigantengZ55":
+            session['admin_logged_in'] = True
+            return redirect("/admin-panel-rahasia")
+        elif request.form.get("action") == "add" and session.get('admin_logged_in'):
+            email = request.form.get("email").strip()
+            identifier = f"google_{email}"
+            duration = request.form.get("duration") # "week" or "month"
+            days = 7 if duration == "week" else 30
+            expiry = (datetime.now() + timedelta(days=days)).isoformat()
+            
+            conn = sqlite3.connect(DB_PATH)
+            c = conn.cursor()
+            c.execute("INSERT OR REPLACE INTO premium (identifier, expiry_date) VALUES (?, ?)", (identifier, expiry))
+            conn.commit()
+            conn.close()
+            return redirect("/admin-panel-rahasia")
+        elif request.form.get("action") == "delete" and session.get('admin_logged_in'):
+            identifier = request.form.get("identifier")
+            conn = sqlite3.connect(DB_PATH)
+            c = conn.cursor()
+            c.execute("DELETE FROM premium WHERE identifier=?", (identifier,))
+            conn.commit()
+            conn.close()
+            return redirect("/admin-panel-rahasia")
+
+    if not session.get('admin_logged_in'):
+        return """
+        <body style="background:#05050a; color:#fff; display:flex; justify-content:center; align-items:center; height:100vh; font-family:sans-serif;">
+        <form method="POST" style="background:rgba(255,255,255,0.05); padding:30px; border-radius:12px; border:1px solid #333; text-align:center;">
+            <h2 style="color:#00e5ff;">Admin Area</h2>
+            <input type="password" name="password" placeholder="Password" style="width:100%; padding:10px; margin:15px 0; border-radius:5px; border:1px solid #555; background:#000; color:#fff;" autofocus>
+            <button type="submit" style="background:#00e5ff; color:#000; font-weight:bold; padding:10px 20px; border:none; border-radius:5px; cursor:pointer; width:100%;">Login</button>
+        </form>
+        </body>
+        """
+        
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("SELECT identifier, expiry_date FROM premium")
+    premiums = c.fetchall()
+    conn.close()
+    
+    html = """
+    <body style="background:#05050a; color:#fff; font-family:sans-serif; padding:40px;">
+        <h1 style="color:#00e5ff;">MCHLERN Admin Panel</h1>
+        
+        <div style="background:rgba(255,255,255,0.05); padding:20px; border-radius:12px; border:1px solid #333; margin-bottom:20px;">
+            <h3 style="margin-top:0;">Tambah Premium User</h3>
+            <form method="POST" style="display:flex; gap:10px; align-items:center;">
+                <input type="hidden" name="action" value="add">
+                <input type="email" name="email" placeholder="Email Google User" required style="padding:10px; border-radius:5px; border:1px solid #555; background:#000; color:#fff; width:300px;">
+                <select name="duration" style="padding:10px; border-radius:5px; border:1px solid #555; background:#000; color:#fff;">
+                    <option value="week">1 Minggu</option>
+                    <option value="month">1 Bulan</option>
+                </select>
+                <button type="submit" style="background:#00e676; color:#000; font-weight:bold; padding:10px 20px; border:none; border-radius:5px; cursor:pointer;">Tambah</button>
+            </form>
+        </div>
+        
+        <div style="background:rgba(255,255,255,0.05); padding:20px; border-radius:12px; border:1px solid #333;">
+            <h3 style="margin-top:0;">Daftar Premium Aktif</h3>
+            <table style="width:100%; border-collapse:collapse; text-align:left;">
+                <tr style="border-bottom:1px solid #333;"><th style="padding:10px;">User Identifier</th><th style="padding:10px;">Berakhir Pada</th><th style="padding:10px;">Aksi</th></tr>
+    """
+    for p in premiums:
+        html += f"""
+                <tr style="border-bottom:1px solid #222;">
+                    <td style="padding:10px;">{p[0]}</td>
+                    <td style="padding:10px;">{p[1][:10]}</td>
+                    <td style="padding:10px;">
+                        <form method="POST" style="margin:0;">
+                            <input type="hidden" name="action" value="delete">
+                            <input type="hidden" name="identifier" value="{p[0]}">
+                            <button style="background:#ff3366; color:#fff; border:none; padding:5px 10px; border-radius:3px; cursor:pointer;">Hapus</button>
+                        </form>
+                    </td>
+                </tr>
+        """
+    html += """
+            </table>
+        </div>
+    </body>
+    """
+    return render_template_string(html)
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
