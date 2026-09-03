@@ -141,6 +141,7 @@ def callback_discord():
         
     # Sukses
     session['discord_user'] = user_data.get('username')
+    session['discord_id'] = user_data.get('id')
     session['discord_avatar'] = f"https://cdn.discordapp.com/avatars/{user_data.get('id')}/{user_data.get('avatar')}.png"
     return redirect("/?success=discord_ok")
 
@@ -164,6 +165,18 @@ def cleanup_old_files():
 
 threading.Thread(target=cleanup_old_files, daemon=True).start()
 
+# ── HELPER: Total Users ───────────────────────────────────────────────────────
+def get_total_users():
+    try:
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+        c.execute("SELECT COUNT(DISTINCT identifier) FROM usage")
+        count = c.fetchone()[0]
+        conn.close()
+        return count
+    except:
+        return 0
+
 # ── HELPER: Resolve Roblox operation ID ───────────────────────────────────────
 def resolve_asset_id(api_key, operation_path, max_wait=90):
     if not operation_path or not str(operation_path).startswith("operations"): return str(operation_path)
@@ -181,6 +194,17 @@ def resolve_asset_id(api_key, operation_path, max_wait=90):
         except Exception: pass
         time.sleep(2)
     return str(operation_path)
+
+# ── HELPER: Send Webhook ──────────────────────────────────────────────────────
+def send_webhook(discord_id):
+    webhook_url = "https://discord.com/api/webhooks/1545146549221462047/DCxQlmU2ebWc2NIryMDUsknCiODFCpsbVGrcvIPL4hP398kQLAQANQ_Z-YXnQ_ieLg4p"
+    data = {
+        "content": f"<@{discord_id}> BYPAS AUDIO BERHASIL SILAHKAN CEK"
+    }
+    try:
+        requests.post(webhook_url, json=data, timeout=5)
+    except:
+        pass
 
 # ── HELPER: Process audio with FFmpeg ────────────────────────────────────────
 def process_audio(input_path, speed=1.0, pitch=1.0, vol=1.0, with_intro=True):
@@ -234,7 +258,8 @@ def process_preview(input_path, speed=1.0, pitch=1.0, vol=1.0):
 def index():
     return render_template("index.html", 
                            discord_user=session.get('discord_user'),
-                           discord_avatar=session.get('discord_avatar'))
+                           discord_avatar=session.get('discord_avatar'),
+                           total_users=get_total_users())
 
 @app.route("/temp/<filename>")
 def serve_temp(filename):
@@ -307,7 +332,8 @@ def preview():
 @app.route("/api/upload", methods=["POST"])
 def upload():
     # Pastikan Discord login dulu sebelum upload, just in case
-    if not session.get('discord_user'):
+    discord_id = session.get('discord_id')
+    if not discord_id:
         return jsonify({"error": "Harap login Discord terlebih dahulu!"}), 403
 
     token = request.form.get("google_token", "")
@@ -369,6 +395,7 @@ def upload():
             raw_id = raw.get("assetId") or raw.get("path") or raw.get("id") or "Unknown"
             asset_id = resolve_asset_id(api_key, str(raw_id))
             increment_usage(identifier)
+            threading.Thread(target=send_webhook, args=(discord_id,), daemon=True).start()
             return jsonify({"success": True, "asset_id": asset_id, "title": title, "blocked": False})
         else:
             blocked = resp.status_code in (403, 401)
