@@ -382,16 +382,57 @@ tr:hover td { background: rgba(255,30,80,0.05); }
   to { opacity: 1; transform: translateY(0) scale(1); } 
 }
 
-/* ── TOP BAR & MODALS ── */
+/* ── TOP BAR ── */
 .top-bar-glow {
-  display: flex; justify-content: flex-end; align-items: center; gap: 16px; 
-  margin-bottom: 0; padding: 12px 20px; background: rgba(0,0,0,0.6); 
-  border-radius: 16px; border: 1px solid rgba(255,30,80,0.2);
-  position: relative; overflow: hidden; box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 20px;
+  background: rgba(0,0,0,0.7);
+  border-radius: 18px; border: 1px solid rgba(255,30,80,0.2);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+  position: relative; overflow: hidden; flex-wrap: wrap;
 }
 .top-bar-glow::before {
   content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255,30,80,0.5), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255,30,80,0.6), transparent);
+}
+.topbar-users { display: flex; flex-direction: column; gap: 2px; }
+.topbar-users-label { font-size: 10px; color: var(--gray); text-transform: uppercase; letter-spacing: 2px; font-weight: 700; }
+.topbar-users-count { display: flex; align-items: center; gap: 10px; }
+.topbar-users-count span:first-child {
+  font-family: 'Outfit', sans-serif; font-size: 28px; font-weight: 900;
+  color: var(--red); text-shadow: 0 0 20px rgba(255,30,80,0.8);
+  transition: all 0.4s ease; line-height: 1;
+}
+.live-badge {
+  font-size: 9px; font-weight: 900; color: var(--success);
+  background: rgba(0,255,136,0.1); border: 1px solid rgba(0,255,136,0.3);
+  padding: 3px 8px; border-radius: 20px; letter-spacing: 2px;
+  animation: livePulse 2s ease-in-out infinite;
+}
+@keyframes livePulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+.btn-premium-top {
+  background: linear-gradient(135deg, #ffd700, #ff8c00);
+  color: #000; font-weight: 900; border: none;
+  padding: 10px 18px; border-radius: 12px; cursor: pointer;
+  font-size: 12px; text-transform: uppercase; letter-spacing: 1px;
+  box-shadow: 0 4px 15px rgba(255,215,0,0.4);
+  transition: all 0.2s; white-space: nowrap; flex-shrink: 0;
+}
+.btn-premium-top:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(255,215,0,0.6); }
+.topbar-profile {
+  display: flex; align-items: center; gap: 10px;
+  background: rgba(0,0,0,0.5); padding: 6px 14px 6px 6px;
+  border-radius: 30px; border: 1px solid rgba(255,255,255,0.1);
+  flex-shrink: 0;
+}
+.topbar-avatar { width: 32px; height: 32px; border-radius: 50%; border: 2px solid var(--red); box-shadow: 0 0 12px rgba(255,30,80,0.5); }
+.topbar-name { font-weight: 800; font-size: 13px; color: #fff; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 600px) {
+  .topbar-users-count span:first-child { font-size: 22px; }
+  .topbar-name { max-width: 80px; }
 }
 #premiumModal { 
   display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); 
@@ -585,17 +626,27 @@ tr:hover td { background: rgba(255,30,80,0.05); }
 
   <!-- ── MAIN CONTENT ── -->
   <div class="main-content">
+    <!-- ── TOP BAR ── -->
     <div class="top-bar-glow">
-      <div style="font-size: 13px; color: var(--white); font-weight: 800; display:flex; align-items:center; gap:6px; letter-spacing: 0.5px;">
-        <svg width="18" height="18" fill="var(--red)" viewBox="0 0 24 24" style="filter: drop-shadow(0 0 8px rgba(255,30,80,0.6));"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg>
-        Total Pengguna: <span id="totalUsersCount" style="color: var(--red); font-size: 15px; text-shadow: 0 0 10px rgba(255,30,80,0.5); transition: all 0.4s ease;">{{ total_users if total_users else '0' }}</span>
+      <!-- Total Users (kiri) -->
+      <div class="topbar-users">
+        <div class="topbar-users-label">👥 Total Pengguna</div>
+        <div class="topbar-users-count">
+          <span id="totalUsersCount">{{ total_users if total_users else '0' }}</span>
+          <span class="live-badge">● LIVE</span>
+        </div>
       </div>
-      
-      <button onclick="document.getElementById('premiumModal').style.display='flex'" style="background: linear-gradient(135deg, #ffd700, #ff8c00); color:#000; font-weight:900; border:none; padding:10px 18px; border-radius:12px; cursor:pointer; font-size:12px; box-shadow: 0 4px 15px rgba(255,215,0,0.4); transition: all 0.2s; text-transform: uppercase; letter-spacing: 1px; margin-left: auto;">💎 ADD PREMIUM</button>
-      
-      <div style="display:flex; align-items:center; gap:12px; background: rgba(0,0,0,0.5); padding: 6px 16px 6px 6px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.1); box-shadow: inset 0 2px 5px rgba(0,0,0,0.5);">
-        <img src="{{ discord_avatar if discord_avatar else 'https://cdn.discordapp.com/embed/avatars/0.png' }}" style="width:34px; height:34px; border-radius:50%; border:2px solid var(--red); box-shadow: 0 0 12px rgba(255,30,80,0.5);">
-        <span style="font-weight: 800; font-size: 13px; color: #fff; letter-spacing: 0.5px;">{{ discord_user if discord_user else 'Guest' }}</span>
+
+      <!-- Spacer -->
+      <div style="flex:1"></div>
+
+      <!-- Premium Button -->
+      <button onclick="document.getElementById('premiumModal').style.display='flex'" class="btn-premium-top">💎 Premium</button>
+
+      <!-- Discord Profile (kanan) -->
+      <div class="topbar-profile">
+        <img src="{{ discord_avatar if discord_avatar else 'https://cdn.discordapp.com/embed/avatars/0.png' }}" class="topbar-avatar">
+        <span class="topbar-name">{{ discord_user if discord_user else 'Guest' }}</span>
       </div>
     </div>
 
