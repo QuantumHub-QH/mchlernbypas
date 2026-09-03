@@ -83,20 +83,42 @@ def verify_google_token(token):
     except Exception as e:
         return None
 
-def check_limits(token, client_ip):
+def get_real_ip():
+    """Ambil IP asli user, bukan IP proxy Railway"""
+    forwarded = request.headers.get('X-Forwarded-For', '')
+    if forwarded:
+        return forwarded.split(',')[0].strip()
+    return request.remote_addr
+
+def check_limits(token, client_ip, discord_id=None):
+    """
+    Prioritas identifier:
+    1. Google email (jika login Google) → limit 10/hari
+    2. Discord ID (jika login Discord) → limit 2/hari  
+    3. Real IP (fallback) → limit 2/hari
+    """
     email = verify_google_token(token)
     if email:
         identifier = f"google_{email}"
         max_limit = 10
+    elif discord_id:
+        identifier = f"discord_{discord_id}"
+        max_limit = 2
     else:
-        identifier = f"ip_{client_ip}"
+        real_ip = get_real_ip()
+        identifier = f"ip_{real_ip}"
         max_limit = 2
         
-    # Cek Premium
+    # Cek Premium (cek juga via Discord ID kalau ada)
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute("SELECT expiry_date FROM premium WHERE identifier=?", (identifier,))
     row = c.fetchone()
+    
+    # Kalau tidak premium via identifier utama, cek juga via discord_id (untuk premium yang di-add via discord)
+    if not row and discord_id and not identifier.startswith("discord_"):
+        c.execute("SELECT expiry_date FROM premium WHERE identifier=?", (f"discord_{discord_id}",))
+        row = c.fetchone()
     conn.close()
     
     if row:
@@ -106,6 +128,8 @@ def check_limits(token, client_ip):
         
     current = get_usage(identifier)
     return identifier, current, max_limit
+
+
 
 
 # ── DISCORD OAUTH2 ────────────────────────────────────────────────────────────
@@ -287,12 +311,16 @@ def serve_temp(filename):
 def get_limits():
     data = request.get_json() or {}
     token = data.get("token", "")
-    ip = request.remote_addr
-    identifier, current, max_limit = check_limits(token, ip)
+    ip = get_real_ip()
+    discord_id = session.get('discord_id')
+    identifier, current, max_limit = check_limits(token, ip, discord_id=discord_id)
     return jsonify({
         "remaining": max(0, max_limit - current),
         "max": max_limit,
-        "is_google": identifier.startswith("google_")
+        "used": current,
+        "is_google": identifier.startswith("google_"),
+        "is_discord": identifier.startswith("discord_"),
+        "is_premium": max_limit > 100
     })
 
 @app.route("/api/check-account", methods=["POST"])
@@ -389,13 +417,15 @@ def upload():
         return jsonify({"error": "Harap login Discord terlebih dahulu!"}), 403
 
     token = request.form.get("google_token", "")
-    ip = request.remote_addr
-    identifier, current, max_limit = check_limits(token, ip)
+    ip = get_real_ip()
+    identifier, current, max_limit = check_limits(token, ip, discord_id=discord_id)
     
     if current >= max_limit:
         return jsonify({
             "limit_exceeded": True, 
-            "error": f"Batas harian tercapai ({max_limit}/{max_limit}). Besok bisa lagi!"
+            "error": f"Batas harian tercapai ({current}/{max_limit}). Besok bisa lagi atau upgrade Premium!",
+            "remaining": 0,
+            "max": max_limit
         }), 403
 
     api_key    = request.form.get("api_key", "").strip()
