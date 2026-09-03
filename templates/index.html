@@ -320,14 +320,17 @@ tr:hover td { background: rgba(255,30,80,0.05); }
 /* ── LANDING PAGE ── */
 .landing-page {
   position: fixed; inset: 0; background: rgba(5,2,3,0.95); z-index: 9999;
-  display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
-  padding: 40px 20px; text-align: center; overflow-y: auto; backdrop-filter: blur(10px);
+  display: block;
+  padding: 40px 20px; text-align: center;
+  overflow-y: scroll;
+  -webkit-overflow-scrolling: touch;
+  backdrop-filter: blur(10px);
 }
 .landing-content {
   background: rgba(20,5,8,0.8); border: 1px solid rgba(255,30,80,0.2); border-radius: 24px;
   padding: 50px 40px; max-width: 800px; width: 100%; box-shadow: 0 20px 60px rgba(255,30,80,0.15);
   animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-  position: relative; overflow: hidden; margin-top: auto; margin-bottom: auto;
+  position: relative; overflow: hidden; margin: 0 auto;
 }
 .landing-content::before {
   content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
