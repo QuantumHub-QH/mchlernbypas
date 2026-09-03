@@ -31,8 +31,13 @@ DISCORD_REDIRECT_URI = os.environ.get("DISCORD_REDIRECT_URI", "https://mchlernby
 FFMPEG = imageio_ffmpeg.get_ffmpeg_exe()
 INTRO_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "intro.mp3")
 TEMP_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "temp_audio")
-DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "usage.db")
+
+# DATA_DIR: set ke /data di Railway (pakai Volume) supaya database tidak hilang saat restart
+DATA_DIR = os.environ.get("DATA_DIR", os.path.dirname(os.path.abspath(__file__)))
+DB_PATH = os.path.join(DATA_DIR, "usage.db")
+
 os.makedirs(TEMP_DIR, exist_ok=True)
+os.makedirs(DATA_DIR, exist_ok=True)
 
 # ── DATABASE SETUP ────────────────────────────────────────────────────────────
 def init_db():
