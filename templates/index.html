@@ -852,7 +852,7 @@ function addFiles(files, m) {
     const div = document.createElement('div'); div.className = 'file-item'; div.id = id;
     div.innerHTML = `
       <div style="overflow:hidden;text-overflow:ellipsis;width:90px;white-space:nowrap;font-weight:600;">${f.name}</div>
-      <input type="text" id="i_${id}" value="${f.name.replace(/\.[^.]+$/,'')}" placeholder="Judul">
+      <input type="text" id="i_${id}" value="${f.name.replace(/\.[^.]+$/,'').slice(0,40)}" placeholder="Judul" maxlength="40">
       <button class="btn btn-red-glow" style="padding:6px 10px; font-size: 11px;" onclick="previewLocal('${id}','${m}')">▶</button>
       <button class="btn btn-danger" style="padding:6px 10px; font-size: 11px;" onclick="removeFile('${id}','${m}')">✕</button>
     `;
@@ -875,7 +875,7 @@ async function fetchYT(m) {
       <img src="${d.thumbnail}" class="yt-thumb">
       <div class="yt-info">
         <div class="yt-title">${d.title}</div>
-        <input type="text" class="input-field" style="padding:8px;font-size:11px;" id="i_${id}" value="${d.title.slice(0,50)}">
+        <input type="text" class="input-field" style="padding:8px;font-size:11px;" id="i_${id}" value="${d.title.slice(0,40)}" maxlength="40">
       </div>
       <button class="btn btn-red-glow" style="padding:6px 10px; font-size: 11px;" onclick="previewYT('${d.file}','${m}')">▶</button>
       <button class="btn btn-danger" style="padding:6px 10px; font-size: 11px;" onclick="removeYT('${id}','${m}')">✕</button>
@@ -920,6 +920,12 @@ async function startUpload(m) {
     ...state[m].yt.map(x=>({type:'yt', yt_file:x.file, title:document.getElementById('i_'+x.id).value}))
   ];
   if(!tasks.length) return;
+  
+  if (tasks.length > 10) {
+    alert(`Maksimal upload 10 lagu per sekali jalan biar server tidak berat!\nKamu memasukkan ${tasks.length} lagu.`);
+    return;
+  }
+
   const btn = document.getElementById('up'+cap(m)); btn.disabled=true;
   const st = document.getElementById('status'+cap(m)); st.style.display='block';
   for(let i=0; i<tasks.length; i++) {
