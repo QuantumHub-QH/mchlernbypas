@@ -933,29 +933,59 @@ window.onload = () => { loadAccount(); renderHistory(); };
 
 function handleCredentialResponse(response) {
   window.googleToken = response.credential;
-  document.getElementById('loginStatus').textContent = '✅ Logged In via Google';
-  document.getElementById('loginStatus').style.color = 'var(--success)';
-  document.getElementById('loginStatus').style.textShadow = '0 0 10px rgba(0,255,136,0.3)';
   updateLimitDisplay();
 }
 async function updateLimitDisplay() {
   try {
     const r = await fetch('/api/limits', {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({token: window.googleToken})
+      body: JSON.stringify({token: window.googleToken || null})
     });
     const d = await r.json();
-    document.getElementById('limitCount').textContent = `${d.remaining}/${d.max}`;
-    if(d.max > 100) { // Unlimited
-       document.getElementById('limitCount').textContent = `∞ / ∞`;
-       document.getElementById('limitCount').style.color = '#ffd700';
-       document.getElementById('limitCount').style.textShadow = '0 0 20px rgba(255,215,0,0.5)';
-       document.getElementById('loginStatus').textContent = '👑 Premium Active';
-       document.getElementById('loginStatus').style.color = '#ffd700';
+
+    const countEl = document.getElementById('limitCount');
+    const statusEl = document.getElementById('loginStatus');
+
+    if(d.is_premium) {
+      // PREMIUM
+      countEl.textContent = '∞ / ∞';
+      countEl.style.color = '#ffd700';
+      countEl.style.textShadow = '0 0 20px rgba(255,215,0,0.6)';
+      statusEl.textContent = '👑 Premium Active';
+      statusEl.style.color = '#ffd700';
+      statusEl.style.textShadow = '0 0 10px rgba(255,215,0,0.4)';
+    } else {
+      // NON-PREMIUM: tampilkan sisa limit
+      const remaining = d.remaining;
+      const maxVal = d.max;
+      countEl.textContent = `${remaining}/${maxVal}`;
+      countEl.style.textShadow = remaining === 0
+        ? '0 0 25px rgba(255,30,80,1)' 
+        : '0 0 25px rgba(255,30,80,0.8)';
+      countEl.style.color = remaining === 0 ? '#ff1e50' : '#fff';
+
+      if(d.is_google) {
+        statusEl.textContent = '✅ Login Google (10x/hari)';
+        statusEl.style.color = 'var(--success)';
+        statusEl.style.textShadow = '0 0 10px rgba(0,255,136,0.3)';
+      } else if(d.is_discord) {
+        statusEl.textContent = '🎮 Login Discord (2x/hari)';
+        statusEl.style.color = '#5865F2';
+        statusEl.style.textShadow = '0 0 10px rgba(88,101,242,0.4)';
+      } else {
+        statusEl.textContent = '👤 Guest Mode (2x/hari)';
+        statusEl.style.color = 'var(--gray)';
+        statusEl.style.textShadow = 'none';
+      }
     }
-  } catch(e) {}
+  } catch(e) {
+    console.error('Gagal fetch limits:', e);
+  }
 }
+// Panggil saat halaman load
 updateLimitDisplay();
+// Auto-refresh limit setiap 30 detik
+setInterval(updateLimitDisplay, 30000);
 </script>
 </body>
 </html>
