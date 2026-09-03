@@ -425,7 +425,7 @@ def upload():
         s = speed if bypass else 1.0
         p = pitch if bypass else 1.0
         v = vol   if bypass else 1.0
-        temp_out, _ = process_audio(input_path, s, p, v, with_intro=True)
+        temp_out, _ = process_audio(input_path, s, p, v, with_intro=bypass)
 
         creator_key = "userId" if creator_type == "User" else "groupId"
         req_body = {
