@@ -295,6 +295,42 @@ def get_limits():
         "is_google": identifier.startswith("google_")
     })
 
+@app.route("/api/check-account", methods=["POST"])
+def check_account():
+    data = request.get_json() or {}
+    creator_id = data.get("creator_id", "").strip()
+    creator_type = data.get("creator_type", "User")
+    api_key = data.get("api_key", "").strip()
+    
+    if not creator_id or not api_key:
+        return jsonify({"error": "API Key dan Creator ID wajib diisi"}), 400
+        
+    try:
+        if creator_type == "User":
+            user_res = requests.get(f"https://users.roblox.com/v1/users/{creator_id}", timeout=10)
+            if user_res.status_code == 200:
+                name = user_res.json().get("name", "Unknown")
+                thumb_res = requests.get(f"https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds={creator_id}&size=150x150&format=Png&isCircular=true", timeout=10)
+                thumb = ""
+                if thumb_res.status_code == 200:
+                    t_data = thumb_res.json().get("data", [])
+                    if t_data: thumb = t_data[0].get("imageUrl", "")
+                return jsonify({"success": True, "name": name, "thumbnail": thumb})
+        elif creator_type == "Group":
+            group_res = requests.get(f"https://groups.roblox.com/v1/groups/{creator_id}", timeout=10)
+            if group_res.status_code == 200:
+                name = group_res.json().get("name", "Unknown Group")
+                thumb_res = requests.get(f"https://thumbnails.roblox.com/v1/groups/icons?groupIds={creator_id}&size=150x150&format=Png&isCircular=true", timeout=10)
+                thumb = ""
+                if thumb_res.status_code == 200:
+                    t_data = thumb_res.json().get("data", [])
+                    if t_data: thumb = t_data[0].get("imageUrl", "")
+                return jsonify({"success": True, "name": name, "thumbnail": thumb})
+                
+        return jsonify({"error": "Creator ID tidak ditemukan di Roblox!"}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
 @app.route("/api/fetch-yt", methods=["POST"])
 def fetch_yt():
     data = request.get_json()
