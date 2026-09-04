@@ -414,7 +414,8 @@ tr:hover td { background: rgba(255,255,255,0.02); }
   .btn { padding: 14px; min-height: 48px; font-size: 13px; }
   .dropzone { padding: 30px 16px; }
   .template-grid { grid-template-columns: repeat(2, 1fr); }
-  .top-bar-glow { flex-wrap: wrap; justify-content: center; }
+  .top-bar-glow { flex-wrap: wrap; justify-content: center; gap: 8px; padding: 10px; }
+  .btn-premium-top { padding: 6px 12px; font-size: 11px; }
   /* Make sure scrolling works smoothly on mobile */
   html, body { overflow-x: hidden; height: auto; min-height: 100vh; }
   .app-container { padding-bottom: 40px; }
@@ -506,10 +507,6 @@ tr:hover td { background: rgba(255,255,255,0.02); }
         <div class="quota-text">Sisa Limit Harian</div>
         <div class="quota-number" id="limitCount">2/2</div>
         <div class="quota-text" id="loginStatus" style="margin-top:4px">Guest Mode</div>
-        <div class="google-btn-wrapper">
-          <div id="g_id_onload" data-client_id="943425114608-1iljg6276qr9ehtplp4u0878bvftumn8.apps.googleusercontent.com" data-callback="handleCredentialResponse"></div>
-          <div class="g_id_signin" data-type="standard" data-theme="outline" data-text="sign_in_with" data-shape="rectangular" data-logo_alignment="left"></div>
-        </div>
       </div>
 
       <div class="divider"></div>
@@ -590,6 +587,15 @@ tr:hover td { background: rgba(255,255,255,0.02); }
 
       <!-- Spacer -->
       <div style="flex:1"></div>
+
+      <!-- Google Login -->
+      <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;">
+        <span style="font-size:9px; color:var(--success); font-weight:700; text-transform:uppercase; letter-spacing:0.5px; text-shadow: 0 0 10px rgba(16,185,129,0.3);">Login Google = Limit 10x!</span>
+        <div style="transform: scale(0.8); transform-origin: center; height: 32px; display: flex; align-items: center; overflow: hidden; margin-top: 2px;">
+          <div id="g_id_onload" data-client_id="943425114608-1iljg6276qr9ehtplp4u0878bvftumn8.apps.googleusercontent.com" data-callback="handleCredentialResponse"></div>
+          <div class="g_id_signin" data-type="standard" data-theme="outline" data-text="sign_in_with" data-shape="rectangular" data-logo_alignment="left"></div>
+        </div>
+      </div>
 
       <!-- Premium Button -->
       <button onclick="document.getElementById('premiumModal').style.display='flex'" class="btn-premium-top">💎 Premium</button>
