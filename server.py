@@ -401,24 +401,62 @@ def fetch_yt():
     if not url: return jsonify({"error": "No URL"}), 400
 
     dl_name = f"yt_{uuid.uuid4().hex}"
+
+    # ── Spotify: ambil judul via oEmbed lalu search di YouTube ──────────────
+    spotify_thumb = ""
+    if "spotify.com/track" in url or "open.spotify.com" in url:
+        try:
+            oembed_resp = requests.get(
+                f"https://open.spotify.com/oembed?url={url}", timeout=10,
+                headers={"User-Agent": "Mozilla/5.0"}
+            )
+            if oembed_resp.status_code != 200:
+                return jsonify({"error": "Link Spotify tidak valid atau privat"}), 400
+            sp_info = oembed_resp.json()
+            search_query = sp_info.get("title", "")
+            spotify_thumb = sp_info.get("thumbnail_url", "")
+            if not search_query:
+                return jsonify({"error": "Tidak bisa baca judul lagu dari Spotify"}), 400
+            # Ubah jadi pencarian YouTube
+            url = f"ytsearch1:{search_query}"
+        except Exception as e:
+            return jsonify({"error": f"Gagal fetch Spotify: {str(e)}"}), 500
+
+    # ── Pilih extractor args sesuai platform ────────────────────────────────
+    is_tiktok = "tiktok.com" in url
+    extractor_args = {}
+    if not is_tiktok:
+        extractor_args = {
+            "youtube": {
+                "player_client": ["tv_embedded", "ios", "web_embedded"],
+            }
+        }
+
     ydl_opts = {
         "format": "bestaudio/best",
         "postprocessors": [{"key": "FFmpegExtractAudio", "preferredcodec": "mp3"}],
         "outtmpl": os.path.join(TEMP_DIR, dl_name),
         "ffmpeg_location": FFMPEG,
         "quiet": True,
-        "extractor_args": {"youtube": {"player_client": ["ios", "web_creator", "default"]}},
+        "extractor_args": extractor_args,
         "http_headers": {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "User-Agent": (
+                "com.zhiliaoapp.musically/2022600030 (Linux; U; Android 10; en_US; Pixel 4; Build/QQ3A.200805.001; Cronet/58.0.2991.0)"
+                if is_tiktok else
+                "Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 Chrome/90.0.4430.91 Mobile Safari/537.36"
+            ),
         },
         "nocheckcertificate": True,
     }
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=True)
-            if not info: raise Exception("Failed to extract info")
+            if not info: raise Exception("Gagal ambil info audio")
+            # Untuk ytsearch, info punya 'entries'
+            if "entries" in info:
+                info = info["entries"][0]
             title = info.get("title", "Unknown")
-            thumb = info.get("thumbnail") or (info.get("thumbnails") or [{}])[-1].get("url", "")
+            thumb = spotify_thumb or info.get("thumbnail") or (info.get("thumbnails") or [{}])[-1].get("url", "")
             actual = os.path.join(TEMP_DIR, dl_name + ".mp3")
             if not os.path.exists(actual):
                 actual = os.path.join(TEMP_DIR, ydl.prepare_filename(info).rsplit(".", 1)[0] + ".mp3")
