@@ -639,9 +639,17 @@ tr:hover td { background: rgba(255,255,255,0.02); }
         </div>
         <div class="file-list" id="listBypass"></div>
 
-        <div style="display:flex;gap:10px;margin-top:20px">
-          <input type="text" class="input-field" id="ytBypass" placeholder="Atau paste link YouTube...">
-          <button class="btn btn-outline" onclick="fetchYT('bypass')" id="btnYtBypass">Fetch</button>
+        <div style="margin-top:20px">
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+            <span style="font-size:10px;padding:3px 8px;border-radius:20px;background:rgba(255,0,0,0.15);border:1px solid rgba(255,0,0,0.3);color:#ff4444;font-weight:700;">▶ YouTube</span>
+            <span style="font-size:10px;padding:3px 8px;border-radius:20px;background:rgba(30,215,96,0.12);border:1px solid rgba(30,215,96,0.3);color:#1ed760;font-weight:700;">♫ Spotify</span>
+            <span style="font-size:10px;padding:3px 8px;border-radius:20px;background:rgba(0,242,234,0.12);border:1px solid rgba(0,242,234,0.3);color:#00f2ea;font-weight:700;">♪ TikTok</span>
+            <span style="font-size:10px;padding:3px 8px;border-radius:20px;background:rgba(255,0,0,0.15);border:1px solid rgba(255,0,0,0.3);color:#ff6b6b;font-weight:700;">🎵 YT Music</span>
+          </div>
+          <div style="display:flex;gap:10px">
+            <input type="text" class="input-field" id="ytBypass" placeholder="Paste link YouTube / Spotify / TikTok / YT Music...">
+            <button class="btn btn-outline" onclick="fetchYT('bypass')" id="btnYtBypass">Fetch</button>
+          </div>
         </div>
         <div id="ytQueueBypass"></div>
 
@@ -663,9 +671,17 @@ tr:hover td { background: rgba(255,255,255,0.02); }
         </div>
         <div class="file-list" id="listNormal"></div>
 
-        <div style="display:flex;gap:10px;margin-top:20px">
-          <input type="text" class="input-field" id="ytNormal" placeholder="Atau paste link YouTube...">
-          <button class="btn btn-outline" onclick="fetchYT('normal')" id="btnYtNormal">Fetch</button>
+        <div style="margin-top:20px">
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
+            <span style="font-size:10px;padding:3px 8px;border-radius:20px;background:rgba(255,0,0,0.15);border:1px solid rgba(255,0,0,0.3);color:#ff4444;font-weight:700;">▶ YouTube</span>
+            <span style="font-size:10px;padding:3px 8px;border-radius:20px;background:rgba(30,215,96,0.12);border:1px solid rgba(30,215,96,0.3);color:#1ed760;font-weight:700;">♫ Spotify</span>
+            <span style="font-size:10px;padding:3px 8px;border-radius:20px;background:rgba(0,242,234,0.12);border:1px solid rgba(0,242,234,0.3);color:#00f2ea;font-weight:700;">♪ TikTok</span>
+            <span style="font-size:10px;padding:3px 8px;border-radius:20px;background:rgba(255,0,0,0.15);border:1px solid rgba(255,0,0,0.3);color:#ff6b6b;font-weight:700;">🎵 YT Music</span>
+          </div>
+          <div style="display:flex;gap:10px">
+            <input type="text" class="input-field" id="ytNormal" placeholder="Paste link YouTube / Spotify / TikTok / YT Music...">
+            <button class="btn btn-outline" onclick="fetchYT('normal')" id="btnYtNormal">Fetch</button>
+          </div>
         </div>
         <div id="ytQueueNormal"></div>
 
