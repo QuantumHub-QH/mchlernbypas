@@ -464,6 +464,11 @@ def fetch_yt():
         "nocheckcertificate": True,
         "ignoreerrors": False,
     }
+    
+    # Deteksi cookies.txt untuk bypass YouTube bot (Simpan file cookies.txt di folder web_version)
+    cookie_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "cookies.txt")
+    if os.path.exists(cookie_path):
+        ydl_opts["cookiefile"] = cookie_path
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=True)
