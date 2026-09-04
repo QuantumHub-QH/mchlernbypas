@@ -349,13 +349,29 @@ def get_limits():
     ip = get_real_ip()
     discord_id = session.get('discord_id')
     identifier, current, max_limit = check_limits(token, ip, discord_id=discord_id)
+    
+    # Ambil expiry premium untuk ditampilkan ke user
+    premium_expiry = None
+    if max_limit > 100:
+        conn = sqlite3.connect(DB_PATH)
+        c = conn.cursor()
+        c.execute("SELECT expiry_date FROM premium WHERE identifier=?", (identifier,))
+        row = c.fetchone()
+        if not row and discord_id:
+            c.execute("SELECT expiry_date FROM premium WHERE identifier=?", (f"discord_{discord_id}",))
+            row = c.fetchone()
+        conn.close()
+        if row:
+            premium_expiry = row[0]  # ISO format string
+
     return jsonify({
         "remaining": max(0, max_limit - current),
         "max": max_limit,
         "used": current,
         "is_google": identifier.startswith("google_"),
         "is_discord": identifier.startswith("discord_"),
-        "is_premium": max_limit > 100
+        "is_premium": max_limit > 100,
+        "premium_expiry": premium_expiry  # e.g. "2026-09-11 17:00:00" atau None
     })
 
 @app.route("/api/check-account", methods=["POST"])
