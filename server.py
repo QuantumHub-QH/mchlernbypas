@@ -498,6 +498,66 @@ def preview():
         return jsonify({"preview_url": f"/temp/{out_name}"})
     except Exception as e: return jsonify({"error": str(e)}), 500
 
+@app.route("/api/generate-spritesheet", methods=["POST"])
+def generate_spritesheet():
+    url = request.form.get("url", "").strip()
+    start_time = float(request.form.get("start", 0))
+    end_time = float(request.form.get("end", 9))
+    duration = min(end_time - start_time, 9.0)
+    if duration <= 0: duration = 9.0
+
+    output_filename = f"sprite_{uuid.uuid4().hex}.png"
+    output_path = os.path.join(TEMP_DIR, output_filename)
+
+    try:
+        if url:
+            # Menggunakan yt-dlp untuk mendapatkan URL video langsung
+            ydl_opts = {'format': 'worst[ext=mp4]/worst', 'quiet': True}
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                info = ydl.extract_info(url, download=False)
+                # Ambil URL asli video (jika ada list format, ambil yang pertama/terburuk yg ada URL-nya)
+                video_url = info.get("url") or info.get("entries", [{}])[0].get("url")
+                if not video_url: return jsonify({"error": "Gagal ekstrak URL video."}), 400
+                
+                # Gunakan FFmpeg untuk trim & tile
+                cmd = [
+                    FFMPEG, "-y", 
+                    "-ss", str(start_time), "-t", str(duration),
+                    "-i", video_url,
+                    "-vf", "fps=6.2,scale=128:128,tile=7x8", 
+                    "-vframes", "1", 
+                    output_path
+                ]
+                subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        elif "file" in request.files:
+            f = request.files["file"]
+            tmp_gif = os.path.join(TEMP_DIR, f"tmp_{uuid.uuid4().hex}.gif")
+            f.save(tmp_gif)
+            cmd = [
+                FFMPEG, "-y", "-i", tmp_gif,
+                "-vf", "fps=6.2,scale=128:128,tile=7x8", 
+                "-vframes", "1", 
+                output_path
+            ]
+            subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            os.remove(tmp_gif)
+        else:
+            return jsonify({"error": "URL atau File wajib diisi!"}), 400
+
+        if not os.path.exists(output_path):
+            return jsonify({"error": "Gagal generate spritesheet"}), 500
+
+        # Karena output_path disimpan di temp_audio, kita bisa akses langsung?
+        # Tapi temp_audio diserve secara lokal? Tidak, mari kirim URL-nya (pakai send_file sementara atau public endpoint)
+        # Akan dibuat /temp_audio/<filename> static route
+        return jsonify({"success": True, "file": output_filename, "url": f"/temp_audio/{output_filename}"})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/temp_audio/<filename>")
+def serve_temp(filename):
+    return send_file(os.path.join(TEMP_DIR, filename))
+
 @app.route("/api/upload", methods=["POST"])
 def upload():
     # Pastikan Discord login dulu sebelum upload, just in case
@@ -526,6 +586,7 @@ def upload():
     vol        = float(request.form.get("vol", 1.0))
     bypass     = request.form.get("bypass", "false") == "true"
     yt_file    = request.form.get("yt_file", "").strip()
+    asset_type = request.form.get("asset_type", "Audio")  # BISA Decal ATAU Audio
 
     if not api_key or not creator_id: return jsonify({"error": "API Key & Creator ID wajib diisi!"}), 400
 
@@ -534,22 +595,28 @@ def upload():
         if not os.path.exists(input_path): return jsonify({"error": "File YouTube hilang"}), 404
     elif "file" in request.files:
         f = request.files["file"]
-        tmp_name = f"up_{uuid.uuid4().hex}.mp3"
+        # Bisa mp3/ogg untuk audio, png/jpg untuk decal
+        ext = os.path.splitext(f.filename)[1]
+        tmp_name = f"up_{uuid.uuid4().hex}{ext}"
         input_path = os.path.join(TEMP_DIR, tmp_name)
         f.save(input_path)
     else: return jsonify({"error": "Tidak ada file"}), 400
 
     temp_out = None
     try:
-        s = speed if bypass else 1.0
-        p = pitch if bypass else 1.0
-        v = vol   if bypass else 1.0
-        # with_intro=True → intro selalu ditambahkan di Normal maupun Bypass
-        temp_out, _ = process_audio(input_path, s, p, v, with_intro=True)
+        if asset_type == "Decal":
+            temp_out = input_path
+            mime_type = "image/png" if input_path.endswith('.png') else "image/jpeg"
+        else:
+            s = speed if bypass else 1.0
+            p = pitch if bypass else 1.0
+            v = vol   if bypass else 1.0
+            temp_out, _ = process_audio(input_path, s, p, v, with_intro=True)
+            mime_type = "audio/mpeg"
 
         creator_key = "userId" if creator_type == "User" else "groupId"
         req_body = {
-            "assetType": "Audio", "displayName": title, "description": "MCHLERN UPLOADER",
+            "assetType": asset_type, "displayName": title, "description": "MCHLERN UPLOADER",
             "creationContext": {"creator": {creator_key: str(creator_id)}}
         }
 
@@ -557,7 +624,7 @@ def upload():
             resp = requests.post(
                 "https://apis.roblox.com/assets/v1/assets",
                 headers={"x-api-key": api_key},
-                files={"fileContent": (os.path.basename(temp_out), fh, "audio/mpeg")},
+                files={"fileContent": (os.path.basename(temp_out), fh, mime_type)},
                 data={"request": json.dumps(req_body)},
                 timeout=60
             )
@@ -576,9 +643,14 @@ def upload():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     finally:
+        # Jika file hasil proses audio (temp_out), hapus. Tapi kalau Decal (input_path langsung), hapus juga?
+        # Supaya aman, kita hapus temp_out jika dia bukan original file atau jika dia file upload sementara
         if temp_out and os.path.exists(temp_out):
             try: os.remove(temp_out)
             except: pass
+        if yt_file and os.path.exists(input_path) and input_path != temp_out:
+             try: os.remove(input_path)
+             except: pass
 
 @app.route("/admin-panel-rahasia", methods=["GET", "POST"])
 def admin_panel():
