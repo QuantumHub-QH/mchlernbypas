@@ -440,7 +440,6 @@ def fetch_yt():
 
     # ── Pilih extractor args sesuai platform ────────────────────────────────
     is_tiktok = "tiktok.com" in url
-    extractor_args = {}
     
     ydl_opts = {
         "format": "bestaudio/best",
@@ -448,7 +447,7 @@ def fetch_yt():
         "outtmpl": os.path.join(TEMP_DIR, dl_name),
         "ffmpeg_location": FFMPEG,
         "quiet": True,
-        "extractor_args": extractor_args,
+        "extractor_args": {} if is_tiktok else {"youtube": {"player_client": ["ios"]}},
         "http_headers": {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
             "Referer": "https://www.tiktok.com/" if is_tiktok else "https://www.youtube.com/",
