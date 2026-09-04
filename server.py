@@ -493,7 +493,8 @@ def upload():
         s = speed if bypass else 1.0
         p = pitch if bypass else 1.0
         v = vol   if bypass else 1.0
-        temp_out, _ = process_audio(input_path, s, p, v, with_intro=bypass)
+        # with_intro=True → intro selalu ditambahkan di Normal maupun Bypass
+        temp_out, _ = process_audio(input_path, s, p, v, with_intro=True)
 
         creator_key = "userId" if creator_type == "User" else "groupId"
         req_body = {
