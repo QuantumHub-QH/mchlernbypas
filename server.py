@@ -428,12 +428,13 @@ def fetch_yt():
     if not is_tiktok:
         extractor_args = {
             "youtube": {
-                "player_client": ["tv_embedded", "ios", "web_embedded"],
+                # ios punya akses format paling lengkap, tv_embedded sebagai fallback
+                "player_client": ["ios", "android", "tv_embedded"],
             }
         }
 
     ydl_opts = {
-        "format": "bestaudio/best",
+        "format": "bestaudio[ext=m4a]/bestaudio[ext=webm]/bestaudio/best",
         "postprocessors": [{"key": "FFmpegExtractAudio", "preferredcodec": "mp3"}],
         "outtmpl": os.path.join(TEMP_DIR, dl_name),
         "ffmpeg_location": FFMPEG,
@@ -443,10 +444,11 @@ def fetch_yt():
             "User-Agent": (
                 "com.zhiliaoapp.musically/2022600030 (Linux; U; Android 10; en_US; Pixel 4; Build/QQ3A.200805.001; Cronet/58.0.2991.0)"
                 if is_tiktok else
-                "Mozilla/5.0 (Linux; Android 11; Pixel 5) AppleWebKit/537.36 Chrome/90.0.4430.91 Mobile Safari/537.36"
+                "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36"
             ),
         },
         "nocheckcertificate": True,
+        "ignoreerrors": False,
     }
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
