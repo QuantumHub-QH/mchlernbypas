@@ -441,16 +441,9 @@ def fetch_yt():
     # ── Pilih extractor args sesuai platform ────────────────────────────────
     is_tiktok = "tiktok.com" in url
     extractor_args = {}
-    if not is_tiktok:
-        extractor_args = {
-            "youtube": {
-                # ios punya akses format paling lengkap, tv_embedded sebagai fallback
-                "player_client": ["ios", "android", "tv_embedded"],
-            }
-        }
-
+    
     ydl_opts = {
-        "format": "bestaudio[ext=m4a]/bestaudio[ext=webm]/bestaudio/best",
+        "format": "bestaudio/best",
         "postprocessors": [{"key": "FFmpegExtractAudio", "preferredcodec": "mp3"}],
         "outtmpl": os.path.join(TEMP_DIR, dl_name),
         "ffmpeg_location": FFMPEG,
