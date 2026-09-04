@@ -442,12 +442,12 @@ def fetch_yt():
     is_tiktok = "tiktok.com" in url
     
     ydl_opts = {
-        "format": "bestaudio/best",
+        "format": "ba/b/best/bestvideo+bestaudio",
         "postprocessors": [{"key": "FFmpegExtractAudio", "preferredcodec": "mp3"}],
         "outtmpl": os.path.join(TEMP_DIR, dl_name),
         "ffmpeg_location": FFMPEG,
         "quiet": True,
-        "extractor_args": {} if is_tiktok else {"youtube": {"player_client": ["ios"]}},
+        "extractor_args": {} if is_tiktok else {"youtube": {"player_client": ["ios", "tv_embedded", "android", "web"]}},
         "http_headers": {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
             "Referer": "https://www.tiktok.com/" if is_tiktok else "https://www.youtube.com/",
