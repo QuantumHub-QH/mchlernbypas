@@ -557,13 +557,58 @@ tr:hover td { background: rgba(255,255,255,0.02); }
 </div>
 <style>
   @keyframes spin { to { transform:rotate(360deg); } }
+
+  /* ── GLITCH EFFECT ── */
+  @keyframes glitch1 {
+    0%,100% { clip-path: inset(0 0 95% 0); transform: translate(-4px, 0); }
+    20%      { clip-path: inset(30% 0 50% 0); transform: translate(4px, 0); }
+    40%      { clip-path: inset(60% 0 20% 0); transform: translate(-3px, 0); }
+    60%      { clip-path: inset(80% 0 5% 0);  transform: translate(3px, 0); }
+    80%      { clip-path: inset(10% 0 70% 0); transform: translate(-2px, 0); }
+  }
+  @keyframes glitch2 {
+    0%,100% { clip-path: inset(80% 0 5% 0);  transform: translate(4px, 0); }
+    20%      { clip-path: inset(10% 0 70% 0); transform: translate(-4px, 0); }
+    40%      { clip-path: inset(0 0 95% 0);   transform: translate(3px, 0); }
+    60%      { clip-path: inset(30% 0 50% 0); transform: translate(-3px, 0); }
+    80%      { clip-path: inset(60% 0 20% 0); transform: translate(2px, 0); }
+  }
+  @keyframes glitchFlicker {
+    0%,90%,100% { opacity:1; }
+    92%          { opacity:0.4; }
+    95%          { opacity:1; }
+    97%          { opacity:0.2; }
+  }
+  .glitch-wrap {
+    position: relative;
+    display: inline-block;
+    animation: glitchFlicker 4s infinite;
+  }
+  .glitch-wrap::before,
+  .glitch-wrap::after {
+    content: attr(data-text);
+    position: absolute;
+    left: 0; top: 0;
+    width: 100%;
+    color: inherit;
+    font: inherit;
+    pointer-events: none;
+  }
+  .glitch-wrap::before {
+    color: #ff0000;
+    animation: glitch1 3s infinite steps(1);
+  }
+  .glitch-wrap::after {
+    color: #ffffff;
+    animation: glitch2 3.5s infinite steps(1);
+  }
 </style>
 
 <!-- ── HUB PAGE ── -->
 <div id="hubPage" style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; padding: 20px;">
   <div style="text-align:center; margin-bottom: 40px;">
     <div style="font-family:'Outfit',sans-serif; font-size:42px; font-weight:900; color:#fff; letter-spacing:-2px;">
-      <span style="color:#ff0000;">MCHLERN</span> TOOLS HUB
+      <span class="glitch-wrap" data-text="MCHLERN" style="color:#ff0000;">MCHLERN</span> TOOLS HUB
     </div>
     <div style="font-size:12px; color:#666; text-transform:uppercase; letter-spacing:4px; margin-top:8px;">Pilih Tool yang Ingin Digunakan</div>
   </div>
@@ -593,7 +638,7 @@ tr:hover td { background: rgba(255,255,255,0.02); }
     <div class="glass-panel" style="margin-bottom:16px; text-align:center;">
       <img src="https://cdn.discordapp.com/attachments/1522140461081432126/1545132976227090582/ChatGPT_Image_Jul_20_2026_03_50_07_AM.png?ex=6a9b08b8&is=6a99b738&hm=c8eac40969dde5aa797a96bc42bbe0d0b78afa49f760ff982c4efcdbf67d646e"
         style="width:80px; height:80px; border-radius:50%; border:3px solid var(--red); margin-bottom:12px; box-shadow:0 0 30px rgba(255,0,0,0.2); object-fit:cover; filter: grayscale(100%) contrast(150%) sepia(100%) hue-rotate(-50deg) saturate(300%);">
-      <div class="logo-title"><span>MCHLERN</span> TOOLS</div>
+      <div class="logo-title"><span class="glitch-wrap" data-text="MCHLERN" style="color:#ff0000;">MCHLERN</span> TOOLS</div>
       <div class="logo-sub">Roblox Uploader Pro V2</div>
 
       <div class="quota-card">
@@ -691,7 +736,7 @@ tr:hover td { background: rgba(255,255,255,0.02); }
     <!-- ── BYPASS SETTINGS ── -->
     <div class="glass-panel" style="margin-bottom:16px;">
       <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; flex-wrap:wrap; gap:8px;">
-        <div class="section-title" style="margin:0;">🎛️ Bypass Settings</div>
+        <div class="section-title" style="margin:0;"><span class="glitch-wrap" data-text="🎛️ Bypass Settings">🎛️ Bypass Settings</span></div>
         <div style="display:flex; gap:6px; flex-wrap:wrap;">
           <button class="btn btn-outline btn-sm" onclick="applyTemplate(1.5)">1.5x</button>
           <button class="btn btn-outline btn-sm" onclick="applyTemplate(1.6)">1.6x</button>
@@ -797,10 +842,8 @@ tr:hover td { background: rgba(255,255,255,0.02); }
   <div class="main-content" id="spriteContent" style="display:none;">
     <button class="btn btn-outline" style="margin-bottom:16px;" onclick="switchTool('hub')">⬅ Keluar ke Hub</button>
     
-    <!-- Top Bar for Sprite (bisa sama atau beda, kita copy style) -->
+    <!-- Top Bar for Sprite — sama dengan Audio -->
     <div class="top-bar-glow">
-      <div style="font-family:'Outfit',sans-serif; font-size:20px; font-weight:800; color:#fff;">SPRITESHEET TOOLS</div>
-      <div style="flex:1"></div>
       <div class="topbar-users">
         <div class="topbar-users-label">👥 Total Pengguna</div>
         <div class="topbar-users-count">
@@ -808,11 +851,25 @@ tr:hover td { background: rgba(255,255,255,0.02); }
           <span class="live-badge">● LIVE</span>
         </div>
       </div>
+      <div style="flex:1"></div>
+      <!-- Google Login -->
+      <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
+        <span style="font-size:9px; color:var(--success); font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">Login Google = Limit 10x!</span>
+        <div style="transform:scale(0.8); transform-origin:center; height:32px; display:flex; align-items:center; overflow:hidden; margin-top:2px;">
+          <div id="g_id_onload_sprite" data-client_id="943425114608-1iljg6276qr9ehtplp4u0878bvftumn8.apps.googleusercontent.com" data-callback="handleCredentialResponse"></div>
+          <div class="g_id_signin" data-type="standard" data-theme="outline" data-text="sign_in_with" data-shape="rectangular" data-logo_alignment="left"></div>
+        </div>
+      </div>
+      <button onclick="document.getElementById('premiumModal').style.display='flex'" class="btn-premium-top">💎 Premium</button>
+      <div class="topbar-profile">
+        <img src="{{ discord_avatar if discord_avatar else 'https://cdn.discordapp.com/embed/avatars/0.png' }}" class="topbar-avatar">
+        <span class="topbar-name">{{ discord_user if discord_user else 'Guest' }}</span>
+      </div>
     </div>
 
     <!-- Spritesheet Generator Panel -->
     <div class="glass-panel" style="margin-bottom:16px;">
-      <div class="section-title" style="margin-bottom:6px;">🎞️ Generate Spritesheet (128x128)</div>
+      <div class="section-title" style="margin-bottom:6px;"><span class="glitch-wrap" data-text="🎞️ Generate Spritesheet (128x128)">🎞️ Generate Spritesheet (128x128)</span></div>
       <p style="font-size:12px; color:var(--gray); margin-bottom:16px; font-weight:500;">
         Max 56 Frame (Grid 7 Kolom x 8 Baris). File GIF atau Video max 9 detik.
       </p>
