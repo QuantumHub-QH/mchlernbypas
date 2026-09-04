@@ -441,11 +441,9 @@ def fetch_yt():
         "quiet": True,
         "extractor_args": extractor_args,
         "http_headers": {
-            "User-Agent": (
-                "com.zhiliaoapp.musically/2022600030 (Linux; U; Android 10; en_US; Pixel 4; Build/QQ3A.200805.001; Cronet/58.0.2991.0)"
-                if is_tiktok else
-                "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36"
-            ),
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
+            "Referer": "https://www.tiktok.com/" if is_tiktok else "https://www.youtube.com/",
+            "Accept-Language": "en-US,en;q=0.9",
         },
         "nocheckcertificate": True,
         "ignoreerrors": False,
