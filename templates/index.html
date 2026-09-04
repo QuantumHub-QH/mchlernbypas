@@ -11,19 +11,19 @@
 <style>
 * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color: transparent; }
 :root {
-  --bg: #09090b;
-  --panel: #18181b;
-  --panel-border: #27272a;
-  --red: #e11d48;
-  --red-dim: #9f1239;
-  --red-glow: rgba(225, 29, 72, 0.3);
-  --red-soft: rgba(225, 29, 72, 0.08);
-  --white: #fafafa;
-  --gray: #a1a1aa;
-  --gray-dark: #3f3f46;
-  --success: #10b981;
-  --danger: #ef4444;
-  --glass-shadow: 0 4px 24px -4px rgba(0, 0, 0, 0.5);
+  --bg: #000000;
+  --panel: #0a0a0a;
+  --panel-border: #333333;
+  --red: #ff0000;
+  --red-dim: #cc0000;
+  --red-glow: transparent;
+  --red-soft: transparent;
+  --white: #ffffff;
+  --gray: #888888;
+  --gray-dark: #444444;
+  --success: #00ff00;
+  --danger: #ff0000;
+  --glass-shadow: none;
 }
 
 body {
@@ -35,28 +35,17 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* ── ANIMATED BACKGROUND ── */
+/* ── SHARP BACKGROUND ── */
 .bg-animation {
-  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -2;
-  background: 
-    radial-gradient(circle at 20% 40%, rgba(255, 30, 80, 0.05) 0%, transparent 50%),
-    radial-gradient(circle at 80% 60%, rgba(200, 10, 40, 0.08) 0%, transparent 50%);
-  animation: bgPulse 10s ease-in-out infinite alternate;
-  pointer-events: none;
+  display: none; /* No more blurry gradients */
 }
 .bg-grid {
   position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1;
   background-image: 
-    linear-gradient(rgba(255,30,80,0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,30,80,0.03) 1px, transparent 1px);
-  background-size: 40px 40px;
-  mask-image: radial-gradient(circle at center, black 40%, transparent 80%);
-  -webkit-mask-image: radial-gradient(circle at center, black 40%, transparent 80%);
+    linear-gradient(rgba(255,0,0,0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,0,0,0.1) 1px, transparent 1px);
+  background-size: 50px 50px;
   pointer-events: none;
-}
-@keyframes bgPulse {
-  0% { transform: scale(1) translate(0, 0); }
-  100% { transform: scale(1.1) translate(2%, 2%); }
 }
 
 /* ── LAYOUT ── */
@@ -530,7 +519,7 @@ tr:hover td { background: rgba(255,255,255,0.02); }
 <!-- ── LOADING SCREEN ── -->
 <div id="loadingScreen" style="
   position:fixed; inset:0; z-index:99999;
-  background:#09090b;
+  background:#000000;
   display:flex; flex-direction:column;
   align-items:center; justify-content:center;
   gap:24px;
@@ -540,43 +529,70 @@ tr:hover td { background: rgba(255,255,255,0.02); }
     <div style="
       position:absolute; inset:0; border-radius:50%;
       border:3px solid transparent;
-      border-top-color:#e11d48;
-      animation:spin 0.9s linear infinite;
+      border-top-color:#ff0000;
+      animation:spin 0.5s linear infinite;
     "></div>
     <div style="
       position:absolute; inset:6px; border-radius:50%;
       border:2px solid transparent;
-      border-bottom-color:rgba(225,29,72,0.4);
-      animation:spin 1.4s linear infinite reverse;
+      border-bottom-color:#cc0000;
+      animation:spin 1s linear infinite reverse;
     "></div>
     <!-- Logo in center -->
     <img src="https://cdn.discordapp.com/attachments/1522140461081432126/1545132976227090582/ChatGPT_Image_Jul_20_2026_03_50_07_AM.png?ex=6a9b08b8&is=6a99b738&hm=c8eac40969dde5aa797a96bc42bbe0d0b78afa49f760ff982c4efcdbf67d646e"
-      style="position:absolute; inset:12px; border-radius:50%; object-fit:cover; width:76px; height:76px;"
+      style="position:absolute; inset:12px; border-radius:50%; object-fit:cover; width:76px; height:76px; filter: grayscale(100%) contrast(200%) sepia(100%) hue-rotate(-50deg) saturate(500%);"
     >
   </div>
   <div style="text-align:center;">
     <div style="font-family:'Outfit',sans-serif; font-size:28px; font-weight:900; color:#fff; letter-spacing:-1px;">
-      <span style="color:#e11d48;">MCHLERN</span> TOOLS
+      <span style="color:#ff0000;">MCHLERN</span> TOOLS
     </div>
-    <div style="font-size:11px; color:#52525b; text-transform:uppercase; letter-spacing:3px; margin-top:4px;">Roblox Uploader Pro V2</div>
+    <div style="font-size:11px; color:#666666; text-transform:uppercase; letter-spacing:3px; margin-top:4px;">SYSTEM BOOT SEQUENCE</div>
   </div>
   <!-- Progress bar -->
-  <div style="width:200px; height:3px; background:#18181b; border-radius:99px; overflow:hidden;">
-    <div id="loadBar" style="height:100%; width:0%; background:linear-gradient(90deg,#e11d48,#f97316); border-radius:99px; transition:width 0.1s linear;"></div>
+  <div style="width:200px; height:2px; background:#222; overflow:hidden;">
+    <div id="loadBar" style="height:100%; width:0%; background:#ff0000; transition:width 0.1s linear;"></div>
   </div>
-  <div id="loadText" style="font-size:11px; color:#52525b; font-weight:600; letter-spacing:1px;">MEMUAT SISTEM...</div>
+  <div id="loadText" style="font-size:11px; color:#888888; font-weight:600; letter-spacing:1px; font-family: monospace;">INITIALIZING...</div>
 </div>
 <style>
   @keyframes spin { to { transform:rotate(360deg); } }
-  @keyframes fadeOutScreen { 0%{opacity:1;} 100%{opacity:0;pointer-events:none;} }
 </style>
 
-<div class="app-container" id="mainApp">
+<!-- ── HUB PAGE ── -->
+<div id="hubPage" style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; padding: 20px;">
+  <div style="text-align:center; margin-bottom: 40px;">
+    <div style="font-family:'Outfit',sans-serif; font-size:42px; font-weight:900; color:#fff; letter-spacing:-2px;">
+      <span style="color:#ff0000;">MCHLERN</span> TOOLS HUB
+    </div>
+    <div style="font-size:12px; color:#666; text-transform:uppercase; letter-spacing:4px; margin-top:8px;">Pilih Tool yang Ingin Digunakan</div>
+  </div>
+
+  <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:24px; max-width: 700px; width: 100%;">
+    
+    <!-- Audio Tools -->
+    <div onclick="switchTool('audio')" style="background:var(--panel); border:1px solid var(--panel-border); border-radius:16px; padding:32px; text-align:center; cursor:pointer; transition:all 0.3s;" onmouseover="this.style.borderColor='#ff0000'" onmouseout="this.style.borderColor='var(--panel-border)'">
+      <div style="font-size:48px; margin-bottom:16px;">🎧</div>
+      <h3 style="color:#fff; font-size:20px; font-weight:800; margin-bottom:8px; font-family:'Outfit',sans-serif;">BYPASS AUDIO TOOLS</h3>
+      <p style="color:#888; font-size:12px; line-height:1.6;">Upload & Bypass filter audio Roblox. Dilengkapi dengan auto pitch, speed, dan volume adjustment.</p>
+    </div>
+
+    <!-- Spritesheet Tools -->
+    <div onclick="switchTool('sprite')" style="background:var(--panel); border:1px solid var(--panel-border); border-radius:16px; padding:32px; text-align:center; cursor:pointer; transition:all 0.3s;" onmouseover="this.style.borderColor='#ff0000'" onmouseout="this.style.borderColor='var(--panel-border)'">
+      <div style="font-size:48px; margin-bottom:16px;">🎞️</div>
+      <h3 style="color:#fff; font-size:20px; font-weight:800; margin-bottom:8px; font-family:'Outfit',sans-serif;">SPRITESHEET TOOLS</h3>
+      <p style="color:#888; font-size:12px; line-height:1.6;">Ubah GIF & YouTube Video jadi Spritesheet (max 56 frames). Upload langsung sebagai Decal.</p>
+    </div>
+
+  </div>
+</div>
+
+<div class="app-container" id="mainApp" style="display:none;">
   <!-- ── SIDEBAR ── -->
   <div class="sidebar">
     <div class="glass-panel" style="margin-bottom:16px; text-align:center;">
       <img src="https://cdn.discordapp.com/attachments/1522140461081432126/1545132976227090582/ChatGPT_Image_Jul_20_2026_03_50_07_AM.png?ex=6a9b08b8&is=6a99b738&hm=c8eac40969dde5aa797a96bc42bbe0d0b78afa49f760ff982c4efcdbf67d646e"
-        style="width:80px; height:80px; border-radius:50%; border:3px solid var(--red); margin-bottom:12px; box-shadow:0 0 30px rgba(255,30,80,0.5); object-fit:cover;">
+        style="width:80px; height:80px; border-radius:50%; border:3px solid var(--red); margin-bottom:12px; box-shadow:0 0 30px rgba(255,0,0,0.2); object-fit:cover; filter: grayscale(100%) contrast(150%) sepia(100%) hue-rotate(-50deg) saturate(300%);">
       <div class="logo-title"><span>MCHLERN</span> TOOLS</div>
       <div class="logo-sub">Roblox Uploader Pro V2</div>
 
@@ -608,7 +624,7 @@ tr:hover td { background: rgba(255,255,255,0.02); }
         </div>
       </div>
 
-      <div id="robloxProfile" style="display:none; align-items:center; gap:10px; margin-bottom:10px; padding:10px; background:rgba(0,0,0,0.5); border-radius:10px; border:1px solid rgba(255,30,80,0.3);">
+      <div id="robloxProfile" style="display:none; align-items:center; gap:10px; margin-bottom:10px; padding:10px; background:rgba(0,0,0,0.8); border-radius:10px; border:1px solid #333;">
         <img id="robloxAvatar" src="" style="width:36px; height:36px; border-radius:50%; border:2px solid var(--red);">
         <div style="text-align:left; flex:1; overflow:hidden;">
           <div id="robloxName" style="font-weight:800; font-size:13px; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Username</div>
@@ -623,8 +639,10 @@ tr:hover td { background: rgba(255,255,255,0.02); }
     </div>
   </div>
 
-  <!-- ── MAIN CONTENT ── -->
-  <div class="main-content">
+  <!-- ── MAIN CONTENT (AUDIO) ── -->
+  <div class="main-content" id="audioContent" style="display:none;">
+    <button class="btn btn-outline" style="margin-bottom:16px;" onclick="switchTool('hub')">⬅ Keluar ke Hub</button>
+
     <!-- ── TOP BAR ── -->
     <div class="top-bar-glow">
       <div class="topbar-users">
@@ -773,41 +791,329 @@ tr:hover td { background: rgba(255,255,255,0.02); }
         </table>
       </div>
     </div>
+  </div> <!-- End of audioContent -->
+
+  <!-- ── MAIN CONTENT (SPRITESHEET) ── -->
+  <div class="main-content" id="spriteContent" style="display:none;">
+    <button class="btn btn-outline" style="margin-bottom:16px;" onclick="switchTool('hub')">⬅ Keluar ke Hub</button>
+    
+    <!-- Top Bar for Sprite (bisa sama atau beda, kita copy style) -->
+    <div class="top-bar-glow">
+      <div style="font-family:'Outfit',sans-serif; font-size:20px; font-weight:800; color:#fff;">SPRITESHEET TOOLS</div>
+      <div style="flex:1"></div>
+      <div class="topbar-users">
+        <div class="topbar-users-label">👥 Total Pengguna</div>
+        <div class="topbar-users-count">
+          <span id="totalUsersCountSprite">{{ total_users if total_users else '0' }}</span>
+          <span class="live-badge">● LIVE</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Spritesheet Generator Panel -->
+    <div class="glass-panel" style="margin-bottom:16px;">
+      <div class="section-title" style="margin-bottom:6px;">🎞️ Generate Spritesheet (128x128)</div>
+      <p style="font-size:12px; color:var(--gray); margin-bottom:16px; font-weight:500;">
+        Max 56 Frame (Grid 7 Kolom x 8 Baris). File GIF atau Video max 9 detik.
+      </p>
+
+      <div class="dropzone" id="dzSprite" ondragover="onDragOver(event,'sprite')" ondragleave="onDragLeave('sprite')" ondrop="onDropSprite(event)">
+        <input type="file" accept="image/gif,video/mp4,video/webm" onchange="onFileSelectSprite(this)">
+        <span class="dz-icon">🎞️</span>
+        <span class="dz-text">Drag & drop .gif/.mp4 atau klik pilih file</span>
+      </div>
+      <div class="file-list" id="listSprite"></div>
+
+      <div style="margin-top:16px;">
+        <div style="font-size:11px; font-weight:700; margin-bottom:6px; color:#ff0000;">ATAU AMBIL DARI YOUTUBE (Max 9 Detik)</div>
+        <div style="display:flex; gap:10px; margin-bottom: 8px;">
+          <input type="text" class="input-field" id="ytSprite" placeholder="Paste link YouTube video...">
+        </div>
+        <div style="display:flex; gap:10px; align-items:center;">
+          <input type="number" class="input-field" id="ytStart" placeholder="Start (detik)" style="width:120px;" min="0" step="0.1">
+          <span style="color:#666;">-</span>
+          <input type="number" class="input-field" id="ytEnd" placeholder="End (detik)" style="width:120px;" min="0" step="0.1">
+          <button class="btn btn-red-glow" onclick="fetchYTSprite()" id="btnYtSprite">Generate & Preview</button>
+        </div>
+      </div>
+      
+      <div id="spritePreviewArea" style="display:none; margin-top:24px; text-align:center;">
+        <div style="font-size:12px; font-weight:700; margin-bottom:8px; color:var(--success);">✅ Preview Spritesheet</div>
+        <img id="imgSpritePreview" src="" style="max-width:100%; border:1px solid #333; border-radius:8px; background:#000;">
+        <div style="display:flex; gap:10px; margin-top:16px;">
+          <button class="btn btn-full upload-btn" onclick="uploadSprite()" id="btnUploadSprite">🚀 Upload ke Roblox (Decal)</button>
+        </div>
+      </div>
+      <div class="status-bar" id="statusSprite" style="margin-top:16px;"></div>
+    </div>
+
+    <!-- History Panel Spritesheet -->
+    <div class="glass-panel history-panel">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
+        <div class="section-title" style="margin:0;">📜 History Spritesheet</div>
+        <div style="display:flex; gap:10px;">
+          <button class="btn btn-outline btn-sm" onclick="copyAllIdsSprite()">📋 Copy All IDs</button>
+          <button class="btn btn-danger btn-sm" onclick="clearHistorySprite()">🗑 Clear</button>
+        </div>
+      </div>
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Waktu</th>
+              <th>Judul</th>
+              <th>Status</th>
+              <th>Decal ID</th>
+            </tr>
+          </thead>
+          <tbody id="historyTbodySprite">
+            <tr><td colspan="4" style="text-align:center; padding:30px; color:var(--gray);">Belum ada aktivitas.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
-</div>
-
-
+</div> <!-- End of app-container -->
 
 <script>
+// ── TOOL SWITCHER ──
+function switchTool(tool) {
+  if (tool === 'hub') {
+    document.getElementById('hubPage').style.display = 'flex';
+    document.getElementById('mainApp').style.display = 'none';
+  } else {
+    // Show loading 10s as requested when entering a tool
+    showLoading(10000, () => {
+      document.getElementById('hubPage').style.display = 'none';
+      document.getElementById('mainApp').style.display = 'grid'; // because app-container is a grid
+      
+      if (tool === 'audio') {
+        document.getElementById('audioContent').style.display = 'block';
+        document.getElementById('spriteContent').style.display = 'none';
+      } else if (tool === 'sprite') {
+        document.getElementById('audioContent').style.display = 'none';
+        document.getElementById('spriteContent').style.display = 'block';
+        renderHistorySprite();
+      }
+    });
+  }
+}
+
 // ── LOADING SCREEN ────────────────────────────────────────────────────────────
-(function() {
+function showLoading(durationMs, callback) {
+  const ls = document.getElementById('loadingScreen');
   const bar = document.getElementById('loadBar');
   const txt = document.getElementById('loadText');
-  const msgs = ['MEMUAT SISTEM...','MENGHUBUNGKAN...','SIAP!'];
+  
+  ls.style.display = 'flex';
+  ls.style.opacity = '1';
+  ls.style.transition = 'none';
+  bar.style.width = '0%';
+  
+  const msgs = ['INITIALIZING...','ESTABLISHING SECURE CONNECTION...','BYPASSING FIREWALL...','READY!'];
   let p = 0;
+  const intervalTime = 100;
+  const increment = 100 / (durationMs / intervalTime);
+  
   const iv = setInterval(() => {
-    p += Math.random() * 18 + 8;
+    p += increment + (Math.random() * 2); // slight random jump
     if(p > 100) p = 100;
     bar.style.width = p + '%';
-    if(p < 40) txt.textContent = msgs[0];
-    else if(p < 80) txt.textContent = msgs[1];
-    else txt.textContent = msgs[2];
+    
+    if(p < 30) txt.textContent = msgs[0];
+    else if(p < 60) txt.textContent = msgs[1];
+    else if(p < 95) txt.textContent = msgs[2];
+    else txt.textContent = msgs[3];
+    
     if(p >= 100) {
       clearInterval(iv);
       setTimeout(() => {
-        const ls = document.getElementById('loadingScreen');
         ls.style.transition = 'opacity 0.6s ease';
         ls.style.opacity = '0';
-        setTimeout(() => ls.style.display = 'none', 600);
+        setTimeout(() => {
+          ls.style.display = 'none';
+          if(callback) callback();
+        }, 600);
       }, 300);
     }
-  }, 80);
-})();
+  }, intervalTime);
+}
 
-const state = { main:{files:[], yt:[]}, history:JSON.parse(localStorage.getItem('mchl_hist')||'[]') };
+window.addEventListener('DOMContentLoaded', () => {
+  // Hide hub while loading, show after boot
+  const hub = document.getElementById('hubPage');
+  if(hub) hub.style.display = 'none';
+  showLoading(10000, () => {
+    if(hub) hub.style.display = 'flex';
+  });
+});
+
+
+const state = { 
+  main:{files:[], yt:[]}, 
+  sprite:{file:null, title:"", generatedUrl:null}, 
+  history:JSON.parse(localStorage.getItem('mchl_hist')||'[]'),
+  historySprite:JSON.parse(localStorage.getItem('mchl_hist_sprite')||'[]')
+};
+
+// ── SPRITESHEET FUNCTIONS ──
+function onDropSprite(e) { e.preventDefault(); onDragLeave('sprite'); handleSpriteFile(e.dataTransfer.files[0]); }
+function onFileSelectSprite(inp) { handleSpriteFile(inp.files[0]); inp.value=''; }
+
+function handleSpriteFile(f) {
+  if(!f) return;
+  state.sprite.file = f;
+  state.sprite.title = f.name.replace(/\.[^.]+$/,'');
+  document.getElementById('listSprite').innerHTML = `
+    <div class="file-item" style="display:flex; justify-content:space-between; align-items:center;">
+      <span style="font-weight:700;">${f.name}</span>
+      <button class="btn btn-red-glow" onclick="generateSpriteLocal()">Generate</button>
+    </div>
+  `;
+}
+
+async function generateSpriteLocal() {
+  if(!state.sprite.file) return;
+  const st = document.getElementById('statusSprite');
+  st.innerHTML = '<span class="spinner" style="display:inline-block;vertical-align:middle;margin-right:8px;"></span> Generating Spritesheet dari file lokal...';
+  
+  const fd = new FormData();
+  fd.append('file', state.sprite.file);
+  try {
+    const r = await fetch('/api/generate-spritesheet', {method:'POST', body:fd});
+    const d = await r.json();
+    if(d.error) throw new Error(d.error);
+    
+    state.sprite.generatedUrl = d.url;
+    document.getElementById('imgSpritePreview').src = d.url;
+    document.getElementById('spritePreviewArea').style.display = 'block';
+    st.innerHTML = '<span style="color:var(--success)">✅ Spritesheet berhasil dibuat!</span>';
+  } catch(e) {
+    st.innerHTML = `<span style="color:#ff0000;">❌ Gagal: ${e.message}</span>`;
+  }
+}
+
+async function fetchYTSprite() {
+  const url = document.getElementById('ytSprite').value;
+  const start = document.getElementById('ytStart').value || '0';
+  const end = document.getElementById('ytEnd').value || '9';
+  if(!url) { alert('Isi link YouTube dulu!'); return; }
+  
+  const btn = document.getElementById('btnYtSprite');
+  const st = document.getElementById('statusSprite');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
+  st.innerHTML = '<span class="spinner" style="display:inline-block;vertical-align:middle;margin-right:8px;"></span> Mengunduh & Generate dari YouTube... (Bisa memakan waktu)';
+  
+  const fd = new FormData();
+  fd.append('url', url);
+  fd.append('start', start);
+  fd.append('end', end);
+  
+  try {
+    const r = await fetch('/api/generate-spritesheet', {method:'POST', body:fd});
+    const d = await r.json();
+    if(d.error) throw new Error(d.error);
+    
+    state.sprite.title = "YT_Spritesheet";
+    state.sprite.generatedUrl = d.url;
+    document.getElementById('imgSpritePreview').src = d.url;
+    document.getElementById('spritePreviewArea').style.display = 'block';
+    st.innerHTML = '<span style="color:var(--success)">✅ Spritesheet dari YouTube berhasil dibuat!</span>';
+  } catch(e) {
+    st.innerHTML = `<span style="color:#ff0000;">❌ Gagal: ${e.message}</span>`;
+  } finally {
+    btn.disabled = false; btn.innerHTML = 'Generate & Preview';
+  }
+}
+
+async function uploadSprite() {
+  if(!state.sprite.generatedUrl) return;
+  const ak = document.getElementById('apiKey').value;
+  const ci = document.getElementById('creatorId').value;
+  const ct = document.getElementById('creatorType').value;
+  const token = window.googleToken || ''; 
+  
+  if(!ak||!ci) { alert('Isi API Key & Creator ID di menu Kiri!'); return; }
+  
+  const btn = document.getElementById('btnUploadSprite');
+  const st = document.getElementById('statusSprite');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Uploading...';
+  
+  // Karena generated file ada di server temp_audio, lebih baik kita kirim nama filenya ke backend
+  // Atau lebih gampang, frontend download url tsb sbg blob, lalu kirim FormData file seperti upload audio
+  try {
+    st.innerHTML = '<span class="spinner" style="display:inline-block;vertical-align:middle;margin-right:8px;"></span> Mengirim data ke Roblox...';
+    
+    // Download image dari server ke memori browser untuk diupload ulang via FormData
+    const imgRes = await fetch(state.sprite.generatedUrl);
+    const blob = await imgRes.blob();
+    
+    const fd = new FormData();
+    fd.append('api_key', ak); fd.append('creator_id', ci); fd.append('creator_type', ct);
+    fd.append('title', state.sprite.title || "Spritesheet");
+    fd.append('file', blob, 'spritesheet.png');
+    fd.append('asset_type', 'Decal');
+    fd.append('google_token', token);
+    
+    const r = await fetch('/api/upload', {method:'POST', body:fd});
+    const d = await r.json();
+    
+    if(d.limit_exceeded) { 
+      await updateLimitDisplay();
+      alert('LIMIT TERCAPAI! ' + d.error); 
+      throw new Error(d.error);
+    }
+    
+    addHistorySprite({
+      time: d.time||new Date().toLocaleString(), title: state.sprite.title||"Spritesheet",
+      id: d.asset_id||'-', status: d.success?'Success':(d.error||'Fail')
+    });
+    
+    if(d.success) {
+      st.innerHTML = `<span style="color:var(--success)">✅ Upload selesai! Asset ID: ${d.asset_id}</span>`;
+    } else {
+      st.innerHTML = `<span style="color:#ff0000;">❌ Gagal Upload: ${d.error}</span>`;
+    }
+    await updateLimitDisplay();
+  } catch(e) {
+    addHistorySprite({time: new Date().toLocaleString(), title: state.sprite.title, id: '-', status: 'Error'});
+    st.innerHTML = `<span style="color:#ff0000;">❌ Error: ${e.message}</span>`;
+  } finally {
+    btn.disabled = false; btn.innerHTML = '🚀 Upload ke Roblox (Decal)';
+  }
+}
+
+function addHistorySprite(h) {
+  state.historySprite.unshift(h);
+  localStorage.setItem('mchl_hist_sprite', JSON.stringify(state.historySprite.slice(0,100)));
+  renderHistorySprite();
+}
+
+function renderHistorySprite() {
+  const t = document.getElementById('historyTbodySprite');
+  if(!t) return;
+  if(!state.historySprite.length) { t.innerHTML='<tr><td colspan="4" style="text-align:center; padding:30px; color:var(--gray);">Belum ada aktivitas.</td></tr>'; return; }
+  t.innerHTML = state.historySprite.map(h => `
+    <tr>
+      <td style="color:var(--gray); font-weight: 500;">${h.time}</td>
+      <td style="font-weight: 600;">${h.title}</td>
+      <td><span class="status-badge ${h.status==='Success'?'bg-green':'bg-red'}">${h.status==='Success'?'SUCCESS':h.status.slice(0,20)}</span></td>
+      <td>
+        ${h.id!=='-' ? `<span class="copy-badge" onclick="navigator.clipboard.writeText('${h.id}');alert('Copied!')">${h.id} 📋</span>` : '-'}
+      </td>
+    </tr>
+  `).join('');
+}
+
+function copyAllIdsSprite() {
+  const ids = state.historySprite.filter(x=>x.id!=='-').map(x=>x.id);
+  if(ids.length) { navigator.clipboard.writeText(ids.join('\n')); alert(ids.length+' IDs copied!'); }
+}
+function clearHistorySprite() { state.historySprite=[]; localStorage.removeItem('mchl_hist_sprite'); renderHistorySprite(); }
 
 // Normal upload = reset sliders to 1.0 then upload
 function normalUpload() {
+
   resetBypass();
   startUpload('normal');
 }
@@ -1144,7 +1450,7 @@ updateLimitDisplay();
 setInterval(updateLimitDisplay, 30000);
 
 // ── REALTIME TOTAL USERS ─────────────────────────────────────────────────────
-let _lastTotalUsers = parseInt(document.getElementById('totalUsersCount').textContent) || 0;
+let _lastTotalUsers = parseInt((document.getElementById('totalUsersCount')||{textContent:'0'}).textContent) || 0;
 
 function animateCount(el, from, to) {
   if (from === to) return;
@@ -1152,7 +1458,7 @@ function animateCount(el, from, to) {
   const start = performance.now();
   function step(now) {
     const progress = Math.min((now - start) / duration, 1);
-    const ease = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+    const ease = 1 - Math.pow(1 - progress, 3);
     el.textContent = Math.round(from + (to - from) * ease);
     if (progress < 1) requestAnimationFrame(step);
     else el.textContent = to;
@@ -1164,24 +1470,30 @@ async function pollTotalUsers() {
   try {
     const r = await fetch('/api/total-users');
     const d = await r.json();
-    const el = document.getElementById('totalUsersCount');
-    if (el && d.total !== _lastTotalUsers) {
-      // Tambah glow effect saat angka naik
-      el.style.textShadow = '0 0 25px rgba(255,30,80,1), 0 0 50px rgba(255,30,80,0.6)';
-      el.style.transform = 'scale(1.2)';
-      animateCount(el, _lastTotalUsers, d.total);
-      setTimeout(() => {
-        el.style.textShadow = '0 0 10px rgba(255,30,80,0.5)';
-        el.style.transform = 'scale(1)';
-      }, 1000);
-      _lastTotalUsers = d.total;
-    }
+    // Update all total user elements (hub page may have different IDs)
+    ['totalUsersCount', 'totalUsersCountSprite'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el && d.total !== _lastTotalUsers) {
+        animateCount(el, _lastTotalUsers, d.total);
+      }
+    });
+    if (d.total !== _lastTotalUsers) _lastTotalUsers = d.total;
   } catch(e) {}
 }
 
 // Poll setiap 10 detik
 pollTotalUsers();
 setInterval(pollTotalUsers, 10000);
+
+// ── renderFiles / renderYT helpers (called from startUpload cleanup) ──
+function renderFiles(m) {
+  const el = document.getElementById('list'+cap(m));
+  if(el) el.innerHTML = '';
+}
+function renderYT(m) {
+  const el = document.getElementById('ytQueue'+cap(m));
+  if(el) el.innerHTML = '';
+}
 
 </script>
 </body>
