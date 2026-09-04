@@ -527,11 +527,56 @@ tr:hover td { background: rgba(255,255,255,0.02); }
   </div>
 </div>
 
+<!-- ── LOADING SCREEN ── -->
+<div id="loadingScreen" style="
+  position:fixed; inset:0; z-index:99999;
+  background:#09090b;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  gap:24px;
+">
+  <div style="position:relative; width:100px; height:100px;">
+    <!-- Spinning ring -->
+    <div style="
+      position:absolute; inset:0; border-radius:50%;
+      border:3px solid transparent;
+      border-top-color:#e11d48;
+      animation:spin 0.9s linear infinite;
+    "></div>
+    <div style="
+      position:absolute; inset:6px; border-radius:50%;
+      border:2px solid transparent;
+      border-bottom-color:rgba(225,29,72,0.4);
+      animation:spin 1.4s linear infinite reverse;
+    "></div>
+    <!-- Logo in center -->
+    <img src="https://cdn.discordapp.com/attachments/1522140461081432126/1545132976227090582/ChatGPT_Image_Jul_20_2026_03_50_07_AM.png?ex=6a9b08b8&is=6a99b738&hm=c8eac40969dde5aa797a96bc42bbe0d0b78afa49f760ff982c4efcdbf67d646e"
+      style="position:absolute; inset:12px; border-radius:50%; object-fit:cover; width:76px; height:76px;"
+    >
+  </div>
+  <div style="text-align:center;">
+    <div style="font-family:'Outfit',sans-serif; font-size:28px; font-weight:900; color:#fff; letter-spacing:-1px;">
+      <span style="color:#e11d48;">MCHLERN</span> TOOLS
+    </div>
+    <div style="font-size:11px; color:#52525b; text-transform:uppercase; letter-spacing:3px; margin-top:4px;">Roblox Uploader Pro V2</div>
+  </div>
+  <!-- Progress bar -->
+  <div style="width:200px; height:3px; background:#18181b; border-radius:99px; overflow:hidden;">
+    <div id="loadBar" style="height:100%; width:0%; background:linear-gradient(90deg,#e11d48,#f97316); border-radius:99px; transition:width 0.1s linear;"></div>
+  </div>
+  <div id="loadText" style="font-size:11px; color:#52525b; font-weight:600; letter-spacing:1px;">MEMUAT SISTEM...</div>
+</div>
+<style>
+  @keyframes spin { to { transform:rotate(360deg); } }
+  @keyframes fadeOutScreen { 0%{opacity:1;} 100%{opacity:0;pointer-events:none;} }
+</style>
+
 <div class="app-container" id="mainApp">
   <!-- ── SIDEBAR ── -->
   <div class="sidebar">
-    <div class="glass-panel" style="margin-bottom:24px; text-align:center;">
-      <img src="https://cdn.discordapp.com/attachments/1522140461081432126/1545132976227090582/ChatGPT_Image_Jul_20_2026_03_50_07_AM.png?ex=6a9b08b8&is=6a99b738&hm=c8eac40969dde5aa797a96bc42bbe0d0b78afa49f760ff982c4efcdbf67d646e" style="width: 100px; height: 100px; border-radius: 50%; border: 3px solid var(--red); margin-bottom: 16px; box-shadow: 0 0 30px rgba(255, 30, 80, 0.5); object-fit: cover;">
+    <div class="glass-panel" style="margin-bottom:16px; text-align:center;">
+      <img src="https://cdn.discordapp.com/attachments/1522140461081432126/1545132976227090582/ChatGPT_Image_Jul_20_2026_03_50_07_AM.png?ex=6a9b08b8&is=6a99b738&hm=c8eac40969dde5aa797a96bc42bbe0d0b78afa49f760ff982c4efcdbf67d646e"
+        style="width:80px; height:80px; border-radius:50%; border:3px solid var(--red); margin-bottom:12px; box-shadow:0 0 30px rgba(255,30,80,0.5); object-fit:cover;">
       <div class="logo-title"><span>MCHLERN</span> TOOLS</div>
       <div class="logo-sub">Roblox Uploader Pro V2</div>
 
@@ -540,17 +585,18 @@ tr:hover td { background: rgba(255,255,255,0.02); }
         <div class="quota-number" id="limitCount">2/2</div>
         <div class="quota-text" id="loginStatus" style="margin-top:4px">Guest Mode</div>
       </div>
+    </div>
 
-      <div class="divider"></div>
-
+    <!-- Akun Roblox -->
+    <div class="glass-panel" style="margin-bottom:16px;">
       <div class="section-title">👤 Akun Roblox</div>
       <div class="input-group">
         <span class="input-label">API Key</span>
         <input type="password" class="input-field" id="apiKey" placeholder="Paste Open Cloud Key">
       </div>
-      <div style="display:flex; gap:12px;">
+      <div style="display:flex; gap:8px;">
         <div class="input-group" style="flex:1">
-          <span class="input-label">Tipe Creator</span>
+          <span class="input-label">Tipe</span>
           <select class="input-field" id="creatorType">
             <option value="User">User</option>
             <option value="Group">Group</option>
@@ -562,45 +608,18 @@ tr:hover td { background: rgba(255,255,255,0.02); }
         </div>
       </div>
 
-      <div id="robloxProfile" style="display:none; align-items:center; gap:12px; margin-bottom:12px; padding:12px; background:rgba(0,0,0,0.5); border-radius:12px; border:1px solid rgba(255,30,80,0.3); box-shadow: inset 0 0 10px rgba(255,30,80,0.1);">
-        <img id="robloxAvatar" src="" style="width:44px; height:44px; border-radius:50%; border:2px solid var(--red); box-shadow: 0 0 15px rgba(255,30,80,0.4);">
+      <div id="robloxProfile" style="display:none; align-items:center; gap:10px; margin-bottom:10px; padding:10px; background:rgba(0,0,0,0.5); border-radius:10px; border:1px solid rgba(255,30,80,0.3);">
+        <img id="robloxAvatar" src="" style="width:36px; height:36px; border-radius:50%; border:2px solid var(--red);">
         <div style="text-align:left; flex:1; overflow:hidden;">
-          <div id="robloxName" style="font-weight:800; font-size:14px; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Username</div>
-          <div style="font-size:11px; color:var(--success); font-weight: 700; margin-top:2px;">✅ Terkoneksi</div>
+          <div id="robloxName" style="font-weight:800; font-size:13px; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Username</div>
+          <div style="font-size:10px; color:var(--success); font-weight:700; margin-top:2px;">✅ Terkoneksi</div>
         </div>
       </div>
 
-      <div style="display:flex; gap:10px; margin-top:8px">
-        <button class="btn btn-red-glow btn-full" onclick="checkAccount()" id="btnCheckAcc">🔍 Konek Akun</button>
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-red-glow btn-full" onclick="checkAccount()" id="btnCheckAcc">🔍 Konek</button>
         <button class="btn btn-outline btn-full" onclick="saveAccount()">💾 Simpan</button>
       </div>
-
-      <div class="divider"></div>
-
-      <div class="section-title">🎛️ Modifiers (Bypass)</div>
-      <div class="template-grid">
-        <button class="btn btn-outline btn-sm" onclick="applyTemplate(1.5)">1.5x</button>
-        <button class="btn btn-outline btn-sm" onclick="applyTemplate(1.6)">1.6x</button>
-        <button class="btn btn-outline btn-sm" onclick="applyTemplate(2.3)">2.3x</button>
-        <button class="btn btn-outline btn-sm" onclick="applyTemplate(2.5)">2.5x</button>
-      </div>
-      <button class="btn btn-danger btn-full" onclick="resetBypass()" style="margin-bottom:16px; font-size:11px; padding:10px; letter-spacing:1px;">🔄 Reset Bypass (1.0x)</button>
-      <div class="slider-container">
-        <span class="slider-label">Speed</span>
-        <input type="range" id="speedSlider" min="0.5" max="3.0" step="0.01" value="1.0" oninput="onSlide('speed',this.value)">
-        <span class="slider-val" id="speedVal">1.00</span>
-      </div>
-      <div class="slider-container">
-        <span class="slider-label">Pitch</span>
-        <input type="range" id="pitchSlider" min="0.5" max="3.0" step="0.01" value="1.0" oninput="onSlide('pitch',this.value)">
-        <span class="slider-val" id="pitchVal">1.00</span>
-      </div>
-      <div class="slider-container">
-        <span class="slider-label">Volume</span>
-        <input type="range" id="volSlider" min="0.1" max="3.0" step="0.01" value="1.0" oninput="onSlide('vol',this.value)">
-        <span class="slider-val" id="volVal">1.00</span>
-      </div>
-      <div class="rec-box" id="recLabel">Rec. PlaybackSpeed: 1.00</div>
     </div>
   </div>
 
@@ -608,7 +627,6 @@ tr:hover td { background: rgba(255,255,255,0.02); }
   <div class="main-content">
     <!-- ── TOP BAR ── -->
     <div class="top-bar-glow">
-      <!-- Total Users (kiri) -->
       <div class="topbar-users">
         <div class="topbar-users-label">👥 Total Pengguna</div>
         <div class="topbar-users-count">
@@ -616,23 +634,16 @@ tr:hover td { background: rgba(255,255,255,0.02); }
           <span class="live-badge">● LIVE</span>
         </div>
       </div>
-
-      <!-- Spacer -->
       <div style="flex:1"></div>
-
       <!-- Google Login -->
-      <div style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px;">
-        <span style="font-size:9px; color:var(--success); font-weight:700; text-transform:uppercase; letter-spacing:0.5px; text-shadow: 0 0 10px rgba(16,185,129,0.3);">Login Google = Limit 10x!</span>
-        <div style="transform: scale(0.8); transform-origin: center; height: 32px; display: flex; align-items: center; overflow: hidden; margin-top: 2px;">
+      <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
+        <span style="font-size:9px; color:var(--success); font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">Login Google = Limit 10x!</span>
+        <div style="transform:scale(0.8); transform-origin:center; height:32px; display:flex; align-items:center; overflow:hidden; margin-top:2px;">
           <div id="g_id_onload" data-client_id="943425114608-1iljg6276qr9ehtplp4u0878bvftumn8.apps.googleusercontent.com" data-callback="handleCredentialResponse"></div>
           <div class="g_id_signin" data-type="standard" data-theme="outline" data-text="sign_in_with" data-shape="rectangular" data-logo_alignment="left"></div>
         </div>
       </div>
-
-      <!-- Premium Button -->
       <button onclick="document.getElementById('premiumModal').style.display='flex'" class="btn-premium-top">💎 Premium</button>
-
-      <!-- Discord Profile (kanan) -->
       <div class="topbar-profile">
         <img src="{{ discord_avatar if discord_avatar else 'https://cdn.discordapp.com/embed/avatars/0.png' }}" class="topbar-avatar">
         <span class="topbar-name">{{ discord_user if discord_user else 'Guest' }}</span>
@@ -642,99 +653,105 @@ tr:hover td { background: rgba(255,255,255,0.02); }
     <!-- PREMIUM MODAL -->
     <div id="premiumModal" onclick="if(event.target===this)this.style.display='none'">
       <div class="premium-content">
-        <h2 style="color:#f59e0b; margin-bottom:12px; font-family:'Outfit', sans-serif; font-weight:800; font-size: 28px;">👑 PREMIUM ACCESS</h2>
-        <p style="color:var(--gray); font-size:14px; margin-bottom:24px; line-height: 1.6;">Dapatkan akses bypass tanpa batas filter Roblox dengan berlangganan premium sekarang!</p>
-        
-        <div style="background:rgba(0,0,0,0.6); border:1px solid rgba(255,215,0,0.3); border-radius:14px; padding:20px; margin-bottom:16px; text-align:left; transition: all 0.3s; cursor: pointer;" onmouseover="this.style.borderColor='#ffd700'; this.style.boxShadow='0 0 20px rgba(255,215,0,0.2)'" onmouseout="this.style.borderColor='rgba(255,215,0,0.3)'; this.style.boxShadow='none'">
-          <div style="font-weight:900; color:#fff; font-size:18px; margin-bottom: 4px;">Rp 30.000</div>
-          <div style="font-size:13px; color:#ffd700; font-weight: 700; letter-spacing: 0.5px;">Unlimited Bypass (1 Minggu)</div>
+        <h2 style="color:#f59e0b; margin-bottom:12px; font-family:'Outfit',sans-serif; font-weight:800; font-size:28px;">👑 PREMIUM ACCESS</h2>
+        <p style="color:var(--gray); font-size:14px; margin-bottom:24px; line-height:1.6;">Dapatkan akses bypass tanpa batas filter Roblox dengan berlangganan premium sekarang!</p>
+        <div style="background:rgba(0,0,0,0.6); border:1px solid rgba(255,215,0,0.3); border-radius:14px; padding:20px; margin-bottom:16px; text-align:left; cursor:pointer;" onmouseover="this.style.borderColor='#ffd700'" onmouseout="this.style.borderColor='rgba(255,215,0,0.3)'">
+          <div style="font-weight:900; color:#fff; font-size:18px; margin-bottom:4px;">Rp 30.000</div>
+          <div style="font-size:13px; color:#ffd700; font-weight:700;">Unlimited Bypass (1 Minggu)</div>
         </div>
-        
-        <div style="background:rgba(0,0,0,0.6); border:1px solid rgba(255,215,0,0.3); border-radius:14px; padding:20px; margin-bottom:30px; text-align:left; transition: all 0.3s; cursor: pointer;" onmouseover="this.style.borderColor='#ffd700'; this.style.boxShadow='0 0 20px rgba(255,215,0,0.2)'" onmouseout="this.style.borderColor='rgba(255,215,0,0.3)'; this.style.boxShadow='none'">
-          <div style="font-weight:900; color:#fff; font-size:18px; margin-bottom: 4px;">Rp 50.000</div>
-          <div style="font-size:13px; color:#ffd700; font-weight: 700; letter-spacing: 0.5px;">Unlimited Bypass (1 Bulan)</div>
+        <div style="background:rgba(0,0,0,0.6); border:1px solid rgba(255,215,0,0.3); border-radius:14px; padding:20px; margin-bottom:30px; text-align:left; cursor:pointer;" onmouseover="this.style.borderColor='#ffd700'" onmouseout="this.style.borderColor='rgba(255,215,0,0.3)'">
+          <div style="font-weight:900; color:#fff; font-size:18px; margin-bottom:4px;">Rp 50.000</div>
+          <div style="font-size:13px; color:#ffd700; font-weight:700;">Unlimited Bypass (1 Bulan)</div>
         </div>
-        
         <div style="display:flex; gap:16px; justify-content:center;">
-          <button onclick="document.getElementById('premiumModal').style.display='none'" style="background:transparent; border:2px solid rgba(255,255,255,0.2); color:#fff; padding:14px 28px; border-radius:12px; cursor:pointer; font-weight:800; transition: all 0.2s; text-transform: uppercase; letter-spacing: 1px;" onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='transparent'">Tutup</button>
-          
-          <a href="https://discord.com/users/1309112913331748915" target="_blank" style="background: linear-gradient(135deg, #ffd700, #ff8c00); color:#000; padding:14px 28px; border-radius:12px; text-decoration:none; font-weight:900; border:none; box-shadow: 0 6px 20px rgba(255,215,0,0.4); transition: all 0.2s; text-transform: uppercase; letter-spacing: 1px;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 25px rgba(255,215,0,0.6)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 6px 20px rgba(255,215,0,0.4)'">Pesan via Discord</a>
+          <button onclick="document.getElementById('premiumModal').style.display='none'" style="background:transparent; border:2px solid rgba(255,255,255,0.2); color:#fff; padding:14px 28px; border-radius:12px; cursor:pointer; font-weight:800;">Tutup</button>
+          <a href="https://discord.com/users/1309112913331748915" target="_blank" style="background:linear-gradient(135deg,#ffd700,#ff8c00); color:#000; padding:14px 28px; border-radius:12px; text-decoration:none; font-weight:900;">Pesan via Discord</a>
         </div>
       </div>
     </div>
 
-    <!-- Upload Area -->
-    <div class="upload-grid">
-      <!-- BYPASS -->
-      <div class="glass-panel">
-        <div class="section-title" style="color:var(--red); font-size:16px;">🚀 BYPASS UPLOAD</div>
-        <p style="font-size:12px;color:var(--gray);margin-bottom:20px; font-weight: 500;">Speed & Pitch otomatis diterapkan</p>
-        
-        <div class="dropzone" id="dzBypass" ondragover="onDragOver(event,'bypass')" ondragleave="onDragLeave('bypass')" ondrop="onDrop(event,'bypass')">
-          <input type="file" multiple accept=".mp3,.ogg" onchange="onFileSelect(this,'bypass')">
-          <span class="dz-icon">📁</span>
-          <span class="dz-text">Drag & drop .mp3/.ogg atau klik</span>
+    <!-- ── BYPASS SETTINGS ── -->
+    <div class="glass-panel" style="margin-bottom:16px;">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; flex-wrap:wrap; gap:8px;">
+        <div class="section-title" style="margin:0;">🎛️ Bypass Settings</div>
+        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+          <button class="btn btn-outline btn-sm" onclick="applyTemplate(1.5)">1.5x</button>
+          <button class="btn btn-outline btn-sm" onclick="applyTemplate(1.6)">1.6x</button>
+          <button class="btn btn-outline btn-sm" onclick="applyTemplate(2.3)">2.3x</button>
+          <button class="btn btn-outline btn-sm" onclick="applyTemplate(2.5)">2.5x</button>
+          <button class="btn btn-danger btn-sm" onclick="resetBypass()">🔄 Reset</button>
         </div>
-        <div class="file-list" id="listBypass"></div>
-
-        <div style="margin-top:20px">
-          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
-            <span style="font-size:10px;padding:3px 8px;border-radius:20px;background:rgba(255,0,0,0.15);border:1px solid rgba(255,0,0,0.3);color:#ff4444;font-weight:700;">▶ YouTube</span>
-            <span style="font-size:10px;padding:3px 8px;border-radius:20px;background:rgba(30,215,96,0.12);border:1px solid rgba(30,215,96,0.3);color:#1ed760;font-weight:700;">♫ Spotify</span>
-            <span style="font-size:10px;padding:3px 8px;border-radius:20px;background:rgba(0,242,234,0.12);border:1px solid rgba(0,242,234,0.3);color:#00f2ea;font-weight:700;">♪ TikTok</span>
-            <span style="font-size:10px;padding:3px 8px;border-radius:20px;background:rgba(255,0,0,0.15);border:1px solid rgba(255,0,0,0.3);color:#ff6b6b;font-weight:700;">🎵 YT Music</span>
-          </div>
-          <div style="display:flex;gap:10px">
-            <input type="text" class="input-field" id="ytBypass" placeholder="Paste link YouTube / Spotify / TikTok / YT Music...">
-            <button class="btn btn-outline" onclick="fetchYT('bypass')" id="btnYtBypass">Fetch</button>
-          </div>
-        </div>
-        <div id="ytQueueBypass"></div>
-
-        <div class="status-bar" id="statusBypass"></div>
-        <audio controls class="audio-preview" id="prevBypass"></audio>
-        
-        <button class="btn btn-full upload-btn bypass-glow" onclick="startUpload('bypass')" id="upBypass">Mulai Bypass Upload</button>
       </div>
-
-      <!-- NORMAL -->
-      <div class="glass-panel">
-        <div class="section-title" style="font-size:16px">📄 NORMAL UPLOAD</div>
-        <p style="font-size:12px;color:var(--gray);margin-bottom:20px; font-weight: 500;">Audio original tanpa editan</p>
-        
-        <div class="dropzone" id="dzNormal" ondragover="onDragOver(event,'normal')" ondragleave="onDragLeave('normal')" ondrop="onDrop(event,'normal')">
-          <input type="file" multiple accept=".mp3,.ogg" onchange="onFileSelect(this,'normal')">
-          <span class="dz-icon">🎵</span>
-          <span class="dz-text">Drag & drop .mp3/.ogg atau klik</span>
-        </div>
-        <div class="file-list" id="listNormal"></div>
-
-        <div style="margin-top:20px">
-          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px">
-            <span style="font-size:10px;padding:3px 8px;border-radius:20px;background:rgba(255,0,0,0.15);border:1px solid rgba(255,0,0,0.3);color:#ff4444;font-weight:700;">▶ YouTube</span>
-            <span style="font-size:10px;padding:3px 8px;border-radius:20px;background:rgba(30,215,96,0.12);border:1px solid rgba(30,215,96,0.3);color:#1ed760;font-weight:700;">♫ Spotify</span>
-            <span style="font-size:10px;padding:3px 8px;border-radius:20px;background:rgba(0,242,234,0.12);border:1px solid rgba(0,242,234,0.3);color:#00f2ea;font-weight:700;">♪ TikTok</span>
-            <span style="font-size:10px;padding:3px 8px;border-radius:20px;background:rgba(255,0,0,0.15);border:1px solid rgba(255,0,0,0.3);color:#ff6b6b;font-weight:700;">🎵 YT Music</span>
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">
+        <div class="slider-container" style="flex-direction:column; align-items:stretch;">
+          <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+            <span class="slider-label">Speed</span>
+            <span class="slider-val" id="speedVal">1.00</span>
           </div>
-          <div style="display:flex;gap:10px">
-            <input type="text" class="input-field" id="ytNormal" placeholder="Paste link YouTube / Spotify / TikTok / YT Music...">
-            <button class="btn btn-outline" onclick="fetchYT('normal')" id="btnYtNormal">Fetch</button>
-          </div>
+          <input type="range" id="speedSlider" min="0.5" max="3.0" step="0.01" value="1.0" oninput="onSlide('speed',this.value)">
         </div>
-        <div id="ytQueueNormal"></div>
+        <div class="slider-container" style="flex-direction:column; align-items:stretch;">
+          <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+            <span class="slider-label">Pitch</span>
+            <span class="slider-val" id="pitchVal">1.00</span>
+          </div>
+          <input type="range" id="pitchSlider" min="0.5" max="3.0" step="0.01" value="1.0" oninput="onSlide('pitch',this.value)">
+        </div>
+        <div class="slider-container" style="flex-direction:column; align-items:stretch;">
+          <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+            <span class="slider-label">Volume</span>
+            <span class="slider-val" id="volVal">1.00</span>
+          </div>
+          <input type="range" id="volSlider" min="0.1" max="3.0" step="0.01" value="1.0" oninput="onSlide('vol',this.value)">
+        </div>
+      </div>
+      <div class="rec-box" id="recLabel" style="margin-top:10px; margin-bottom:0;">Rec. PlaybackSpeed: 1.00</div>
+    </div>
 
-        <div class="status-bar" id="statusNormal"></div>
-        <audio controls class="audio-preview" id="prevNormal"></audio>
-        
-        <button class="btn btn-outline btn-full upload-btn" style="margin-top:20px" onclick="startUpload('normal')" id="upNormal">Mulai Normal Upload</button>
+    <!-- ── SINGLE UPLOAD PANEL ── -->
+    <div class="glass-panel" style="margin-bottom:16px;">
+      <div class="section-title" style="margin-bottom:6px;">🎵 Upload Audio</div>
+      <p style="font-size:12px; color:var(--gray); margin-bottom:16px; font-weight:500;">Drag &amp; drop atau paste link dari berbagai platform</p>
+
+      <!-- Dropzone -->
+      <div class="dropzone" id="dzMain" ondragover="onDragOver(event,'main')" ondragleave="onDragLeave('main')" ondrop="onDrop(event,'main')">
+        <input type="file" multiple accept=".mp3,.ogg" onchange="onFileSelect(this,'main')">
+        <span class="dz-icon">🎵</span>
+        <span class="dz-text">Drag &amp; drop .mp3/.ogg atau klik untuk pilih file</span>
+      </div>
+      <div class="file-list" id="listMain"></div>
+
+      <!-- URL Fetch -->
+      <div style="margin-top:16px;">
+        <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px;">
+          <span style="font-size:10px;padding:3px 8px;border-radius:20px;background:rgba(255,0,0,0.15);border:1px solid rgba(255,0,0,0.3);color:#ff4444;font-weight:700;">▶ YouTube</span>
+          <span style="font-size:10px;padding:3px 8px;border-radius:20px;background:rgba(30,215,96,0.12);border:1px solid rgba(30,215,96,0.3);color:#1ed760;font-weight:700;">♫ Spotify</span>
+          <span style="font-size:10px;padding:3px 8px;border-radius:20px;background:rgba(0,242,234,0.12);border:1px solid rgba(0,242,234,0.3);color:#00f2ea;font-weight:700;">♪ TikTok</span>
+          <span style="font-size:10px;padding:3px 8px;border-radius:20px;background:rgba(255,0,0,0.15);border:1px solid rgba(255,0,0,0.3);color:#ff6b6b;font-weight:700;">🎵 YT Music</span>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <input type="text" class="input-field" id="ytMain" placeholder="Paste link YouTube / Spotify / TikTok / YT Music...">
+          <button class="btn btn-outline" onclick="fetchYT('main')" id="btnYtMain">Fetch</button>
+        </div>
+      </div>
+      <div id="ytQueueMain"></div>
+
+      <!-- Status + Preview -->
+      <div class="status-bar" id="statusMain"></div>
+      <audio controls class="audio-preview" id="prevMain"></audio>
+
+      <!-- Upload Buttons -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:16px;">
+        <button class="btn btn-full upload-btn bypass-glow" onclick="startUpload('bypass')" id="upBypass">🎛 Bypass Upload</button>
+        <button class="btn btn-outline btn-full upload-btn" onclick="normalUpload()" id="upNormal">📄 Normal Upload</button>
       </div>
     </div>
 
     <!-- History Panel -->
     <div class="glass-panel history-panel">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px; flex-wrap: wrap; gap: 16px;">
-        <div class="section-title" style="margin:0">📜 History Upload</div>
-        <div style="display:flex;gap:12px">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
+        <div class="section-title" style="margin:0;">📜 History Upload</div>
+        <div style="display:flex; gap:10px;">
           <button class="btn btn-outline btn-sm" onclick="copyAllIds()">📋 Copy All IDs</button>
           <button class="btn btn-danger btn-sm" onclick="clearHistory()">🗑 Clear</button>
         </div>
@@ -751,7 +768,7 @@ tr:hover td { background: rgba(255,255,255,0.02); }
             </tr>
           </thead>
           <tbody id="historyTbody">
-            <tr><td colspan="5" style="text-align:center; padding: 30px; color: var(--gray);">Belum ada aktivitas upload.</td></tr>
+            <tr><td colspan="5" style="text-align:center; padding:30px; color:var(--gray);">Belum ada aktivitas upload.</td></tr>
           </tbody>
         </table>
       </div>
@@ -759,8 +776,41 @@ tr:hover td { background: rgba(255,255,255,0.02); }
   </div>
 </div>
 
+
+
 <script>
-const state = { bypass:{files:[], yt:[]}, normal:{files:[], yt:[]}, history:JSON.parse(localStorage.getItem('mchl_hist')||'[]') };
+// ── LOADING SCREEN ────────────────────────────────────────────────────────────
+(function() {
+  const bar = document.getElementById('loadBar');
+  const txt = document.getElementById('loadText');
+  const msgs = ['MEMUAT SISTEM...','MENGHUBUNGKAN...','SIAP!'];
+  let p = 0;
+  const iv = setInterval(() => {
+    p += Math.random() * 18 + 8;
+    if(p > 100) p = 100;
+    bar.style.width = p + '%';
+    if(p < 40) txt.textContent = msgs[0];
+    else if(p < 80) txt.textContent = msgs[1];
+    else txt.textContent = msgs[2];
+    if(p >= 100) {
+      clearInterval(iv);
+      setTimeout(() => {
+        const ls = document.getElementById('loadingScreen');
+        ls.style.transition = 'opacity 0.6s ease';
+        ls.style.opacity = '0';
+        setTimeout(() => ls.style.display = 'none', 600);
+      }, 300);
+    }
+  }, 80);
+})();
+
+const state = { main:{files:[], yt:[]}, history:JSON.parse(localStorage.getItem('mchl_hist')||'[]') };
+
+// Normal upload = reset sliders to 1.0 then upload
+function normalUpload() {
+  resetBypass();
+  startUpload('normal');
+}
 
 function loadAccount() {
   const saved = JSON.parse(localStorage.getItem('mchlern_account') || 'null');
@@ -915,14 +965,17 @@ async function doPreview(m, ytFile, file) {
 }
 
 async function startUpload(m) {
+  // m is either 'bypass' or 'normal'
   const ak = document.getElementById('apiKey').value;
   const ci = document.getElementById('creatorId').value;
   const ct = document.getElementById('creatorType').value;
   const token = window.googleToken || ''; 
   if(!ak||!ci) { alert('Isi API Key & Creator ID di kiri!'); return; }
+  
+  // Use state.main since there is only one file queue now
   const tasks = [
-    ...state[m].files.map(x=>({type:'local', file:x.file, title:document.getElementById('i_'+x.id).value})),
-    ...state[m].yt.map(x=>({type:'yt', yt_file:x.file, title:document.getElementById('i_'+x.id).value}))
+    ...state.main.files.map(x=>({type:'local', file:x.file, title:document.getElementById('i_'+x.id).value})),
+    ...state.main.yt.map(x=>({type:'yt', yt_file:x.file, title:document.getElementById('i_'+x.id).value}))
   ];
   if(!tasks.length) return;
   
@@ -931,10 +984,13 @@ async function startUpload(m) {
     return;
   }
 
-  const btn = document.getElementById('up'+cap(m)); btn.disabled=true;
-  const st = document.getElementById('status'+cap(m)); st.style.display='block';
+  const btn = document.getElementById(m==='bypass' ? 'upBypass' : 'upNormal');
+  const btnOther = document.getElementById(m==='bypass' ? 'upNormal' : 'upBypass');
+  btn.disabled=true; btnOther.disabled=true;
+  
+  const st = document.getElementById('statusMain'); st.style.display='block';
   for(let i=0; i<tasks.length; i++) {
-    st.innerHTML = `<span class="spinner" style="display:inline-block;vertical-align:middle;margin-right:8px;"></span> Uploading [${i+1}/${tasks.length}]...`;
+    st.innerHTML = `<span class="spinner" style="display:inline-block;vertical-align:middle;margin-right:8px;"></span> Mengupload [${i+1}/${tasks.length}]...`;
     const t = tasks[i];
     const fd = new FormData();
     fd.append('api_key', ak); fd.append('creator_id', ci); fd.append('creator_type', ct);
@@ -952,17 +1008,17 @@ async function startUpload(m) {
         alert('LIMIT TERCAPAI! ' + d.error); break; 
       }
       addHistory({
-        time: d.time||new Date().toLocaleString(), title: t.title, mode: m,
+        time: d.time||new Date().toLocaleString(), title: t.title, mode: m.toUpperCase(),
         id: d.asset_id||'-', status: d.success?'Success':(d.error||'Fail'), blocked: d.blocked||false
       });
-      await updateLimitDisplay(); // refresh sisa limit setelah tiap upload
+      await updateLimitDisplay();
     } catch(e) {
-      addHistory({time: new Date().toLocaleString(), title: t.title, mode: m, id: '-', status: 'Network Error', blocked: false});
+      addHistory({time: new Date().toLocaleString(), title: t.title, mode: m.toUpperCase(), id: '-', status: 'Network Error', blocked: false});
     }
   }
-  st.style.display='none'; btn.disabled=false;
-  document.getElementById('list'+cap(m)).innerHTML=''; document.getElementById('ytQueue'+cap(m)).innerHTML='';
-  state[m].files=[]; state[m].yt=[];
+  st.style.display='none'; btn.disabled=false; btnOther.disabled=false;
+  document.getElementById('listMain').innerHTML=''; document.getElementById('ytQueueMain').innerHTML='';
+  state.main.files=[]; state.main.yt=[];
 }
 
 function addHistory(h) {
