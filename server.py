@@ -547,16 +547,10 @@ def generate_spritesheet():
         if not os.path.exists(output_path):
             return jsonify({"error": "Gagal generate spritesheet"}), 500
 
-        # Karena output_path disimpan di temp_audio, kita bisa akses langsung?
-        # Tapi temp_audio diserve secara lokal? Tidak, mari kirim URL-nya (pakai send_file sementara atau public endpoint)
-        # Akan dibuat /temp_audio/<filename> static route
-        return jsonify({"success": True, "file": output_filename, "url": f"/temp_audio/{output_filename}"})
+        # Kembalikan URL menggunakan route /temp/ yang sudah ada
+        return jsonify({"success": True, "file": output_filename, "url": f"/temp/{output_filename}"})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
-
-@app.route("/temp_audio/<filename>")
-def serve_temp(filename):
-    return send_file(os.path.join(TEMP_DIR, filename))
 
 @app.route("/api/upload", methods=["POST"])
 def upload():
