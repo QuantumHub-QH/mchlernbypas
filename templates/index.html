@@ -70,7 +70,49 @@ body {
   min-height: 100vh;
 }
 @media(max-width: 950px) {
-  .app-container { grid-template-columns: 1fr; padding: 16px; gap: 20px; }
+  .app-container { 
+    grid-template-columns: 200px 1fr; 
+    padding: 8px; 
+    gap: 10px; 
+  }
+  .sidebar { min-width: 0; }
+  .glass-panel { padding: 12px; border-radius: 12px; }
+  .logo-title { font-size: 16px; }
+  .logo-sub { font-size: 9px; margin-bottom: 12px; }
+  .section-title { font-size: 11px; }
+  .input-label { font-size: 9px; }
+  .input-field { padding: 8px 10px; font-size: 11px; border-radius: 8px; }
+  .btn { font-size: 11px; padding: 8px 12px; }
+  .quota-number { font-size: 24px; }
+  .quota-text { font-size: 10px; }
+  .quota-card { padding: 12px; }
+  .upload-grid { gap: 10px; }
+}
+@media(max-width: 600px) {
+  .app-container { 
+    grid-template-columns: 160px 1fr; 
+    padding: 6px; 
+    gap: 8px; 
+  }
+  .glass-panel { padding: 10px; border-radius: 10px; }
+  .logo-title { font-size: 13px; }
+  .logo-sub { font-size: 8px; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .sidebar img[style*="width: 100px"] { width: 50px !important; height: 50px !important; margin-bottom: 8px !important; }
+  .section-title { font-size: 10px; margin-bottom: 8px; }
+  .input-field { padding: 6px 8px; font-size: 10px; }
+  .btn { font-size: 10px; padding: 7px 8px; min-height: 32px; }
+  .quota-number { font-size: 20px; }
+  .quota-text { font-size: 9px; }
+  .quota-card { padding: 10px; margin-bottom: 8px; }
+  .divider { margin: 10px 0; }
+  .dropzone { padding: 16px 8px; }
+  .dz-icon { font-size: 24px !important; }
+  .dz-text { font-size: 10px !important; }
+  .upload-btn { font-size: 11px !important; padding: 10px !important; }
+  .top-bar-glow { flex-wrap: wrap; justify-content: center; gap: 6px; padding: 8px; }
+  .btn-premium-top { padding: 5px 8px; font-size: 9px; }
+  .topbar-name { font-size: 10px; }
+  .topbar-avatar { width: 24px !important; height: 24px !important; }
 }
 
 /* ── PANELS ── */
@@ -407,18 +449,8 @@ tr:hover td { background: rgba(255,255,255,0.02); }
 ::-webkit-scrollbar-thumb:hover { background: rgba(255,30,80,0.7); }
 
 @media (max-width: 600px) {
-  .landing-title { font-size: 28px; }
-  .landing-content { padding: 30px 20px; }
-  .logo-title { font-size: 22px; }
-  .quota-number { font-size: 28px; }
-  .btn { padding: 14px; min-height: 48px; font-size: 13px; }
-  .dropzone { padding: 30px 16px; }
-  .template-grid { grid-template-columns: repeat(2, 1fr); }
-  .top-bar-glow { flex-wrap: wrap; justify-content: center; gap: 8px; padding: 10px; }
-  .btn-premium-top { padding: 6px 12px; font-size: 11px; }
-  /* Make sure scrolling works smoothly on mobile */
-  html, body { overflow-x: hidden; height: auto; min-height: 100vh; }
-  .app-container { padding-bottom: 40px; }
+  /* Scrollbar */
+  ::-webkit-scrollbar { display: none; }
 }
 </style>
 <base target="_blank">
