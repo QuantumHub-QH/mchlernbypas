@@ -571,7 +571,7 @@ def fetch_yt():
         "outtmpl": os.path.join(TEMP_DIR, dl_name),
         "ffmpeg_location": FFMPEG,
         "quiet": True,
-        "extractor_args": {} if is_tiktok else {"youtube": {"player_client": ["ios", "tv_embedded", "android", "web"]}},
+        "extractor_args": {"youtube": {"client": ["WEB_CREATOR", "ANDROID_VR", "WEB"]}},
         "http_headers": {
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/125.0.0.0 Safari/537.36",
             "Referer": "https://www.tiktok.com/" if is_tiktok else "https://www.youtube.com/",
@@ -602,25 +602,39 @@ def fetch_yt():
         return jsonify({"error": str(e)}), 500
 
 @app.route("/api/preview", methods=["POST"])
-def preview():
-    speed = float(request.form.get("speed", 1.0))
-    pitch = float(request.form.get("pitch", 1.0))
-    vol   = float(request.form.get("vol", 1.0))
-    yt_file = request.form.get("yt_file", "").strip()
-
-    if yt_file:
-        input_path = os.path.join(TEMP_DIR, os.path.basename(yt_file))
-    elif "file" in request.files:
-        f = request.files["file"]
-        tmp_name = f"up_{uuid.uuid4().hex}.mp3"
-        input_path = os.path.join(TEMP_DIR, tmp_name)
-        f.save(input_path)
-    else: return jsonify({"error": "No file"}), 400
-
+def api_preview():
+    data = request.get_json()
+    url = data.get("url", "").strip()
+    start_time = float(data.get("start_time", 0))
+    duration = float(data.get("duration", 9))
+    
+    out_name = f"prev_yt_{uuid.uuid4().hex}.png"
+    output_path = os.path.join(TEMP_DIR, out_name)
+    
     try:
-        _, out_name = process_preview(input_path, speed, pitch, vol)
-        return jsonify({"preview_url": f"/temp/{out_name}"})
-    except Exception as e: return jsonify({"error": str(e)}), 500
+        if url:
+            # Menggunakan yt-dlp untuk mendapatkan URL video langsung
+            ydl_opts = {'format': 'worst[ext=mp4]/worst', 'quiet': True, 'extractor_args': {"youtube": {"client": ["WEB_CREATOR", "ANDROID_VR", "WEB"]}}}
+            with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                info = ydl.extract_info(url, download=False)
+                # Ambil URL asli video
+                video_url = info.get("url") or info.get("entries", [{}])[0].get("url")
+                if not video_url: return jsonify({"error": "Gagal ekstrak URL video."}), 400
+                
+                # Gunakan FFmpeg untuk trim & tile
+                cmd = [
+                    FFMPEG, "-y", 
+                    "-ss", str(start_time), "-t", str(duration),
+                    "-i", video_url,
+                    "-vf", "fps=6.2,scale=128:128,tile=7x8", 
+                    "-vframes", "1", 
+                    output_path
+                ]
+                subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                
+            return jsonify({"success": True, "file": out_name})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 @app.route("/api/generate-spritesheet", methods=["POST"])
 def generate_spritesheet():
@@ -776,68 +790,71 @@ os.makedirs(STORE_DIR, exist_ok=True)
 ASSETS_DIR = os.path.join(DATA_DIR, "free_assets")
 os.makedirs(ASSETS_DIR, exist_ok=True)
 
-@app.route("/store_img/<filename>")
-def serve_store_img(filename):
-    return send_file(os.path.join(STORE_DIR, filename))
+from flask import send_from_directory
 
-@app.route("/free_asset/<filename>")
+@app.route("/store_img/<path:filename>")
+def serve_store_img(filename):
+    return send_from_directory(STORE_DIR, filename)
+
+@app.route("/free_asset/<path:filename>")
 def serve_free_asset(filename):
-    return send_file(os.path.join(ASSETS_DIR, filename), as_attachment=True)
+    # Hapus as_attachment agar video bisa play di browser
+    return send_from_directory(ASSETS_DIR, filename)
 
 
 @app.route("/api/comments/product/<int:product_id>", methods=["GET"])
 def api_product_comments(product_id):
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
-    c.execute("SELECT id, username, avatar, content, rating, created_at FROM comments WHERE product_id=? ORDER BY id DESC", (product_id,))
+    c.execute("SELECT id, username, avatar, content, rating, created_at FROM comments WHERE product_id=? ORDER BY id DESC LIMIT 50", (product_id,))
     rows = c.fetchall()
-    c.execute("SELECT AVG(rating) FROM comments WHERE product_id=?", (product_id,))
-    avg = c.fetchone()[0] or 0
     conn.close()
-    return jsonify({"comments": [{"id":r[0], "username":r[1], "avatar":r[2], "content":r[3], "rating":r[4], "created_at":r[5]} for r in rows], "average": round(avg, 1)})
+    
+    comments = [{"id": r[0], "username": r[1], "avatar": r[2], "content": r[3], "rating": r[4], "created_at": r[5]} for r in rows]
+    avg = sum(c["rating"] for c in comments)/len(comments) if comments else 0
+    return jsonify({"average": avg, "comments": comments})
 
 @app.route("/api/comments/asset/<int:asset_id>", methods=["GET"])
 def api_asset_comments(asset_id):
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
-    c.execute("SELECT id, username, avatar, content, rating, created_at FROM comments WHERE asset_id=? ORDER BY id DESC", (asset_id,))
+    c.execute("SELECT id, username, avatar, content, rating, created_at FROM comments WHERE asset_id=? ORDER BY id DESC LIMIT 50", (asset_id,))
     rows = c.fetchall()
-    c.execute("SELECT AVG(rating) FROM comments WHERE asset_id=?", (asset_id,))
-    avg = c.fetchone()[0] or 0
     conn.close()
-    return jsonify({"comments": [{"id":r[0], "username":r[1], "avatar":r[2], "content":r[3], "rating":r[4], "created_at":r[5]} for r in rows], "average": round(avg, 1)})
+    
+    comments = [{"id": r[0], "username": r[1], "avatar": r[2], "content": r[3], "rating": r[4], "created_at": r[5]} for r in rows]
+    avg = sum(c["rating"] for c in comments)/len(comments) if comments else 0
+    return jsonify({"average": avg, "comments": comments})
 
 @app.route("/api/comments/add", methods=["POST"])
-def api_add_comment():
+def api_comments_add():
     data = request.json
-    username = data.get("username", "Anonim")
-    avatar = data.get("avatar", "")
-    content = data.get("content", "")
-    rating = data.get("rating", 5)
-    product_id = data.get("product_id")
-    asset_id = data.get("asset_id")
-    
-    if not content:
-        return jsonify({"success": False, "error": "Komentar kosong"}), 400
-        
-    from datetime import datetime
-    created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
-    c.execute("INSERT INTO comments (username, avatar, content, rating, created_at, product_id, asset_id) VALUES (?, ?, ?, ?, ?, ?, ?)",
-              (username, avatar, content, rating, created_at, product_id, asset_id))
+    c.execute("""
+        INSERT INTO comments (username, avatar, content, rating, created_at, product_id, asset_id) 
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+    """, (
+        data.get("username", "Anonymous"),
+        data.get("avatar", ""),
+        data.get("content", ""),
+        data.get("rating", 5),
+        datetime.now().isoformat(),
+        data.get("product_id"),
+        data.get("asset_id")
+    ))
     conn.commit()
     conn.close()
     return jsonify({"success": True})
 
 @app.route("/api/free-assets", methods=["GET"])
-def api_free_assets():
+def api_get_free_assets():
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
-    c.execute("SELECT id, title, description, file_url, filename, created_at FROM free_assets ORDER BY id DESC")
+    c.execute("SELECT id, title, description, file_url, created_at FROM free_assets ORDER BY id DESC")
     rows = c.fetchall()
     conn.close()
-    return jsonify([{"id": r[0], "title": r[1], "description": r[2] or "", "file_url": r[3], "filename": r[4], "created_at": r[5]} for r in rows])
+    return jsonify([{"id": r[0], "title": r[1], "description": r[2] or "", "file_url": r[3], "created_at": r[4]} for r in rows])
 
 @app.route("/admin-panel-rahasia", methods=["GET", "POST"])
 def admin_panel():
@@ -873,17 +890,20 @@ def admin_panel():
             category = request.form.get("category").strip()
             price = request.form.get("price").strip()
             desc = request.form.get("description", "").strip()
-            image_url = ""
-            if "image" in request.files:
-                f = request.files["image"]
+            
+            image_urls = []
+            for f in request.files.getlist("image"):
                 if f.filename:
                     ext = os.path.splitext(f.filename)[1]
                     tmp_name = f"prod_{uuid.uuid4().hex}{ext}"
                     f.save(os.path.join(STORE_DIR, tmp_name))
-                    image_url = f"/store_img/{tmp_name}"
+                    image_urls.append(f"/store_img/{tmp_name}")
+            
+            image_url_str = ",".join(image_urls)
+            
             conn = sqlite3.connect(DB_PATH)
             c = conn.cursor()
-            c.execute("INSERT INTO products (category, title, price, image_url, description) VALUES (?, ?, ?, ?, ?)", (category, title, price, image_url, desc))
+            c.execute("INSERT INTO products (category, title, price, image_url, description) VALUES (?, ?, ?, ?, ?)", (category, title, price, image_url_str, desc))
             conn.commit()
             conn.close()
             return redirect("/admin-panel-rahasia")
@@ -899,17 +919,21 @@ def admin_panel():
         elif request.form.get("action") == "add_free_asset":
             title = request.form.get("title").strip()
             desc = request.form.get("description", "").strip()
-            if "file" in request.files:
-                f = request.files["file"]
+            
+            file_urls = []
+            for f in request.files.getlist("file"):
                 if f.filename:
                     fname = f"{int(time.time())}_{f.filename}"
                     f.save(os.path.join(ASSETS_DIR, fname))
-                    file_url = f"/free_asset/{fname}"
-                    conn = sqlite3.connect(DB_PATH)
-                    c = conn.cursor()
-                    c.execute("INSERT INTO free_assets (title, description, file_url, filename) VALUES (?, ?, ?, ?)", (title, desc, file_url, fname))
-                    conn.commit()
-                    conn.close()
+                    file_urls.append(f"/free_asset/{fname}")
+            
+            file_url_str = ",".join(file_urls)
+            
+            conn = sqlite3.connect(DB_PATH)
+            c = conn.cursor()
+            c.execute("INSERT INTO free_assets (title, description, file_url, created_at) VALUES (?, ?, ?, ?)", (title, desc, file_url_str, datetime.now().isoformat()))
+            conn.commit()
+            conn.close()
             return redirect("/admin-panel-rahasia")
         elif request.form.get("action") == "delete_free_asset":
             asset_id = request.form.get("asset_id")
@@ -1033,8 +1057,8 @@ def admin_panel():
                     </select>
                     <input type="text" name="price" placeholder="Harga (contoh: Rp 50.000)" required style="padding:10px; border-radius:5px; border:1px solid #555; background:#000; color:#fff;">
                     <textarea name="description" placeholder="Deskripsi Produk..." rows="3" style="padding:10px; border-radius:5px; border:1px solid #555; background:#000; color:#fff; font-family:sans-serif;"></textarea>
-                    <label style="color:#aaa; font-size:11px;">Foto / Video Produk (wajib):</label>
-                    <input type="file" name="image" accept="image/*,video/*" required style="padding:10px; border-radius:5px; border:1px solid #555; background:#000; color:#fff;">
+                    <label style="color:#aaa; font-size:11px;">Foto / Video Produk (wajib, bisa pilih lebih dari 1):</label>
+                    <input type="file" name="image" accept="image/*,video/*" multiple required style="padding:10px; border-radius:5px; border:1px solid #555; background:#000; color:#fff;">
                     <button type="submit" style="background:#f59e0b; color:#000; font-weight:bold; padding:10px 20px; border:none; border-radius:5px; cursor:pointer;">Tambah Produk</button>
                 </form>
                 
@@ -1104,7 +1128,7 @@ def admin_panel():
                     <input type="hidden" name="action" value="add_free_asset">
                     <input type="text" name="title" placeholder="Nama Asset (contoh: Efek Suara Tembakan)" required style="padding:10px; border-radius:5px; border:1px solid #555; background:#000; color:#fff;">
                     <textarea name="description" placeholder="Deskripsi Asset..." rows="3" style="padding:10px; border-radius:5px; border:1px solid #555; background:#000; color:#fff; font-family:sans-serif;"></textarea>
-                    <input type="file" name="file" required style="padding:10px; border-radius:5px; border:1px solid #555; background:#000; color:#fff;">
+                    <input type="file" name="file" multiple required style="padding:10px; border-radius:5px; border:1px solid #555; background:#000; color:#fff;">
                     <button type="submit" style="background:#06b6d4; color:#000; font-weight:bold; padding:10px 20px; border:none; border-radius:5px; cursor:pointer;">Upload Asset</button>
                 </form>
                 
