@@ -72,8 +72,17 @@ def init_db():
                     category TEXT,
                     title TEXT,
                     price TEXT,
-                    image_url TEXT
+                    image_url TEXT,
+                    description TEXT
                  )''')
+    c.execute('''CREATE TABLE IF NOT EXISTS categories (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    name TEXT UNIQUE
+                 )''')
+    try:
+        c.execute("ALTER TABLE products ADD COLUMN description TEXT")
+    except sqlite3.OperationalError:
+        pass
     conn.commit()
     conn.close()
 
@@ -272,10 +281,19 @@ def api_comments():
 def api_products():
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
-    c.execute("SELECT id, category, title, price, image_url FROM products ORDER BY id DESC")
+    c.execute("SELECT id, category, title, price, image_url, description FROM products ORDER BY id DESC")
     rows = c.fetchall()
     conn.close()
-    return jsonify([{"id": r[0], "category": r[1], "title": r[2], "price": r[3], "image_url": r[4]} for r in rows])
+    return jsonify([{"id": r[0], "category": r[1], "title": r[2], "price": r[3], "image_url": r[4], "description": r[5] or ""} for r in rows])
+
+@app.route("/api/categories", methods=["GET"])
+def api_categories():
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("SELECT name FROM categories ORDER BY name ASC")
+    rows = c.fetchall()
+    conn.close()
+    return jsonify([r[0] for r in rows])
 
 # ── CLEANUP old temp files (>30 min) ─────────────────────────────────────────
 def cleanup_old_files():
@@ -745,6 +763,7 @@ def admin_panel():
             title = request.form.get("title").strip()
             category = request.form.get("category").strip()
             price = request.form.get("price").strip()
+            desc = request.form.get("description", "").strip()
             image_url = ""
             if "image" in request.files:
                 f = request.files["image"]
@@ -755,7 +774,7 @@ def admin_panel():
                     image_url = f"/store_img/{tmp_name}"
             conn = sqlite3.connect(DB_PATH)
             c = conn.cursor()
-            c.execute("INSERT INTO products (category, title, price, image_url) VALUES (?, ?, ?, ?)", (category, title, price, image_url))
+            c.execute("INSERT INTO products (category, title, price, image_url, description) VALUES (?, ?, ?, ?, ?)", (category, title, price, image_url, desc))
             conn.commit()
             conn.close()
             return redirect("/admin-panel-rahasia")
@@ -764,6 +783,26 @@ def admin_panel():
             conn = sqlite3.connect(DB_PATH)
             c = conn.cursor()
             c.execute("DELETE FROM products WHERE id=?", (pid,))
+            conn.commit()
+            conn.close()
+            return redirect("/admin-panel-rahasia")
+        elif request.form.get("action") == "add_category":
+            cat_name = request.form.get("category_name").strip().upper()
+            if cat_name:
+                conn = sqlite3.connect(DB_PATH)
+                c = conn.cursor()
+                try:
+                    c.execute("INSERT INTO categories (name) VALUES (?)", (cat_name,))
+                    conn.commit()
+                except sqlite3.IntegrityError:
+                    pass
+                conn.close()
+            return redirect("/admin-panel-rahasia")
+        elif request.form.get("action") == "delete_category":
+            cat_id = request.form.get("category_id")
+            conn = sqlite3.connect(DB_PATH)
+            c = conn.cursor()
+            c.execute("DELETE FROM categories WHERE id=?", (cat_id,))
             conn.commit()
             conn.close()
             return redirect("/admin-panel-rahasia")
@@ -783,8 +822,10 @@ def admin_panel():
     c = conn.cursor()
     c.execute("SELECT identifier, expiry_date FROM premium")
     premiums = c.fetchall()
-    c.execute("SELECT id, category, title, price, image_url FROM products ORDER BY id DESC")
+    c.execute("SELECT id, category, title, price, image_url, description FROM products ORDER BY id DESC")
     products = c.fetchall()
+    c.execute("SELECT id, name FROM categories ORDER BY name ASC")
+    categories = c.fetchall()
     conn.close()
     
     html = f"""
