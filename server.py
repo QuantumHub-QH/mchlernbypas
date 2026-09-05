@@ -59,8 +59,26 @@ def init_db():
                     discord_avatar TEXT,
                     joined_at TEXT
                  )''')
+    c.execute('''CREATE TABLE IF NOT EXISTS comments (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    username TEXT,
+                    avatar TEXT,
+                    content TEXT,
+                    rating INTEGER,
+                    created_at TEXT
+                 )''')
+    c.execute('''CREATE TABLE IF NOT EXISTS products (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    category TEXT,
+                    title TEXT,
+                    price TEXT,
+                    image_url TEXT
+                 )''')
     conn.commit()
     conn.close()
+
+# In-memory tracking for online users
+online_users = {}
 
 init_db()
 
@@ -221,6 +239,44 @@ def logout():
     return redirect("/")
 
 
+@app.before_request
+def track_user_activity():
+    if not request.path.startswith('/static'):
+        uid = session.get('discord_user') or get_real_ip()
+        online_users[uid] = time.time()
+
+        # Cleanup old online users (> 5 minutes inactive)
+        current_time = time.time()
+        to_delete = [k for k, v in online_users.items() if current_time - v > 300]
+        for k in to_delete:
+            del online_users[k]
+
+@app.route("/api/comments", methods=["GET", "POST"])
+def api_comments():
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    if request.method == "POST":
+        data = request.json
+        c.execute("INSERT INTO comments (username, avatar, content, rating, created_at) VALUES (?, ?, ?, ?, ?)", 
+                  (data.get("username", "Anonymous"), data.get("avatar", ""), data.get("content", ""), data.get("rating", 5), datetime.now().isoformat()))
+        conn.commit()
+        conn.close()
+        return jsonify({"success": True})
+    else:
+        c.execute("SELECT id, username, avatar, content, rating, created_at FROM comments ORDER BY id DESC LIMIT 50")
+        rows = c.fetchall()
+        conn.close()
+        return jsonify([{"id": r[0], "username": r[1], "avatar": r[2], "content": r[3], "rating": r[4], "created_at": r[5]} for r in rows])
+
+@app.route("/api/products", methods=["GET"])
+def api_products():
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("SELECT id, category, title, price, image_url FROM products ORDER BY id DESC")
+    rows = c.fetchall()
+    conn.close()
+    return jsonify([{"id": r[0], "category": r[1], "title": r[2], "price": r[3], "image_url": r[4]} for r in rows])
+
 # ── CLEANUP old temp files (>30 min) ─────────────────────────────────────────
 def cleanup_old_files():
     while True:
@@ -249,8 +305,11 @@ def get_total_users():
 
 @app.route("/api/total-users")
 def api_total_users():
-    """Endpoint untuk polling realtime total pengguna di frontend"""
-    return jsonify({"total": get_total_users()})
+    """Endpoint untuk polling realtime total pengguna di frontend dan online count"""
+    return jsonify({
+        "total": get_total_users(),
+        "online": len(online_users)
+    })
 
 # ── HELPER: Resolve Roblox operation ID ───────────────────────────────────────
 def resolve_asset_id(api_key, operation_path, max_wait=90):
@@ -646,16 +705,25 @@ def upload():
              try: os.remove(input_path)
              except: pass
 
+STORE_DIR = os.path.join(DATA_DIR, "store_images")
+os.makedirs(STORE_DIR, exist_ok=True)
+
+@app.route("/store_img/<filename>")
+def serve_store_img(filename):
+    return send_file(os.path.join(STORE_DIR, filename))
+
 @app.route("/admin-panel-rahasia", methods=["GET", "POST"])
 def admin_panel():
     if request.method == "POST":
         if request.form.get("password") == "rikigantengZ55":
             session['admin_logged_in'] = True
             return redirect("/admin-panel-rahasia")
-        elif request.form.get("action") == "add" and session.get('admin_logged_in'):
+        elif not session.get('admin_logged_in'):
+            pass
+        elif request.form.get("action") == "add":
             email = request.form.get("email").strip()
             identifier = f"google_{email}"
-            duration = request.form.get("duration") # "week" or "month"
+            duration = request.form.get("duration")
             days = 7 if duration == "week" else 30
             expiry = (datetime.now() + timedelta(days=days)).isoformat()
             
@@ -665,11 +733,37 @@ def admin_panel():
             conn.commit()
             conn.close()
             return redirect("/admin-panel-rahasia")
-        elif request.form.get("action") == "delete" and session.get('admin_logged_in'):
+        elif request.form.get("action") == "delete":
             identifier = request.form.get("identifier")
             conn = sqlite3.connect(DB_PATH)
             c = conn.cursor()
             c.execute("DELETE FROM premium WHERE identifier=?", (identifier,))
+            conn.commit()
+            conn.close()
+            return redirect("/admin-panel-rahasia")
+        elif request.form.get("action") == "add_product":
+            title = request.form.get("title").strip()
+            category = request.form.get("category").strip()
+            price = request.form.get("price").strip()
+            image_url = ""
+            if "image" in request.files:
+                f = request.files["image"]
+                if f.filename:
+                    ext = os.path.splitext(f.filename)[1]
+                    tmp_name = f"prod_{uuid.uuid4().hex}{ext}"
+                    f.save(os.path.join(STORE_DIR, tmp_name))
+                    image_url = f"/store_img/{tmp_name}"
+            conn = sqlite3.connect(DB_PATH)
+            c = conn.cursor()
+            c.execute("INSERT INTO products (category, title, price, image_url) VALUES (?, ?, ?, ?)", (category, title, price, image_url))
+            conn.commit()
+            conn.close()
+            return redirect("/admin-panel-rahasia")
+        elif request.form.get("action") == "delete_product":
+            pid = request.form.get("product_id")
+            conn = sqlite3.connect(DB_PATH)
+            c = conn.cursor()
+            c.execute("DELETE FROM products WHERE id=?", (pid,))
             conn.commit()
             conn.close()
             return redirect("/admin-panel-rahasia")
@@ -689,46 +783,109 @@ def admin_panel():
     c = conn.cursor()
     c.execute("SELECT identifier, expiry_date FROM premium")
     premiums = c.fetchall()
+    c.execute("SELECT id, category, title, price, image_url FROM products ORDER BY id DESC")
+    products = c.fetchall()
     conn.close()
     
-    html = """
+    html = f"""
     <body style="background:#05050a; color:#fff; font-family:sans-serif; padding:40px;">
         <h1 style="color:#00e5ff;">MCHLERN Admin Panel</h1>
         
+        <!-- ONLINE USERS -->
         <div style="background:rgba(255,255,255,0.05); padding:20px; border-radius:12px; border:1px solid #333; margin-bottom:20px;">
-            <h3 style="margin-top:0;">Tambah Premium User</h3>
-            <form method="POST" style="display:flex; gap:10px; align-items:center;">
-                <input type="hidden" name="action" value="add">
-                <input type="email" name="email" placeholder="Email Google User" required style="padding:10px; border-radius:5px; border:1px solid #555; background:#000; color:#fff; width:300px;">
-                <select name="duration" style="padding:10px; border-radius:5px; border:1px solid #555; background:#000; color:#fff;">
-                    <option value="week">1 Minggu</option>
-                    <option value="month">1 Bulan</option>
-                </select>
-                <button type="submit" style="background:#00e676; color:#000; font-weight:bold; padding:10px 20px; border:none; border-radius:5px; cursor:pointer;">Tambah</button>
-            </form>
+            <h3 style="margin-top:0; color:#00e676;">🟢 Users Online Real-time (Active in last 5 mins)</h3>
+            <div style="display:flex; flex-wrap:wrap; gap:10px;">
+    """
+    if not online_users:
+        html += "<p style='color:#888;'>Tidak ada user online.</p>"
+    for uid, last_active in online_users.items():
+        time_ago = int(time.time() - last_active)
+        html += f"<span style='background:#111; padding:5px 10px; border-radius:20px; border:1px solid #333;'>{uid} <small style='color:#888'>({time_ago}s ago)</small></span>"
+        
+    html += """
+            </div>
         </div>
         
-        <div style="background:rgba(255,255,255,0.05); padding:20px; border-radius:12px; border:1px solid #333;">
-            <h3 style="margin-top:0;">Daftar Premium Aktif</h3>
-            <table style="width:100%; border-collapse:collapse; text-align:left;">
-                <tr style="border-bottom:1px solid #333;"><th style="padding:10px;">User Identifier</th><th style="padding:10px;">Berakhir Pada</th><th style="padding:10px;">Aksi</th></tr>
+        <div style="display:flex; gap:20px; flex-wrap:wrap;">
+            <!-- PREMIUM SECTION -->
+            <div style="flex:1; min-width:400px; background:rgba(255,255,255,0.05); padding:20px; border-radius:12px; border:1px solid #333;">
+                <h3 style="margin-top:0;">Tambah Premium User</h3>
+                <form method="POST" style="display:flex; gap:10px; align-items:center; margin-bottom:20px;">
+                    <input type="hidden" name="action" value="add">
+                    <input type="email" name="email" placeholder="Email Google User" required style="padding:10px; border-radius:5px; border:1px solid #555; background:#000; color:#fff; width:200px;">
+                    <select name="duration" style="padding:10px; border-radius:5px; border:1px solid #555; background:#000; color:#fff;">
+                        <option value="week">1 Minggu</option>
+                        <option value="month">1 Bulan</option>
+                    </select>
+                    <button type="submit" style="background:#00e676; color:#000; font-weight:bold; padding:10px 20px; border:none; border-radius:5px; cursor:pointer;">Tambah</button>
+                </form>
+                
+                <h3 style="margin-top:0;">Daftar Premium Aktif</h3>
+                <table style="width:100%; border-collapse:collapse; text-align:left;">
+                    <tr style="border-bottom:1px solid #333;"><th style="padding:10px;">User Identifier</th><th style="padding:10px;">Berakhir Pada</th><th style="padding:10px;">Aksi</th></tr>
     """
     for p in premiums:
         html += f"""
-                <tr style="border-bottom:1px solid #222;">
-                    <td style="padding:10px;">{p[0]}</td>
-                    <td style="padding:10px;">{p[1][:10]}</td>
-                    <td style="padding:10px;">
-                        <form method="POST" style="margin:0;">
-                            <input type="hidden" name="action" value="delete">
-                            <input type="hidden" name="identifier" value="{p[0]}">
-                            <button style="background:#ff3366; color:#fff; border:none; padding:5px 10px; border-radius:3px; cursor:pointer;">Hapus</button>
-                        </form>
-                    </td>
-                </tr>
+                    <tr style="border-bottom:1px solid #222;">
+                        <td style="padding:10px;">{p[0]}</td>
+                        <td style="padding:10px;">{p[1][:10]}</td>
+                        <td style="padding:10px;">
+                            <form method="POST" style="margin:0;">
+                                <input type="hidden" name="action" value="delete">
+                                <input type="hidden" name="identifier" value="{p[0]}">
+                                <button style="background:#ff3366; color:#fff; border:none; padding:5px 10px; border-radius:3px; cursor:pointer;">Hapus</button>
+                            </form>
+                        </td>
+                    </tr>
         """
     html += """
-            </table>
+                </table>
+            </div>
+            
+            <!-- STORE PRODUCTS SECTION -->
+            <div style="flex:1; min-width:400px; background:rgba(255,255,255,0.05); padding:20px; border-radius:12px; border:1px solid #333;">
+                <h3 style="margin-top:0; color:#f59e0b;">Tambah Produk Toko</h3>
+                <form method="POST" enctype="multipart/form-data" style="display:flex; flex-direction:column; gap:10px; margin-bottom:20px;">
+                    <input type="hidden" name="action" value="add_product">
+                    <input type="text" name="title" placeholder="Nama Produk" required style="padding:10px; border-radius:5px; border:1px solid #555; background:#000; color:#fff;">
+                    <select name="category" style="padding:10px; border-radius:5px; border:1px solid #555; background:#000; color:#fff;">
+                        <option value="ALBUM FUNKOT">ALBUM FUNKOT</option>
+                        <option value="ALBUM DJ">ALBUM DJ</option>
+                        <option value="ALBUM GALAU">ALBUM GALAU</option>
+                        <option value="ALBUM BKB">ALBUM BKB</option>
+                        <option value="ALBUM JAWA">ALBUM JAWA</option>
+                        <option value="ALBUM SUNDA">ALBUM SUNDA</option>
+                    </select>
+                    <input type="text" name="price" placeholder="Harga (contoh: Rp 50.000)" required style="padding:10px; border-radius:5px; border:1px solid #555; background:#000; color:#fff;">
+                    <input type="file" name="image" accept="image/*" required style="padding:10px; border-radius:5px; border:1px solid #555; background:#000; color:#fff;">
+                    <button type="submit" style="background:#f59e0b; color:#000; font-weight:bold; padding:10px 20px; border:none; border-radius:5px; cursor:pointer;">Tambah Produk</button>
+                </form>
+                
+                <h3 style="margin-top:0;">Daftar Produk Toko</h3>
+                <div style="max-height:400px; overflow-y:auto;">
+                    <table style="width:100%; border-collapse:collapse; text-align:left;">
+                        <tr style="border-bottom:1px solid #333;"><th style="padding:10px;">IMG</th><th style="padding:10px;">Kategori</th><th style="padding:10px;">Nama</th><th style="padding:10px;">Harga</th><th style="padding:10px;">Aksi</th></tr>
+    """
+    for pr in products:
+        html += f"""
+                        <tr style="border-bottom:1px solid #222;">
+                            <td style="padding:10px;"><img src="{pr[4]}" width="40" height="40" style="border-radius:5px; object-fit:cover;"></td>
+                            <td style="padding:10px; font-size:12px; color:#888;">{pr[1]}</td>
+                            <td style="padding:10px; font-weight:bold;">{pr[2]}</td>
+                            <td style="padding:10px; color:#00e676;">{pr[3]}</td>
+                            <td style="padding:10px;">
+                                <form method="POST" style="margin:0;">
+                                    <input type="hidden" name="action" value="delete_product">
+                                    <input type="hidden" name="product_id" value="{pr[0]}">
+                                    <button style="background:#ff3366; color:#fff; border:none; padding:5px 10px; border-radius:3px; cursor:pointer;">Hapus</button>
+                                </form>
+                            </td>
+                        </tr>
+        """
+    html += """
+                    </table>
+                </div>
+            </div>
         </div>
     </body>
     """
