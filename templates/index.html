@@ -1,193 +1,1557 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Roblox Audio Uploader - MCHLERN (Web)</title>
-    <style>
-        body { background-color: #121212; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; }
-        h1 { color: #00ffcc; text-align: center; }
-        .container { max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
-        .card { background-color: #1e1e1e; border: 1px solid #333; border-radius: 8px; padding: 20px; }
-        .card h2 { margin-top: 0; font-size: 1.2rem; border-bottom: 1px solid #444; padding-bottom: 10px; }
-        .form-group { margin-bottom: 15px; }
-        label { display: block; margin-bottom: 5px; font-weight: bold; }
-        input[type="text"], input[type="password"], select, textarea { width: 100%; padding: 10px; background-color: #2b2b2b; border: 1px solid #444; color: white; border-radius: 4px; box-sizing: border-box; }
-        input[type="range"] { width: 100%; }
-        .slider-container { display: flex; justify-content: space-between; align-items: center; margin-top: 5px; }
-        button { background-color: #444; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; transition: 0.2s; }
-        button:hover { background-color: #666; }
-        .btn-upload { background-color: #107c10; width: 100%; font-size: 1.1rem; font-weight: bold; padding: 15px; margin-top: 10px; }
-        .btn-upload:hover { background-color: #0a500a; }
-        .btn-danger { background-color: #b83535; }
-        .btn-danger:hover { background-color: #d64949; }
-        .templates { display: flex; gap: 10px; margin-bottom: 15px; }
-        #history-box { background-color: #121212; border: 1px solid #444; height: 200px; overflow-y: auto; padding: 10px; border-radius: 4px; font-family: monospace; white-space: pre-wrap; }
-        #loading { display: none; text-align: center; color: #00aaff; margin-top: 10px; font-weight: bold; }
-        .recommendation { color: #00ffcc; font-weight: bold; margin-top: 15px; text-align: center; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>MCHLERN TOOLS — Roblox Audio Uploader PRO</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@700;900&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+* { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color: transparent; }
+:root {
+  --bg: #000000;
+  --panel: #0a0a0a;
+  --panel-border: #333333;
+  --red: #ff0000;
+  --red-dim: #cc0000;
+  --red-glow: transparent;
+  --red-soft: transparent;
+  --white: #ffffff;
+  --gray: #888888;
+  --gray-dark: #444444;
+  --success: #00ff00;
+  --danger: #ff0000;
+  --glass-shadow: none;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: var(--bg);
+  color: var(--white);
+  min-height: 100vh;
+  position: relative;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── SHARP BACKGROUND ── */
+.bg-animation {
+  display: none; /* No more blurry gradients */
+}
+.bg-grid {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1;
+  background-image: 
+    linear-gradient(rgba(255,0,0,0.1) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,0,0,0.1) 1px, transparent 1px);
+  background-size: 50px 50px;
+  pointer-events: none;
+}
+
+/* ── LAYOUT ── */
+.app-container {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 24px;
+  min-height: 100vh;
+}
+@media(max-width: 950px) {
+  .app-container { 
+    grid-template-columns: 200px 1fr; 
+    padding: 8px; 
+    gap: 10px; 
+  }
+  .sidebar { min-width: 0; }
+  .glass-panel { padding: 12px; border-radius: 12px; }
+  .logo-title { font-size: 16px; }
+  .logo-sub { font-size: 9px; margin-bottom: 12px; }
+  .section-title { font-size: 11px; }
+  .input-label { font-size: 9px; }
+  .input-field { padding: 8px 10px; font-size: 11px; border-radius: 8px; }
+  .btn { font-size: 11px; padding: 8px 12px; }
+  .quota-number { font-size: 24px; }
+  .quota-text { font-size: 10px; }
+  .quota-card { padding: 12px; }
+  .upload-grid { gap: 10px; }
+}
+@media(max-width: 600px) {
+  .app-container { 
+    grid-template-columns: 160px 1fr; 
+    padding: 6px; 
+    gap: 8px; 
+  }
+  .glass-panel { padding: 10px; border-radius: 10px; }
+  .logo-title { font-size: 13px; }
+  .logo-sub { font-size: 8px; letter-spacing: 0.5px; margin-bottom: 8px; }
+  .sidebar img[style*="width: 100px"] { width: 50px !important; height: 50px !important; margin-bottom: 8px !important; }
+  .section-title { font-size: 10px; margin-bottom: 8px; }
+  .input-field { padding: 6px 8px; font-size: 10px; }
+  .btn { font-size: 10px; padding: 7px 8px; min-height: 32px; }
+  .quota-number { font-size: 20px; }
+  .quota-text { font-size: 9px; }
+  .quota-card { padding: 10px; margin-bottom: 8px; }
+  .divider { margin: 10px 0; }
+  .dropzone { padding: 16px 8px; }
+  .dz-icon { font-size: 24px !important; }
+  .dz-text { font-size: 10px !important; }
+  .upload-btn { font-size: 11px !important; padding: 10px !important; }
+  .top-bar-glow { flex-wrap: wrap; justify-content: center; gap: 6px; padding: 8px; }
+  .btn-premium-top { padding: 5px 8px; font-size: 9px; }
+  .topbar-name { font-size: 10px; }
+  .topbar-avatar { width: 24px !important; height: 24px !important; }
+}
+
+/* ── PANELS ── */
+.glass-panel {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: var(--glass-shadow);
+  position: relative;
+  overflow: hidden;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.glass-panel:hover {
+  border-color: var(--gray-dark);
+}
+
+/* ── HEADER / LOGO ── */
+.logo-title {
+  font-family: 'Outfit', sans-serif; font-size: 26px; font-weight: 800;
+  color: var(--white);
+  margin-bottom: 4px;
+  letter-spacing: -0.5px;
+}
+.logo-title span { color: var(--red); }
+.logo-sub { 
+  font-size: 11px; color: var(--gray); text-transform: uppercase; letter-spacing: 2px; 
+  margin-bottom: 24px; font-weight: 600;
+}
+.section-title { 
+  font-size: 14px; font-weight: 800; color: var(--white); margin-bottom: 16px; 
+  display: flex; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 1px;
+}
+.divider { 
+  height: 1px; background: linear-gradient(90deg, transparent, rgba(255,30,80,0.2), transparent); 
+  margin: 24px 0; border: none; 
+}
+
+/* ── INPUTS & BUTTONS ── */
+.input-group { margin-bottom: 16px; }
+.input-label { 
+  display: block; font-size: 11px; color: var(--gray); margin-bottom: 6px; 
+  text-transform: uppercase; letter-spacing: 1px; font-weight: 700;
+}
+.input-field {
+  width: 100%; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1);
+  color: var(--white); padding: 12px 16px; border-radius: 12px; font-size: 13px; font-family: inherit;
+  transition: all 0.3s; outline: none; box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+}
+.input-field:focus { 
+  border-color: var(--red); 
+  box-shadow: 0 0 0 4px rgba(255,30,80,0.15), inset 0 2px 4px rgba(0,0,0,0.2); 
+  background: rgba(15,5,8,0.8);
+}
+select.input-field { appearance: none; cursor: pointer; }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 10px 18px; border-radius: 8px; font-size: 13px; font-weight: 600;
+  border: none; cursor: pointer; transition: all 0.2s; white-space: nowrap;
+  letter-spacing: 0.5px;
+}
+.btn-red-glow { 
+  background: var(--red); color: #fff; 
+  box-shadow: 0 2px 10px var(--red-soft);
+}
+.btn-red-glow:hover { 
+  background: var(--red-dim); 
+  transform: translateY(-1px); 
+}
+.btn-outline { 
+  background: transparent; border: 1px solid var(--panel-border); color: var(--white); 
+}
+.btn-outline:hover { 
+  background: rgba(255,255,255,0.05); border-color: var(--gray-dark); 
+}
+.btn-danger { 
+  background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); color: var(--danger); 
+}
+.btn-danger:hover { 
+  background: rgba(239, 68, 68, 0.2); border-color: var(--danger);
+}
+.btn-full { width: 100%; }
+
+/* ── QUOTA & LOGIN CARD ── */
+.quota-card {
+  background: var(--bg); 
+  border-radius: 12px; padding: 20px; 
+  border: 1px solid var(--panel-border);
+  margin-bottom: 16px; text-align: center;
+}
+.quota-number { 
+  font-size: 32px; font-family: 'Outfit', sans-serif; font-weight: 800; 
+  color: #fff; margin: 8px 0;
+}
+.quota-text { font-size: 11px; color: var(--gray); text-transform: uppercase; letter-spacing: 1px; font-weight: 600;}
+.google-btn-wrapper { display: flex; justify-content: center; margin-top: 16px; }
+
+/* ── MODIFIERS ── */
+.slider-container { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
+.slider-label { 
+  font-size: 11px; color: var(--gray); width: 60px; flex-shrink: 0; 
+  text-transform: uppercase; letter-spacing: 1px; font-weight: 600;
+}
+.slider-val { 
+  font-size: 12px; font-weight: 700; color: var(--white); width: 45px; text-align: right;
+  background: var(--bg); padding: 4px 6px; border-radius: 6px; border: 1px solid var(--panel-border);
+}
+input[type=range] {
+  flex: 1; -webkit-appearance: none; height: 4px; border-radius: 2px; 
+  background: var(--panel-border); outline: none; cursor: pointer;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%; 
+  background: #fff; border: 2px solid var(--red);
+  cursor: pointer; transition: all 0.2s;
+}
+input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.1); background: var(--red); border-color: #fff; }
+.template-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 20px; }
+.rec-box { 
+  background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); 
+  color: var(--success); padding: 12px; border-radius: 8px; font-size: 12px; 
+  text-align: center; font-weight: 600; margin-top: 16px;
+}
+
+/* ── UPLOAD AREA ── */
+.main-content { display: flex; flex-direction: column; gap: 24px; min-width: 0; }
+.upload-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+@media(max-width: 1100px) { .upload-grid { grid-template-columns: 1fr; } }
+.dropzone {
+  border: 2px dashed var(--panel-border); border-radius: 12px; padding: 40px 20px;
+  text-align: center; cursor: pointer; transition: all 0.2s ease; position: relative;
+  background: var(--bg);
+}
+.dropzone:hover, .dropzone.dragover { 
+  border-color: var(--red); background: rgba(225, 29, 72, 0.05); 
+}
+.dropzone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+.dz-icon { font-size: 32px; margin-bottom: 12px; display: block; filter: drop-shadow(0 4px 10px rgba(0,0,0,0.4)); }
+.dz-text { font-size: 13px; color: var(--gray); font-weight: 500; }
+.file-list { margin-top: 16px; display: flex; flex-direction: column; gap: 8px; max-height: 250px; overflow-y: auto; padding-right: 4px; }
+.file-item {
+  background: var(--bg); border: 1px solid var(--panel-border); border-radius: 8px;
+  padding: 10px 14px; display: flex; align-items: center; gap: 12px; font-size: 12px;
+  transition: all 0.2s;
+}
+.file-item:hover { border-color: var(--gray-dark); }
+.file-item input {
+  flex: 1; background: transparent; border: none; border-bottom: 1px solid var(--panel-border);
+  color: #fff; padding: 6px; font-size: 12px; outline: none; transition: 0.2s;
+}
+.file-item input:focus { border-color: var(--red); }
+.yt-card {
+  display: flex; align-items: center; gap: 12px; padding: 10px; background: rgba(0,0,0,0.6);
+  border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; margin-top: 12px;
+  transition: all 0.2s;
+}
+.yt-card:hover { border-color: rgba(255,30,80,0.3); background: rgba(255,30,80,0.05); }
+.yt-thumb { width: 70px; height: 45px; object-fit: cover; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); }
+.yt-info { flex: 1; min-width: 0; }
+.yt-title { 
+  font-size: 11px; color: var(--gray); white-space: nowrap; overflow: hidden; 
+  text-overflow: ellipsis; margin-bottom: 6px; font-weight: 600;
+}
+.audio-preview { width: 100%; height: 45px; margin-top: 16px; border-radius: 10px; display: none; }
+.audio-preview::-webkit-media-controls-panel { background: rgba(30,10,15,0.9); }
+.upload-btn {
+  margin-top: 20px; width: 100%; padding: 16px; font-size: 14px; font-weight: 900;
+  text-transform: uppercase; letter-spacing: 2px; border-radius: 14px;
+}
+.bypass-glow {
+  background: linear-gradient(135deg, var(--red), #ff5577); color: #fff; border: none;
+  box-shadow: 0 8px 25px rgba(255,30,80,0.4);
+  position: relative; overflow: hidden;
+}
+.bypass-glow::before {
+  content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+  background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.2) 50%, transparent 70%);
+  animation: shimmer 2.5s infinite;
+}
+@keyframes shimmer {
+  0% { transform: translateX(-100%) rotate(0deg); }
+  100% { transform: translateX(100%) rotate(0deg); }
+}
+.bypass-glow:hover { 
+  box-shadow: 0 10px 35px rgba(255,30,80,0.6); transform: translateY(-3px); 
+}
+
+/* ── HISTORY TABLE ── */
+.history-panel { margin-top: 8px; }
+.table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 12px; }
+table { width: 100%; border-collapse: collapse; font-size: 12px; text-align: left; min-width: 600px; }
+th { 
+  padding: 16px 12px; color: var(--gray); border-bottom: 1px solid var(--panel-border); 
+  font-weight: 700; text-transform: uppercase; letter-spacing: 1px; background: var(--bg);
+}
+td { padding: 16px 12px; border-bottom: 1px solid var(--panel-border); }
+tr:hover td { background: rgba(255,255,255,0.02); }
+.status-badge { padding: 6px 10px; border-radius: 6px; font-weight: 700; font-size: 10px; text-transform: uppercase; letter-spacing: 1px;}
+.bg-green { background: rgba(16, 185, 129, 0.1); color: var(--success); border: 1px solid rgba(16, 185, 129, 0.2); }
+.bg-red { background: rgba(239, 68, 68, 0.1); color: var(--danger); border: 1px solid rgba(239, 68, 68, 0.2); }
+.copy-badge { 
+  cursor: pointer; background: var(--panel-border); color: #fff; 
+  padding: 6px 10px; border-radius: 6px; border: 1px solid transparent; 
+  transition: all 0.2s; font-weight: 600; display: inline-block;
+}
+.copy-badge:hover { 
+  background: var(--gray-dark);
+}
+.spinner { 
+  width: 16px; height: 16px; border: 2px solid var(--gray-dark); 
+  border-top-color: var(--red); border-radius: 50%; animation: spin 0.6s linear infinite; 
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+.status-bar { 
+  padding: 14px; border-radius: 8px; font-size: 12px; font-weight: 600; 
+  margin-top: 16px; display: none; text-align: center; letter-spacing: 0.5px;
+  background: var(--bg); border: 1px solid var(--panel-border);
+  color: var(--white);
+}
+
+/* ── LANDING PAGE ── */
+.landing-page {
+  position: fixed; inset: 0; background: var(--bg); z-index: 9999;
+  display: block;
+  padding: 40px 20px; text-align: center;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.landing-content {
+  background: var(--panel); border: 1px solid var(--panel-border); border-radius: 24px;
+  padding: 50px 40px; max-width: 800px; width: 100%; box-shadow: var(--glass-shadow);
+  animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative; overflow: hidden; margin: 0 auto;
+}
+.landing-title { 
+  font-size: 38px; font-family: 'Outfit', sans-serif; font-weight: 800; 
+  color: var(--white);
+  margin-bottom: 12px;
+  letter-spacing: -0.5px; line-height: 1.2;
+}
+.landing-sub { color: var(--gray); margin-bottom: 40px; font-size: 15px; font-weight: 500; letter-spacing: 1px; }
+.steps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-bottom: 40px; text-align: left; }
+@media(max-width: 768px) { .steps-grid { grid-template-columns: 1fr; } }
+.step-card { 
+  background: var(--bg); border: 1px solid var(--panel-border); 
+  padding: 24px; border-radius: 12px; transition: all 0.2s ease;
+}
+.step-card:hover { 
+  border-color: var(--gray-dark); 
+}
+.step-number { 
+  font-size: 28px; font-weight: 800; color: var(--red); margin-bottom: 12px; 
+  font-family: 'Outfit', sans-serif;
+}
+.step-title { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+.step-desc { font-size: 13px; color: var(--gray); line-height: 1.6; }
+.btn-start {
+  background: var(--white); color: var(--bg);
+  border: none; padding: 16px 40px; font-size: 15px; font-weight: 700;
+  border-radius: 8px; cursor: pointer; letter-spacing: 0.5px;
+  transition: all 0.2s;
+}
+.btn-start:hover { 
+  background: var(--gray);
+}
+@keyframes fadeIn { 
+  from { opacity: 0; transform: translateY(30px) scale(0.95); } 
+  to { opacity: 1; transform: translateY(0) scale(1); } 
+}
+
+/* ── TOP BAR ── */
+.top-bar-glow {
+  display: flex; align-items: center; gap: 14px;
+  padding: 14px 20px;
+  background: var(--bg);
+  border-radius: 12px; border: 1px solid var(--panel-border);
+  position: relative; overflow: hidden; flex-wrap: wrap;
+}
+.topbar-users { display: flex; flex-direction: column; gap: 2px; }
+.topbar-users-label { font-size: 10px; color: var(--gray); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
+.topbar-users-count { display: flex; align-items: center; gap: 10px; }
+.topbar-users-count span:first-child {
+  font-family: 'Outfit', sans-serif; font-size: 28px; font-weight: 800;
+  color: var(--white);
+  transition: all 0.2s ease; line-height: 1;
+}
+.live-badge {
+  font-size: 9px; font-weight: 900; color: var(--success);
+  background: rgba(0,255,136,0.1); border: 1px solid rgba(0,255,136,0.3);
+  padding: 3px 8px; border-radius: 20px; letter-spacing: 2px;
+  animation: livePulse 2s ease-in-out infinite;
+}
+@keyframes livePulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+.btn-premium-top {
+  background: linear-gradient(135deg, #f59e0b, #d97706);
+  color: #fff; font-weight: 700; border: none;
+  padding: 10px 16px; border-radius: 8px; cursor: pointer;
+  font-size: 12px; letter-spacing: 0.5px;
+  transition: all 0.2s; white-space: nowrap; flex-shrink: 0;
+}
+.btn-premium-top:hover { background: #d97706; }
+.topbar-profile {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--bg); padding: 4px 12px 4px 4px;
+  border-radius: 20px; border: 1px solid var(--panel-border);
+  flex-shrink: 0;
+}
+.topbar-avatar { width: 32px; height: 32px; border-radius: 50%; }
+.topbar-name { font-weight: 600; font-size: 13px; color: #fff; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 600px) {
+  .topbar-users-count span:first-child { font-size: 22px; }
+  .topbar-name { max-width: 80px; }
+}
+#premiumModal { 
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); 
+  z-index: 99999; align-items: center; justify-content: center; padding: 20px; 
+}
+.premium-content {
+  background: var(--panel); border: 1px solid #f59e0b; border-radius: 16px; 
+  padding: 40px; max-width: 450px; width: 100%; text-align: center; 
+  position: relative; overflow: hidden; box-shadow: var(--glass-shadow);
+}
+.premium-content::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; 
+  background: linear-gradient(90deg, transparent, #ffd700, transparent);
+}
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); border-radius: 4px; }
+::-webkit-scrollbar-thumb { background: rgba(255,30,80,0.4); border-radius: 4px; border: 1px solid rgba(255,255,255,0.1); }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,30,80,0.7); }
+
+@media (max-width: 600px) {
+  /* Scrollbar */
+  ::-webkit-scrollbar { display: none; }
+}
+</style>
+<base target="_blank">
 </head>
 <body>
+<div class="bg-animation"></div>
+<div class="bg-grid"></div>
 
-<div class="container">
-    <h1>Roblox Audio Uploader - MCHLERN</h1>
-    
-    <form id="uploadForm">
-        <div class="card">
-            <h2>1. API CONFIGURATION</h2>
-            <div class="form-group">
-                <label>API Key:</label>
-                <input type="password" id="api_key" required>
-            </div>
-            <div style="display: flex; gap: 20px;">
-                <div class="form-group" style="flex: 1;">
-                    <label>Creator Type:</label>
-                    <select id="creator_type">
-                        <option value="User">User</option>
-                        <option value="Group">Group</option>
-                    </select>
-                </div>
-                <div class="form-group" style="flex: 2;">
-                    <label>Creator ID:</label>
-                    <input type="text" id="creator_id" required>
-                </div>
-            </div>
-        </div>
+<!-- ── LANDING PAGE ── -->
+<div class="landing-page" id="landingPage">
+  <div class="landing-content">
+    <img src="https://cdn.discordapp.com/attachments/1522140461081432126/1545132976227090582/ChatGPT_Image_Jul_20_2026_03_50_07_AM.png?ex=6a9b08b8&is=6a99b738&hm=c8eac40969dde5aa797a96bc42bbe0d0b78afa49f760ff982c4efcdbf67d646e" style="width:110px; height:110px; border-radius:50%; border:3px solid var(--red); box-shadow: 0 0 40px rgba(255,30,80,0.6); margin-bottom:24px; object-fit:cover;">
+    <h1 class="landing-title">Selamat Datang di <span>MCHLERN</span> TOOLS</h1>
+    <p class="landing-sub">Sistem Bypass Audio Roblox Paling Canggih & Otomatis</p>
 
-        <div class="card">
-            <h2>2. AUDIO MODIFIER SETTINGS</h2>
-            <label>Bypass Templates:</label>
-            <div class="templates">
-                <button type="button" onclick="setTemplate(1.5)">1.5x</button>
-                <button type="button" onclick="setTemplate(1.6)">1.6x</button>
-                <button type="button" onclick="setTemplate(2.3)">2.3x</button>
-                <button type="button" onclick="setTemplate(2.5)">2.5x</button>
-                <button type="button" onclick="setTemplate(1.0)" class="btn-danger">Reset</button>
-            </div>
-            
-            <div class="form-group">
-                <label>Speed (Tempo): <span id="speed_val">1.00</span></label>
-                <input type="range" id="speed" min="0.5" max="3.0" step="0.01" value="1.0" oninput="updateUI()">
-            </div>
-            <div class="form-group">
-                <label>Pitch: <span id="pitch_val">1.00</span></label>
-                <input type="range" id="pitch" min="0.5" max="3.0" step="0.01" value="1.0" oninput="updateUI()">
-            </div>
-            <div class="form-group">
-                <label>Volume: <span id="vol_val">1.00</span></label>
-                <input type="range" id="vol" min="0.1" max="3.0" step="0.01" value="1.0" oninput="document.getElementById('vol_val').innerText = this.value">
-            </div>
-            
-            <div class="recommendation" id="rec_label">Rec. In-Game PlaybackSpeed: 1.00</div>
-        </div>
-
-        <div class="card">
-            <h2>3. UPLOAD CONTROLS</h2>
-            <div class="form-group">
-                <label>Select Local Audio Files (.mp3, .ogg):</label>
-                <input type="file" id="audio_files" multiple accept=".mp3, .ogg" style="color:white;">
-            </div>
-            <div style="text-align: center; margin: 10px 0; color: #666;">-- OR --</div>
-            <div class="form-group">
-                <label>Paste YouTube Link(s) (One per line):</label>
-                <textarea id="yt_url" rows="4"></textarea>
-            </div>
-            <button type="submit" class="btn-upload" id="uploadBtn">START UPLOAD</button>
-            <div id="loading">Processing & Uploading... Please wait!</div>
-        </div>
-    </form>
-
-    <div class="card">
-        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #444; padding-bottom: 10px; margin-bottom: 10px;">
-            <h2 style="border: none; margin: 0; padding: 0;">UPLOAD HISTORY</h2>
-            <button type="button" class="btn-danger" onclick="clearHistory()">Clear History</button>
-        </div>
-        <div id="history-box"></div>
+    {% if not discord_user %}
+    {% set url_error = request.args.get('error','') %}
+    {% if url_error == 'not_in_server' %}
+    <div style="background:rgba(255,30,80,0.15);border:1px solid rgba(255,30,80,0.4);border-radius:12px;padding:16px;margin-bottom:24px;color:#fff;font-size:14px;box-shadow:0 0 20px rgba(255,30,80,0.2);">
+      ❌ Kamu belum bergabung di Server Discord kami!<br>
+      <a href="https://discord.gg/YOUR_INVITE_CODE" target="_blank" style="color:#ff5577;font-weight:800; display:inline-block; margin-top:8px;">👉 Klik di sini untuk Join Server</a>
     </div>
+    {% elif url_error %}
+    <div style="background:rgba(255,30,80,0.1);border:1px solid rgba(255,30,80,0.3);border-radius:12px;padding:16px;margin-bottom:24px;color:#fff;font-size:14px;">
+      ⚠️ Terjadi kesalahan saat login Discord. Coba lagi.
+    </div>
+    {% endif %}
+    {% endif %}
+
+    <div class="steps-grid">
+      <div class="step-card">
+        <div class="step-number">🔐</div>
+        <div class="step-title">1. Login Discord</div>
+        <div class="step-desc">Kamu wajib login dengan akun Discord dan bergabung di server kami untuk akses gratis.</div>
+      </div>
+      <div class="step-card">
+        <div class="step-number">🎛️</div>
+        <div class="step-title">2. Pilih Mode Upload</div>
+        <div class="step-desc">Gunakan <b>Bypass Upload</b> untuk lolos dari filter Roblox, atau <b>Normal</b> untuk audio original.</div>
+      </div>
+      <div class="step-card">
+        <div class="step-number">🚀</div>
+        <div class="step-title">3. Upload & Selesai</div>
+        <div class="step-desc">Tinggal drag & drop file. ID Roblox otomatis muncul dan siap digunakan di dalam game!</div>
+      </div>
+    </div>
+
+    <div style="background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(255,50,50,0.05)); border: 1px solid rgba(255,215,0,0.3); border-radius: 16px; padding: 24px; margin-bottom: 36px; text-align: left; box-shadow: 0 10px 30px rgba(255,215,0,0.05);">
+      <h3 style="color: #f59e0b; margin-bottom: 16px; font-family: 'Outfit', sans-serif; font-size: 22px;">👑 PREMIUM ACCESS</h3>
+      <ul style="color: #e0e0e0; font-size: 14px; line-height: 1.8; list-style-type: none;">
+        <li style="margin-bottom: 8px;">✅ <b style="color:#fff;">Unlimited Bypass:</b> Tidak ada batasan 10x upload per hari! Bypass sepuasnya tanpa batas.</li>
+        <li style="margin-bottom: 8px;">✅ <b style="color:#fff;">Server Prioritas:</b> Proses render audio menggunakan FFmpeg jauh lebih cepat.</li>
+        <li style="margin-bottom: 12px;">✅ <b style="color:#fff;">Tanpa Ribet:</b> Langsung pakai tanpa perlu ganti-ganti akun Google.</li>
+        <li style="padding-top: 12px; border-top: 1px dashed rgba(255,215,0,0.3); font-weight: 900; color: #ffd700; font-size: 15px;">💰 Harga: Rp 30.000 / Minggu atau Rp 50.000 / Bulan</li>
+      </ul>
+    </div>
+
+    {% if discord_user %}
+    <div style="display:flex;align-items:center;justify-content:center;gap:16px;background:rgba(255,30,80,0.1);border:1px solid rgba(255,30,80,0.3);border-radius:16px;padding:16px 24px;margin-bottom:24px;box-shadow:inset 0 0 20px rgba(255,30,80,0.05);">
+      <img src="{{ discord_avatar }}" style="width:48px;height:48px;border-radius:50%;border:2px solid var(--red); box-shadow: 0 0 15px rgba(255,30,80,0.4);">
+      <div style="text-align:left">
+        <div style="font-weight:800;font-size:15px;color:#fff;">{{ discord_user }}</div>
+        <div style="font-size:12px;color:var(--success);font-weight:700;margin-top:2px;">✅ Terverifikasi Discord Member</div>
+      </div>
+      <a href="/logout" style="margin-left:auto;font-size:12px;color:#fff;text-decoration:none;border:1px solid rgba(255,30,80,0.5);background:rgba(255,30,80,0.2);padding:8px 16px;border-radius:8px;font-weight:700;transition:all 0.2s;">Logout</a>
+    </div>
+    <button class="btn-start" onclick="document.getElementById('landingPage').style.display='none'">🚀 Masuk ke Panel</button>
+    {% else %}
+    <a href="/login/discord" class="btn-start" style="text-decoration:none;display:inline-flex;align-items:center;">
+      <svg width="22" height="22" viewBox="0 0 127.14 96.36" fill="white" style="margin-right:10px"><path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z"/></svg>
+      Login dengan Discord
+    </a>
+    {% endif %}
+  </div>
 </div>
 
+<!-- ── LOADING SCREEN ── -->
+<div id="loadingScreen" style="
+  position:fixed; inset:0; z-index:99999;
+  background:#000000;
+  display:flex; flex-direction:column;
+  align-items:center; justify-content:center;
+  gap:24px;
+">
+  <div style="position:relative; width:100px; height:100px;">
+    <!-- Spinning ring -->
+    <div style="
+      position:absolute; inset:0; border-radius:50%;
+      border:3px solid transparent;
+      border-top-color:#ff0000;
+      animation:spin 0.5s linear infinite;
+    "></div>
+    <div style="
+      position:absolute; inset:6px; border-radius:50%;
+      border:2px solid transparent;
+      border-bottom-color:#cc0000;
+      animation:spin 1s linear infinite reverse;
+    "></div>
+    <!-- Logo in center -->
+    <img src="https://cdn.discordapp.com/attachments/1522140461081432126/1545132976227090582/ChatGPT_Image_Jul_20_2026_03_50_07_AM.png?ex=6a9b08b8&is=6a99b738&hm=c8eac40969dde5aa797a96bc42bbe0d0b78afa49f760ff982c4efcdbf67d646e"
+      style="position:absolute; inset:12px; border-radius:50%; object-fit:cover; width:76px; height:76px; filter: grayscale(100%) contrast(200%) sepia(100%) hue-rotate(-50deg) saturate(500%);"
+    >
+  </div>
+  <div style="text-align:center;">
+    <div style="font-family:'Outfit',sans-serif; font-size:28px; font-weight:900; color:#fff; letter-spacing:-1px;">
+      <span style="color:#ff0000;">MCHLERN</span> TOOLS
+    </div>
+    <div style="font-size:11px; color:#666666; text-transform:uppercase; letter-spacing:3px; margin-top:4px;">SYSTEM BOOT SEQUENCE</div>
+  </div>
+  <!-- Progress bar -->
+  <div style="width:200px; height:2px; background:#222; overflow:hidden;">
+    <div id="loadBar" style="height:100%; width:0%; background:#ff0000; transition:width 0.1s linear;"></div>
+  </div>
+  <div id="loadText" style="font-size:11px; color:#888888; font-weight:600; letter-spacing:1px; font-family: monospace;">INITIALIZING...</div>
+</div>
+<style>
+  @keyframes spin { to { transform:rotate(360deg); } }
+
+  /* ── GLITCH EFFECT ── */
+  @keyframes glitch1 {
+    0%,100% { clip-path: inset(0 0 95% 0); transform: translate(-4px, 0); }
+    20%      { clip-path: inset(30% 0 50% 0); transform: translate(4px, 0); }
+    40%      { clip-path: inset(60% 0 20% 0); transform: translate(-3px, 0); }
+    60%      { clip-path: inset(80% 0 5% 0);  transform: translate(3px, 0); }
+    80%      { clip-path: inset(10% 0 70% 0); transform: translate(-2px, 0); }
+  }
+  @keyframes glitch2 {
+    0%,100% { clip-path: inset(80% 0 5% 0);  transform: translate(4px, 0); }
+    20%      { clip-path: inset(10% 0 70% 0); transform: translate(-4px, 0); }
+    40%      { clip-path: inset(0 0 95% 0);   transform: translate(3px, 0); }
+    60%      { clip-path: inset(30% 0 50% 0); transform: translate(-3px, 0); }
+    80%      { clip-path: inset(60% 0 20% 0); transform: translate(2px, 0); }
+  }
+  @keyframes glitchFlicker {
+    0%,90%,100% { opacity:1; }
+    92%          { opacity:0.4; }
+    95%          { opacity:1; }
+    97%          { opacity:0.2; }
+  }
+  .glitch-wrap {
+    position: relative;
+    display: inline-block;
+    animation: glitchFlicker 4s infinite;
+  }
+  .glitch-wrap::before,
+  .glitch-wrap::after {
+    content: attr(data-text);
+    position: absolute;
+    left: 0; top: 0;
+    width: 100%;
+    color: inherit;
+    font: inherit;
+    pointer-events: none;
+  }
+  .glitch-wrap::before {
+    color: #ff0000;
+    animation: glitch1 3s infinite steps(1);
+  }
+  .glitch-wrap::after {
+    color: #ffffff;
+    animation: glitch2 3.5s infinite steps(1);
+  }
+</style>
+
+<!-- ── HUB PAGE ── -->
+<div id="hubPage" style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; padding: 20px;">
+  <div style="text-align:center; margin-bottom: 40px;">
+    <div style="font-family:'Outfit',sans-serif; font-size:42px; font-weight:900; color:#fff; letter-spacing:-2px;">
+      <span class="glitch-wrap" data-text="MCHLERN" style="color:#ff0000;">MCHLERN</span> TOOLS HUB
+    </div>
+    <div style="font-size:12px; color:#666; text-transform:uppercase; letter-spacing:4px; margin-top:8px;">Pilih Tool yang Ingin Digunakan</div>
+  </div>
+
+  <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:24px; max-width: 700px; width: 100%;">
+    
+    <!-- Audio Tools -->
+    <div onclick="switchTool('audio')" style="background:var(--panel); border:1px solid var(--panel-border); border-radius:16px; padding:32px; text-align:center; cursor:pointer; transition:all 0.3s;" onmouseover="this.style.borderColor='#ff0000'" onmouseout="this.style.borderColor='var(--panel-border)'">
+      <div style="font-size:48px; margin-bottom:16px;">🎧</div>
+      <h3 style="color:#fff; font-size:20px; font-weight:800; margin-bottom:8px; font-family:'Outfit',sans-serif;">BYPASS AUDIO TOOLS</h3>
+      <p style="color:#888; font-size:12px; line-height:1.6;">Upload & Bypass filter audio Roblox. Dilengkapi dengan auto pitch, speed, dan volume adjustment.</p>
+    </div>
+
+    <!-- Spritesheet Tools -->
+    <div onclick="switchTool('sprite')" style="background:var(--panel); border:1px solid var(--panel-border); border-radius:16px; padding:32px; text-align:center; cursor:pointer; transition:all 0.3s;" onmouseover="this.style.borderColor='#ff0000'" onmouseout="this.style.borderColor='var(--panel-border)'">
+      <div style="font-size:48px; margin-bottom:16px;">🎞️</div>
+      <h3 style="color:#fff; font-size:20px; font-weight:800; margin-bottom:8px; font-family:'Outfit',sans-serif;">SPRITESHEET TOOLS</h3>
+      <p style="color:#888; font-size:12px; line-height:1.6;">Ubah GIF & YouTube Video jadi Spritesheet (max 56 frames). Upload langsung sebagai Decal.</p>
+    </div>
+
+  </div>
+</div>
+
+<div class="app-container" id="mainApp" style="display:none;">
+  <!-- ── SIDEBAR ── -->
+  <div class="sidebar">
+    <div class="glass-panel" style="margin-bottom:16px; text-align:center;">
+      <img src="https://cdn.discordapp.com/attachments/1522140461081432126/1545132976227090582/ChatGPT_Image_Jul_20_2026_03_50_07_AM.png?ex=6a9b08b8&is=6a99b738&hm=c8eac40969dde5aa797a96bc42bbe0d0b78afa49f760ff982c4efcdbf67d646e"
+        style="width:80px; height:80px; border-radius:50%; border:3px solid var(--red); margin-bottom:12px; box-shadow:0 0 30px rgba(255,0,0,0.2); object-fit:cover; filter: grayscale(100%) contrast(150%) sepia(100%) hue-rotate(-50deg) saturate(300%);">
+      <div class="logo-title"><span class="glitch-wrap" data-text="MCHLERN" style="color:#ff0000;">MCHLERN</span> TOOLS</div>
+      <div class="logo-sub">Roblox Uploader Pro V2</div>
+
+      <div class="quota-card">
+        <div class="quota-text">Sisa Limit Harian</div>
+        <div class="quota-number" id="limitCount">2/2</div>
+        <div class="quota-text" id="loginStatus" style="margin-top:4px">Guest Mode</div>
+      </div>
+    </div>
+
+    <!-- Akun Roblox -->
+    <div class="glass-panel" style="margin-bottom:16px;">
+      <div class="section-title">👤 Akun Roblox</div>
+      <div class="input-group">
+        <span class="input-label">API Key</span>
+        <input type="password" class="input-field" id="apiKey" placeholder="Paste Open Cloud Key">
+      </div>
+      <div style="display:flex; gap:8px;">
+        <div class="input-group" style="flex:1">
+          <span class="input-label">Tipe</span>
+          <select class="input-field" id="creatorType">
+            <option value="User">User</option>
+            <option value="Group">Group</option>
+          </select>
+        </div>
+        <div class="input-group" style="flex:2">
+          <span class="input-label">Creator ID</span>
+          <input type="text" class="input-field" id="creatorId" placeholder="ID Angka">
+        </div>
+      </div>
+
+      <div id="robloxProfile" style="display:none; align-items:center; gap:10px; margin-bottom:10px; padding:10px; background:rgba(0,0,0,0.8); border-radius:10px; border:1px solid #333;">
+        <img id="robloxAvatar" src="" style="width:36px; height:36px; border-radius:50%; border:2px solid var(--red);">
+        <div style="text-align:left; flex:1; overflow:hidden;">
+          <div id="robloxName" style="font-weight:800; font-size:13px; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Username</div>
+          <div style="font-size:10px; color:var(--success); font-weight:700; margin-top:2px;">✅ Terkoneksi</div>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:8px;">
+        <button class="btn btn-red-glow btn-full" onclick="checkAccount()" id="btnCheckAcc">🔍 Konek</button>
+        <button class="btn btn-outline btn-full" onclick="saveAccount()">💾 Simpan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── MAIN CONTENT (AUDIO) ── -->
+  <div class="main-content" id="audioContent" style="display:none;">
+    <button class="btn btn-outline" style="margin-bottom:16px;" onclick="switchTool('hub')">⬅ Keluar ke Hub</button>
+
+    <!-- ── TOP BAR ── -->
+    <div class="top-bar-glow">
+      <div class="topbar-users">
+        <div class="topbar-users-label">👥 Total Pengguna</div>
+        <div class="topbar-users-count">
+          <span id="totalUsersCount">{{ total_users if total_users else '0' }}</span>
+          <span class="live-badge">● LIVE</span>
+        </div>
+      </div>
+      <div style="flex:1"></div>
+      <!-- Google Login -->
+      <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
+        <span style="font-size:9px; color:var(--success); font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">Login Google = Limit 10x!</span>
+        <div style="transform:scale(0.8); transform-origin:center; height:32px; display:flex; align-items:center; overflow:hidden; margin-top:2px;">
+          <div id="g_id_onload" data-client_id="943425114608-1iljg6276qr9ehtplp4u0878bvftumn8.apps.googleusercontent.com" data-callback="handleCredentialResponse"></div>
+          <div class="g_id_signin" data-type="standard" data-theme="outline" data-text="sign_in_with" data-shape="rectangular" data-logo_alignment="left"></div>
+        </div>
+      </div>
+      <button onclick="document.getElementById('premiumModal').style.display='flex'" class="btn-premium-top">💎 Premium</button>
+      <div class="topbar-profile">
+        <img src="{{ discord_avatar if discord_avatar else 'https://cdn.discordapp.com/embed/avatars/0.png' }}" class="topbar-avatar">
+        <span class="topbar-name">{{ discord_user if discord_user else 'Guest' }}</span>
+      </div>
+    </div>
+
+    <!-- PREMIUM MODAL -->
+    <div id="premiumModal" onclick="if(event.target===this)this.style.display='none'">
+      <div class="premium-content">
+        <h2 style="color:#f59e0b; margin-bottom:12px; font-family:'Outfit',sans-serif; font-weight:800; font-size:28px;">👑 PREMIUM ACCESS</h2>
+        <p style="color:var(--gray); font-size:14px; margin-bottom:24px; line-height:1.6;">Dapatkan akses bypass tanpa batas filter Roblox dengan berlangganan premium sekarang!</p>
+        <div style="background:rgba(0,0,0,0.6); border:1px solid rgba(255,215,0,0.3); border-radius:14px; padding:20px; margin-bottom:16px; text-align:left; cursor:pointer;" onmouseover="this.style.borderColor='#ffd700'" onmouseout="this.style.borderColor='rgba(255,215,0,0.3)'">
+          <div style="font-weight:900; color:#fff; font-size:18px; margin-bottom:4px;">Rp 30.000</div>
+          <div style="font-size:13px; color:#ffd700; font-weight:700;">Unlimited Bypass (1 Minggu)</div>
+        </div>
+        <div style="background:rgba(0,0,0,0.6); border:1px solid rgba(255,215,0,0.3); border-radius:14px; padding:20px; margin-bottom:30px; text-align:left; cursor:pointer;" onmouseover="this.style.borderColor='#ffd700'" onmouseout="this.style.borderColor='rgba(255,215,0,0.3)'">
+          <div style="font-weight:900; color:#fff; font-size:18px; margin-bottom:4px;">Rp 50.000</div>
+          <div style="font-size:13px; color:#ffd700; font-weight:700;">Unlimited Bypass (1 Bulan)</div>
+        </div>
+        <div style="display:flex; gap:16px; justify-content:center;">
+          <button onclick="document.getElementById('premiumModal').style.display='none'" style="background:transparent; border:2px solid rgba(255,255,255,0.2); color:#fff; padding:14px 28px; border-radius:12px; cursor:pointer; font-weight:800;">Tutup</button>
+          <a href="https://discord.com/users/1309112913331748915" target="_blank" style="background:linear-gradient(135deg,#ffd700,#ff8c00); color:#000; padding:14px 28px; border-radius:12px; text-decoration:none; font-weight:900;">Pesan via Discord</a>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── BYPASS SETTINGS ── -->
+    <div class="glass-panel" style="margin-bottom:16px;">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; flex-wrap:wrap; gap:8px;">
+        <div class="section-title" style="margin:0;"><span class="glitch-wrap" data-text="🎛️ Bypass Settings">🎛️ Bypass Settings</span></div>
+        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+          <button class="btn btn-outline btn-sm" onclick="applyTemplate(1.5)">1.5x</button>
+          <button class="btn btn-outline btn-sm" onclick="applyTemplate(1.6)">1.6x</button>
+          <button class="btn btn-outline btn-sm" onclick="applyTemplate(2.3)">2.3x</button>
+          <button class="btn btn-outline btn-sm" onclick="applyTemplate(2.5)">2.5x</button>
+          <button class="btn btn-danger btn-sm" onclick="resetBypass()">🔄 Reset</button>
+        </div>
+      </div>
+      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">
+        <div class="slider-container" style="flex-direction:column; align-items:stretch;">
+          <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+            <span class="slider-label">Speed</span>
+            <span class="slider-val" id="speedVal">1.00</span>
+          </div>
+          <input type="range" id="speedSlider" min="0.5" max="3.0" step="0.01" value="1.0" oninput="onSlide('speed',this.value)">
+        </div>
+        <div class="slider-container" style="flex-direction:column; align-items:stretch;">
+          <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+            <span class="slider-label">Pitch</span>
+            <span class="slider-val" id="pitchVal">1.00</span>
+          </div>
+          <input type="range" id="pitchSlider" min="0.5" max="3.0" step="0.01" value="1.0" oninput="onSlide('pitch',this.value)">
+        </div>
+        <div class="slider-container" style="flex-direction:column; align-items:stretch;">
+          <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+            <span class="slider-label">Volume</span>
+            <span class="slider-val" id="volVal">1.00</span>
+          </div>
+          <input type="range" id="volSlider" min="0.1" max="3.0" step="0.01" value="1.0" oninput="onSlide('vol',this.value)">
+        </div>
+      </div>
+      <div class="rec-box" id="recLabel" style="margin-top:10px; margin-bottom:0;">Rec. PlaybackSpeed: 1.00</div>
+    </div>
+
+    <!-- ── SINGLE UPLOAD PANEL ── -->
+    <div class="glass-panel" style="margin-bottom:16px;">
+      <div class="section-title" style="margin-bottom:6px;">🎵 Upload Audio</div>
+      <p style="font-size:12px; color:var(--gray); margin-bottom:16px; font-weight:500;">Drag &amp; drop atau paste link dari berbagai platform</p>
+
+      <!-- Dropzone -->
+      <div class="dropzone" id="dzMain" ondragover="onDragOver(event,'main')" ondragleave="onDragLeave('main')" ondrop="onDrop(event,'main')">
+        <input type="file" multiple accept=".mp3,.ogg" onchange="onFileSelect(this,'main')">
+        <span class="dz-icon">🎵</span>
+        <span class="dz-text">Drag &amp; drop .mp3/.ogg atau klik untuk pilih file</span>
+      </div>
+      <div class="file-list" id="listMain"></div>
+
+      <!-- URL Fetch -->
+      <div style="margin-top:16px;">
+        <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px;">
+          <span style="font-size:10px;padding:3px 8px;border-radius:20px;background:rgba(255,0,0,0.15);border:1px solid rgba(255,0,0,0.3);color:#ff4444;font-weight:700;">▶ YouTube</span>
+          <span style="font-size:10px;padding:3px 8px;border-radius:20px;background:rgba(30,215,96,0.12);border:1px solid rgba(30,215,96,0.3);color:#1ed760;font-weight:700;">♫ Spotify</span>
+          <span style="font-size:10px;padding:3px 8px;border-radius:20px;background:rgba(0,242,234,0.12);border:1px solid rgba(0,242,234,0.3);color:#00f2ea;font-weight:700;">♪ TikTok</span>
+          <span style="font-size:10px;padding:3px 8px;border-radius:20px;background:rgba(255,0,0,0.15);border:1px solid rgba(255,0,0,0.3);color:#ff6b6b;font-weight:700;">🎵 YT Music</span>
+        </div>
+        <div style="display:flex; gap:10px;">
+          <input type="text" class="input-field" id="ytMain" placeholder="Paste link YouTube / Spotify / TikTok / YT Music...">
+          <button class="btn btn-outline" onclick="fetchYT('main')" id="btnYtMain">Fetch</button>
+        </div>
+      </div>
+      <div id="ytQueueMain"></div>
+
+      <!-- Status + Preview -->
+      <div class="status-bar" id="statusMain"></div>
+      <audio controls class="audio-preview" id="prevMain"></audio>
+
+      <!-- Upload Buttons -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:16px;">
+        <button class="btn btn-full upload-btn bypass-glow" onclick="startUpload('bypass')" id="upBypass">🎛 Bypass Upload</button>
+        <button class="btn btn-outline btn-full upload-btn" onclick="normalUpload()" id="upNormal">📄 Normal Upload</button>
+      </div>
+    </div>
+
+    <!-- History Panel -->
+    <div class="glass-panel history-panel">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
+        <div class="section-title" style="margin:0;">📜 History Upload</div>
+        <div style="display:flex; gap:10px;">
+          <button class="btn btn-outline btn-sm" onclick="copyAllIds()">📋 Copy All IDs</button>
+          <button class="btn btn-danger btn-sm" onclick="clearHistory()">🗑 Clear</button>
+        </div>
+      </div>
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Waktu</th>
+              <th>Judul</th>
+              <th>Mode</th>
+              <th>Status</th>
+              <th>Asset ID</th>
+            </tr>
+          </thead>
+          <tbody id="historyTbody">
+            <tr><td colspan="5" style="text-align:center; padding:30px; color:var(--gray);">Belum ada aktivitas upload.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div> <!-- End of audioContent -->
+
+  <!-- ── MAIN CONTENT (SPRITESHEET) ── -->
+  <div class="main-content" id="spriteContent" style="display:none;">
+    <button class="btn btn-outline" style="margin-bottom:16px;" onclick="switchTool('hub')">⬅ Keluar ke Hub</button>
+    
+    <!-- Top Bar for Sprite — sama dengan Audio -->
+    <div class="top-bar-glow">
+      <div class="topbar-users">
+        <div class="topbar-users-label">👥 Total Pengguna</div>
+        <div class="topbar-users-count">
+          <span id="totalUsersCountSprite">{{ total_users if total_users else '0' }}</span>
+          <span class="live-badge">● LIVE</span>
+        </div>
+      </div>
+      <div style="flex:1"></div>
+      <!-- Google Login -->
+      <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
+        <span style="font-size:9px; color:var(--success); font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">Login Google = Limit 10x!</span>
+        <div style="transform:scale(0.8); transform-origin:center; height:32px; display:flex; align-items:center; overflow:hidden; margin-top:2px;">
+          <div id="g_id_onload_sprite" data-client_id="943425114608-1iljg6276qr9ehtplp4u0878bvftumn8.apps.googleusercontent.com" data-callback="handleCredentialResponse"></div>
+          <div class="g_id_signin" data-type="standard" data-theme="outline" data-text="sign_in_with" data-shape="rectangular" data-logo_alignment="left"></div>
+        </div>
+      </div>
+      <button onclick="document.getElementById('premiumModal').style.display='flex'" class="btn-premium-top">💎 Premium</button>
+      <div class="topbar-profile">
+        <img src="{{ discord_avatar if discord_avatar else 'https://cdn.discordapp.com/embed/avatars/0.png' }}" class="topbar-avatar">
+        <span class="topbar-name">{{ discord_user if discord_user else 'Guest' }}</span>
+      </div>
+    </div>
+
+    <!-- Spritesheet Generator Panel -->
+    <div class="glass-panel" style="margin-bottom:16px;">
+      <div class="section-title" style="margin-bottom:6px;"><span class="glitch-wrap" data-text="🎞️ Generate Spritesheet (128x128)">🎞️ Generate Spritesheet (128x128)</span></div>
+      <p style="font-size:12px; color:var(--gray); margin-bottom:16px; font-weight:500;">
+        Max 56 Frame (Grid 7 Kolom x 8 Baris). File GIF atau Video max 9 detik.
+      </p>
+
+      <div class="dropzone" id="dzSprite" ondragover="onDragOver(event,'sprite')" ondragleave="onDragLeave('sprite')" ondrop="onDropSprite(event)">
+        <input type="file" accept="image/gif,video/mp4,video/webm" onchange="onFileSelectSprite(this)">
+        <span class="dz-icon">🎞️</span>
+        <span class="dz-text">Drag & drop .gif/.mp4 atau klik pilih file</span>
+      </div>
+      <div class="file-list" id="listSprite"></div>
+
+      <div style="margin-top:16px;">
+        <div style="font-size:11px; font-weight:700; margin-bottom:6px; color:#ff0000;">ATAU AMBIL DARI YOUTUBE (Max 9 Detik)</div>
+        <div style="display:flex; gap:10px; margin-bottom: 8px;">
+          <input type="text" class="input-field" id="ytSprite" placeholder="Paste link YouTube video...">
+        </div>
+        <div style="display:flex; gap:10px; align-items:center;">
+          <input type="number" class="input-field" id="ytStart" placeholder="Start (detik)" style="width:120px;" min="0" step="0.1">
+          <span style="color:#666;">-</span>
+          <input type="number" class="input-field" id="ytEnd" placeholder="End (detik)" style="width:120px;" min="0" step="0.1">
+          <button class="btn btn-red-glow" onclick="fetchYTSprite()" id="btnYtSprite">Generate & Preview</button>
+        </div>
+      </div>
+      
+      <div id="spritePreviewArea" style="display:none; margin-top:24px; text-align:center;">
+        <div style="font-size:12px; font-weight:700; margin-bottom:8px; color:var(--success);">✅ Preview Spritesheet</div>
+        <img id="imgSpritePreview" src="" style="max-width:100%; border:1px solid #333; border-radius:8px; background:#000;">
+        <div style="display:flex; gap:10px; margin-top:16px;">
+          <button class="btn btn-full upload-btn" onclick="uploadSprite()" id="btnUploadSprite">🚀 Upload ke Roblox (Decal)</button>
+        </div>
+      </div>
+      <div class="status-bar" id="statusSprite" style="margin-top:16px;"></div>
+    </div>
+
+    <!-- History Panel Spritesheet -->
+    <div class="glass-panel history-panel">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
+        <div class="section-title" style="margin:0;">📜 History Spritesheet</div>
+        <div style="display:flex; gap:10px;">
+          <button class="btn btn-outline btn-sm" onclick="copyAllIdsSprite()">📋 Copy All IDs</button>
+          <button class="btn btn-danger btn-sm" onclick="clearHistorySprite()">🗑 Clear</button>
+        </div>
+      </div>
+      <div class="table-responsive">
+        <table>
+          <thead>
+            <tr>
+              <th>Waktu</th>
+              <th>Judul</th>
+              <th>Status</th>
+              <th>Decal ID</th>
+            </tr>
+          </thead>
+          <tbody id="historyTbodySprite">
+            <tr><td colspan="4" style="text-align:center; padding:30px; color:var(--gray);">Belum ada aktivitas.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div> <!-- End of app-container -->
+
 <script>
-    function updateUI() {
-        let speed = document.getElementById('speed').value;
-        let pitch = document.getElementById('pitch').value;
-        document.getElementById('speed_val').innerText = parseFloat(speed).toFixed(2);
-        document.getElementById('pitch_val').innerText = parseFloat(pitch).toFixed(2);
-        
-        let rec = (1.0 / speed).toFixed(2);
-        let recLabel = document.getElementById('rec_label');
-        if (speed !== pitch) {
-            recLabel.innerText = `Rec. In-Game PlaybackSpeed: ${rec} (Pitch mismatch!)`;
-            recLabel.style.color = "#ffcc00";
-        } else {
-            recLabel.innerText = `Rec. In-Game PlaybackSpeed: ${rec}`;
-            recLabel.style.color = "#00ffcc";
-        }
+// ── TOOL SWITCHER ──
+function switchTool(tool) {
+  if (tool === 'hub') {
+    document.getElementById('hubPage').style.display = 'flex';
+    document.getElementById('mainApp').style.display = 'none';
+  } else {
+    // Show loading 10s as requested when entering a tool
+    showLoading(10000, () => {
+      document.getElementById('hubPage').style.display = 'none';
+      document.getElementById('mainApp').style.display = 'grid'; // because app-container is a grid
+      
+      if (tool === 'audio') {
+        document.getElementById('audioContent').style.display = 'block';
+        document.getElementById('spriteContent').style.display = 'none';
+      } else if (tool === 'sprite') {
+        document.getElementById('audioContent').style.display = 'none';
+        document.getElementById('spriteContent').style.display = 'block';
+        renderHistorySprite();
+      }
+    });
+  }
+}
+
+// ── LOADING SCREEN ────────────────────────────────────────────────────────────
+function showLoading(durationMs, callback) {
+  const ls = document.getElementById('loadingScreen');
+  const bar = document.getElementById('loadBar');
+  const txt = document.getElementById('loadText');
+  
+  ls.style.display = 'flex';
+  ls.style.opacity = '1';
+  ls.style.transition = 'none';
+  bar.style.width = '0%';
+  
+  const msgs = ['INITIALIZING...','ESTABLISHING SECURE CONNECTION...','BYPASSING FIREWALL...','READY!'];
+  let p = 0;
+  const intervalTime = 100;
+  const increment = 100 / (durationMs / intervalTime);
+  
+  const iv = setInterval(() => {
+    p += increment + (Math.random() * 2); // slight random jump
+    if(p > 100) p = 100;
+    bar.style.width = p + '%';
+    
+    if(p < 30) txt.textContent = msgs[0];
+    else if(p < 60) txt.textContent = msgs[1];
+    else if(p < 95) txt.textContent = msgs[2];
+    else txt.textContent = msgs[3];
+    
+    if(p >= 100) {
+      clearInterval(iv);
+      setTimeout(() => {
+        ls.style.transition = 'opacity 0.6s ease';
+        ls.style.opacity = '0';
+        setTimeout(() => {
+          ls.style.display = 'none';
+          if(callback) callback();
+        }, 600);
+      }, 300);
+    }
+  }, intervalTime);
+}
+
+window.addEventListener('DOMContentLoaded', () => {
+  // Hide hub while loading, show after boot
+  const hub = document.getElementById('hubPage');
+  if(hub) hub.style.display = 'none';
+  showLoading(10000, () => {
+    if(hub) hub.style.display = 'flex';
+  });
+});
+
+
+const state = { 
+  main:{files:[], yt:[]}, 
+  sprite:{file:null, title:"", generatedUrl:null}, 
+  history:JSON.parse(localStorage.getItem('mchl_hist')||'[]'),
+  historySprite:JSON.parse(localStorage.getItem('mchl_hist_sprite')||'[]')
+};
+
+// ── SPRITESHEET FUNCTIONS ──
+function onDropSprite(e) { e.preventDefault(); onDragLeave('sprite'); handleSpriteFile(e.dataTransfer.files[0]); }
+function onFileSelectSprite(inp) { handleSpriteFile(inp.files[0]); inp.value=''; }
+
+function handleSpriteFile(f) {
+  if(!f) return;
+  state.sprite.file = f;
+  state.sprite.title = f.name.replace(/\.[^.]+$/,'');
+  document.getElementById('listSprite').innerHTML = `
+    <div class="file-item" style="display:flex; justify-content:space-between; align-items:center;">
+      <span style="font-weight:700;">${f.name}</span>
+      <button class="btn btn-red-glow" onclick="generateSpriteLocal()">Generate</button>
+    </div>
+  `;
+}
+
+async function generateSpriteLocal() {
+  if(!state.sprite.file) return;
+  const st = document.getElementById('statusSprite');
+  st.innerHTML = '<span class="spinner" style="display:inline-block;vertical-align:middle;margin-right:8px;"></span> Generating Spritesheet dari file lokal...';
+  
+  const fd = new FormData();
+  fd.append('file', state.sprite.file);
+  try {
+    const r = await fetch('/api/generate-spritesheet', {method:'POST', body:fd});
+    const d = await r.json();
+    if(d.error) throw new Error(d.error);
+    
+    state.sprite.generatedUrl = d.url;
+    document.getElementById('imgSpritePreview').src = d.url;
+    document.getElementById('spritePreviewArea').style.display = 'block';
+    st.innerHTML = '<span style="color:var(--success)">✅ Spritesheet berhasil dibuat!</span>';
+  } catch(e) {
+    st.innerHTML = `<span style="color:#ff0000;">❌ Gagal: ${e.message}</span>`;
+  }
+}
+
+async function fetchYTSprite() {
+  const url = document.getElementById('ytSprite').value;
+  const start = document.getElementById('ytStart').value || '0';
+  const end = document.getElementById('ytEnd').value || '9';
+  if(!url) { alert('Isi link YouTube dulu!'); return; }
+  
+  const btn = document.getElementById('btnYtSprite');
+  const st = document.getElementById('statusSprite');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
+  st.innerHTML = '<span class="spinner" style="display:inline-block;vertical-align:middle;margin-right:8px;"></span> Mengunduh & Generate dari YouTube... (Bisa memakan waktu)';
+  
+  const fd = new FormData();
+  fd.append('url', url);
+  fd.append('start', start);
+  fd.append('end', end);
+  
+  try {
+    const r = await fetch('/api/generate-spritesheet', {method:'POST', body:fd});
+    const d = await r.json();
+    if(d.error) throw new Error(d.error);
+    
+    state.sprite.title = "YT_Spritesheet";
+    state.sprite.generatedUrl = d.url;
+    document.getElementById('imgSpritePreview').src = d.url;
+    document.getElementById('spritePreviewArea').style.display = 'block';
+    st.innerHTML = '<span style="color:var(--success)">✅ Spritesheet dari YouTube berhasil dibuat!</span>';
+  } catch(e) {
+    st.innerHTML = `<span style="color:#ff0000;">❌ Gagal: ${e.message}</span>`;
+  } finally {
+    btn.disabled = false; btn.innerHTML = 'Generate & Preview';
+  }
+}
+
+async function uploadSprite() {
+  if(!state.sprite.generatedUrl) return;
+  const ak = document.getElementById('apiKey').value;
+  const ci = document.getElementById('creatorId').value;
+  const ct = document.getElementById('creatorType').value;
+  const token = window.googleToken || ''; 
+  
+  if(!ak||!ci) { alert('Isi API Key & Creator ID di menu Kiri!'); return; }
+  
+  const btn = document.getElementById('btnUploadSprite');
+  const st = document.getElementById('statusSprite');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Uploading...';
+  
+  // Karena generated file ada di server temp_audio, lebih baik kita kirim nama filenya ke backend
+  // Atau lebih gampang, frontend download url tsb sbg blob, lalu kirim FormData file seperti upload audio
+  try {
+    st.innerHTML = '<span class="spinner" style="display:inline-block;vertical-align:middle;margin-right:8px;"></span> Mengirim data ke Roblox...';
+    
+    // Download image dari server ke memori browser untuk diupload ulang via FormData
+    const imgRes = await fetch(state.sprite.generatedUrl);
+    const blob = await imgRes.blob();
+    
+    const fd = new FormData();
+    fd.append('api_key', ak); fd.append('creator_id', ci); fd.append('creator_type', ct);
+    fd.append('title', state.sprite.title || "Spritesheet");
+    fd.append('file', blob, 'spritesheet.png');
+    fd.append('asset_type', 'Decal');
+    fd.append('google_token', token);
+    
+    const r = await fetch('/api/upload', {method:'POST', body:fd});
+    const d = await r.json();
+    
+    if(d.limit_exceeded) { 
+      await updateLimitDisplay();
+      alert('LIMIT TERCAPAI! ' + d.error); 
+      throw new Error(d.error);
+    }
+    
+    addHistorySprite({
+      time: d.time||new Date().toLocaleString(), title: state.sprite.title||"Spritesheet",
+      id: d.asset_id||'-', status: d.success?'Success':(d.error||'Fail')
+    });
+    
+    if(d.success) {
+      st.innerHTML = `<span style="color:var(--success)">✅ Upload selesai! Asset ID: ${d.asset_id}</span>`;
+    } else {
+      st.innerHTML = `<span style="color:#ff0000;">❌ Gagal Upload: ${d.error}</span>`;
+    }
+    await updateLimitDisplay();
+  } catch(e) {
+    addHistorySprite({time: new Date().toLocaleString(), title: state.sprite.title, id: '-', status: 'Error'});
+    st.innerHTML = `<span style="color:#ff0000;">❌ Error: ${e.message}</span>`;
+  } finally {
+    btn.disabled = false; btn.innerHTML = '🚀 Upload ke Roblox (Decal)';
+  }
+}
+
+function addHistorySprite(h) {
+  state.historySprite.unshift(h);
+  localStorage.setItem('mchl_hist_sprite', JSON.stringify(state.historySprite.slice(0,100)));
+  renderHistorySprite();
+}
+
+function renderHistorySprite() {
+  const t = document.getElementById('historyTbodySprite');
+  if(!t) return;
+  if(!state.historySprite.length) { t.innerHTML='<tr><td colspan="4" style="text-align:center; padding:30px; color:var(--gray);">Belum ada aktivitas.</td></tr>'; return; }
+  t.innerHTML = state.historySprite.map(h => `
+    <tr>
+      <td style="color:var(--gray); font-weight: 500;">${h.time}</td>
+      <td style="font-weight: 600;">${h.title}</td>
+      <td><span class="status-badge ${h.status==='Success'?'bg-green':'bg-red'}">${h.status==='Success'?'SUCCESS':h.status.slice(0,20)}</span></td>
+      <td>
+        ${h.id!=='-' ? `<span class="copy-badge" onclick="navigator.clipboard.writeText('${h.id}');alert('Copied!')">${h.id} 📋</span>` : '-'}
+      </td>
+    </tr>
+  `).join('');
+}
+
+function copyAllIdsSprite() {
+  const ids = state.historySprite.filter(x=>x.id!=='-').map(x=>x.id);
+  if(ids.length) { navigator.clipboard.writeText(ids.join('\n')); alert(ids.length+' IDs copied!'); }
+}
+function clearHistorySprite() { state.historySprite=[]; localStorage.removeItem('mchl_hist_sprite'); renderHistorySprite(); }
+
+// Normal upload = reset sliders to 1.0 then upload
+function normalUpload() {
+
+  resetBypass();
+  startUpload('normal');
+}
+
+function loadAccount() {
+  const saved = JSON.parse(localStorage.getItem('mchlern_account') || 'null');
+  if(saved) {
+    document.getElementById('apiKey').value = saved.api_key || '';
+    document.getElementById('creatorId').value = saved.creator_id || '';
+    document.getElementById('creatorType').value = saved.creator_type || 'User';
+    if(saved.name && saved.thumb) {
+      document.getElementById('robloxName').textContent = saved.name;
+      document.getElementById('robloxAvatar').src = saved.thumb;
+      document.getElementById('robloxProfile').style.display = 'flex';
+    }
+  }
+}
+function saveAccount() {
+  localStorage.setItem('mchlern_account', JSON.stringify({
+    api_key: document.getElementById('apiKey').value,
+    creator_id: document.getElementById('creatorId').value,
+    creator_type: document.getElementById('creatorType').value,
+    name: document.getElementById('robloxName').textContent,
+    thumb: document.getElementById('robloxAvatar').src
+  }));
+  alert('Akun Roblox berhasil disimpan di browser!');
+}
+
+async function checkAccount() {
+  const ak = document.getElementById('apiKey').value;
+  const ci = document.getElementById('creatorId').value;
+  const ct = document.getElementById('creatorType').value;
+  if(!ak || !ci) { alert('Isi API Key & Creator ID dulu!'); return; }
+  const btn = document.getElementById('btnCheckAcc');
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
+  try {
+    const r = await fetch('/api/check-account', {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({api_key: ak, creator_id: ci, creator_type: ct})
+    });
+    const d = await r.json();
+    if(d.error) throw new Error(d.error);
+    document.getElementById('robloxName').textContent = d.name;
+    document.getElementById('robloxAvatar').src = d.thumbnail;
+    document.getElementById('robloxProfile').style.display = 'flex';
+    saveAccount();
+  } catch(e) {
+    alert(e.message);
+    document.getElementById('robloxProfile').style.display = 'none';
+  } finally {
+    btn.disabled = false; btn.innerHTML = '🔍 Konek Akun';
+  }
+}
+
+function onSlide(type, val) {
+  val = parseFloat(val).toFixed(2);
+  document.getElementById(type+'Val').textContent = val;
+  updateRec();
+}
+function applyTemplate(v) {
+  ['speed','pitch'].forEach(t => {
+    document.getElementById(t+'Slider').value = v;
+    document.getElementById(t+'Val').textContent = v.toFixed(2);
+  });
+  updateRec();
+}
+function resetBypass() {
+  ['speed','pitch','vol'].forEach(t => {
+    const slider = document.getElementById(t+'Slider');
+    slider.value = 1.0;
+    document.getElementById(t+'Val').textContent = '1.00';
+  });
+  updateRec();
+}
+function updateRec() {
+  const s = parseFloat(document.getElementById('speedSlider').value);
+  const p = parseFloat(document.getElementById('pitchSlider').value);
+  const rec = (1/s).toFixed(2);
+  const mm = Math.abs(s-p)>0.01;
+  const el = document.getElementById('recLabel');
+  el.textContent = `Rec. PlaybackSpeed: ${rec} ${mm?'⚠':''}`;
+  el.style.color = mm ? 'var(--white)' : 'var(--success)';
+  if (mm) { el.style.background = 'rgba(255,30,80,0.1)'; el.style.borderColor = 'var(--red)'; el.style.boxShadow = '0 0 15px rgba(255,30,80,0.2)'; }
+  else { el.style.background = 'rgba(0,255,136,0.1)'; el.style.borderColor = 'rgba(0,255,136,0.3)'; el.style.boxShadow = '0 0 20px rgba(0,255,136,0.1)'; }
+}
+
+function onDragOver(e, m) { e.preventDefault(); document.getElementById('dz'+cap(m)).classList.add('dragover'); }
+function onDragLeave(m) { document.getElementById('dz'+cap(m)).classList.remove('dragover'); }
+function onDrop(e, m) { e.preventDefault(); onDragLeave(m); addFiles(e.dataTransfer.files, m); }
+function onFileSelect(inp, m) { addFiles(inp.files, m); inp.value=''; }
+function cap(s) { return s[0].toUpperCase() + s.slice(1); }
+
+function addFiles(files, m) {
+  Array.from(files).forEach(f => {
+    const id = 'f'+Date.now()+Math.floor(Math.random()*1000);
+    state[m].files.push({id, file:f, title:f.name.replace(/\.[^.]+$/,'')});
+    const div = document.createElement('div'); div.className = 'file-item'; div.id = id;
+    div.innerHTML = `
+      <div style="overflow:hidden;text-overflow:ellipsis;width:90px;white-space:nowrap;font-weight:600;">${f.name}</div>
+      <input type="text" id="i_${id}" value="${f.name.replace(/\.[^.]+$/,'').slice(0,40)}" placeholder="Judul" maxlength="40">
+      <button class="btn btn-red-glow" style="padding:6px 10px; font-size: 11px;" onclick="previewLocal('${id}','${m}')">▶</button>
+      <button class="btn btn-danger" style="padding:6px 10px; font-size: 11px;" onclick="removeFile('${id}','${m}')">✕</button>
+    `;
+    document.getElementById('list'+cap(m)).appendChild(div);
+  });
+}
+function removeFile(id, m) { state[m].files = state[m].files.filter(x=>x.id!==id); document.getElementById(id).remove(); }
+
+async function fetchYT(m) {
+  const url = document.getElementById('yt'+cap(m)).value; if(!url) return;
+  const btn = document.getElementById('btnYt'+cap(m)); btn.disabled=true; btn.innerHTML='<span class="spinner"></span>';
+  try {
+    const r = await fetch('/api/fetch-yt',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url})});
+    const d = await r.json();
+    if(d.error) throw new Error(d.error);
+    const id = 'y'+Date.now();
+    state[m].yt.push({id, ...d});
+    const div = document.createElement('div'); div.className = 'yt-card'; div.id = id;
+    div.innerHTML = `
+      <img src="${d.thumbnail}" class="yt-thumb">
+      <div class="yt-info">
+        <div class="yt-title">${d.title}</div>
+        <input type="text" class="input-field" style="padding:8px;font-size:11px;" id="i_${id}" value="${d.title.slice(0,40)}" maxlength="40">
+      </div>
+      <button class="btn btn-red-glow" style="padding:6px 10px; font-size: 11px;" onclick="previewYT('${d.file}','${m}')">▶</button>
+      <button class="btn btn-danger" style="padding:6px 10px; font-size: 11px;" onclick="removeYT('${id}','${m}')">✕</button>
+    `;
+    document.getElementById('ytQueue'+cap(m)).appendChild(div);
+    document.getElementById('yt'+cap(m)).value = '';
+  } catch(e) { alert(e.message); }
+  finally { btn.disabled=false; btn.innerHTML='Fetch'; }
+}
+function removeYT(id, m) { state[m].yt = state[m].yt.filter(x=>x.id!==id); document.getElementById(id).remove(); }
+
+async function previewLocal(id, m) {
+  const f = state[m].files.find(x=>x.id===id); if(f) doPreview(m, null, f.file);
+}
+async function previewYT(ytFile, m) { doPreview(m, ytFile, null); }
+
+async function doPreview(m, ytFile, file) {
+  const p = document.getElementById('prev'+cap(m));
+  const fd = new FormData();
+  fd.append('speed', document.getElementById('speedSlider').value);
+  fd.append('pitch', document.getElementById('pitchSlider').value);
+  fd.append('vol', document.getElementById('volSlider').value);
+  if(ytFile) fd.append('yt_file', ytFile); else fd.append('file', file);
+  try {
+    const r = await fetch('/api/preview',{method:'POST',body:fd});
+    const d = await r.json();
+    if(d.error) throw new Error(d.error);
+    p.src = d.preview_url+'?t='+Date.now();
+    p.style.display = 'block';
+    p.play();
+  } catch(e) { alert(e.message); }
+}
+
+async function startUpload(m) {
+  // m is either 'bypass' or 'normal'
+  const ak = document.getElementById('apiKey').value;
+  const ci = document.getElementById('creatorId').value;
+  const ct = document.getElementById('creatorType').value;
+  const token = window.googleToken || ''; 
+  if(!ak||!ci) { alert('Isi API Key & Creator ID di kiri!'); return; }
+  
+  // Use state.main since there is only one file queue now
+  const tasks = [
+    ...state.main.files.map(x=>({type:'local', file:x.file, title:document.getElementById('i_'+x.id).value})),
+    ...state.main.yt.map(x=>({type:'yt', yt_file:x.file, title:document.getElementById('i_'+x.id).value}))
+  ];
+  if(!tasks.length) return;
+  
+  if (tasks.length > 10) {
+    alert(`Maksimal upload 10 lagu per sekali jalan biar server tidak berat!\nKamu memasukkan ${tasks.length} lagu.`);
+    return;
+  }
+
+  const btn = document.getElementById(m==='bypass' ? 'upBypass' : 'upNormal');
+  const btnOther = document.getElementById(m==='bypass' ? 'upNormal' : 'upBypass');
+  btn.disabled=true; btnOther.disabled=true;
+  
+  const st = document.getElementById('statusMain'); st.style.display='block';
+  for(let i=0; i<tasks.length; i++) {
+    st.innerHTML = `<span class="spinner" style="display:inline-block;vertical-align:middle;margin-right:8px;"></span> Mengupload [${i+1}/${tasks.length}]...`;
+    const t = tasks[i];
+    const fd = new FormData();
+    fd.append('api_key', ak); fd.append('creator_id', ci); fd.append('creator_type', ct);
+    fd.append('title', t.title); fd.append('bypass', m==='bypass'?'true':'false');
+    fd.append('speed', document.getElementById('speedSlider').value);
+    fd.append('pitch', document.getElementById('pitchSlider').value);
+    fd.append('vol', document.getElementById('volSlider').value);
+    if(t.type==='local') fd.append('file', t.file); else fd.append('yt_file', t.yt_file);
+    fd.append('google_token', token);
+    try {
+      const r = await fetch('/api/upload',{method:'POST',body:fd});
+      const d = await r.json();
+      if(d.limit_exceeded) { 
+        await updateLimitDisplay();
+        alert('LIMIT TERCAPAI! ' + d.error); break; 
+      }
+      addHistory({
+        time: d.time||new Date().toLocaleString(), title: t.title, mode: m.toUpperCase(),
+        id: d.asset_id||'-', status: d.success?'Success':(d.error||'Fail'), blocked: d.blocked||false
+      });
+      await updateLimitDisplay();
+    } catch(e) {
+      addHistory({time: new Date().toLocaleString(), title: t.title, mode: m.toUpperCase(), id: '-', status: 'Network Error', blocked: false});
+    }
+  }
+  st.style.display='none'; btn.disabled=false; btnOther.disabled=false;
+  document.getElementById('listMain').innerHTML=''; document.getElementById('ytQueueMain').innerHTML='';
+  state.main.files=[]; state.main.yt=[];
+}
+
+function addHistory(h) {
+  state.history.unshift(h);
+  localStorage.setItem('mchl_hist', JSON.stringify(state.history.slice(0,100)));
+  renderHistory();
+}
+function renderHistory() {
+  const t = document.getElementById('historyTbody');
+  if(!state.history.length) { t.innerHTML='<tr><td colspan="5" style="text-align:center; padding: 30px; color: var(--gray);">Belum ada aktivitas upload.</td></tr>'; return; }
+  t.innerHTML = state.history.map(h => `
+    <tr>
+      <td style="color:var(--gray); font-weight: 500;">${h.time}</td>
+      <td style="font-weight: 600;">${h.title}</td>
+      <td><span class="status-badge" style="background:rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color:#fff;">${h.mode.toUpperCase()}</span></td>
+      <td><span class="status-badge ${h.blocked?'bg-red':(h.status==='Success'?'bg-green':'')}">${h.blocked?'BLOCKED':(h.status==='Success'?'SUCCESS':h.status.slice(0,20))}</span></td>
+      <td>
+        ${h.id!=='-' ? `<span class="copy-badge" onclick="navigator.clipboard.writeText('${h.id}');alert('Copied!')">${h.id} 📋</span>` : '-'}
+      </td>
+    </tr>
+  `).join('');
+}
+function copyAllIds() {
+  const ids = state.history.filter(x=>x.id!=='-').map(x=>x.id);
+  if(ids.length) { navigator.clipboard.writeText(ids.join('\n')); alert(ids.length+' IDs copied!'); }
+}
+function clearHistory() { state.history=[]; localStorage.removeItem('mchl_hist'); renderHistory(); }
+
+window.onload = () => { loadAccount(); renderHistory(); };
+
+function handleCredentialResponse(response) {
+  window.googleToken = response.credential;
+  updateLimitDisplay();
+}
+async function updateLimitDisplay() {
+  try {
+    const r = await fetch('/api/limits', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({token: window.googleToken || null})
+    });
+    const d = await r.json();
+
+    const countEl = document.getElementById('limitCount');
+    const statusEl = document.getElementById('loginStatus');
+
+    if(d.is_premium) {
+      // PREMIUM — tampilkan sisa waktu
+      countEl.textContent = '∞ / ∞';
+      countEl.style.color = '#f59e0b';
+
+      if(d.premium_expiry) {
+        window._premiumExpiry = d.premium_expiry;
+        startPremiumCountdown(statusEl, d.premium_expiry);
+      } else {
+        statusEl.textContent = '👑 Premium Active';
+        statusEl.style.color = '#f59e0b';
+      }
+    } else {
+      // NON-PREMIUM: tampilkan sisa limit
+      if(window._premiumCountdownTimer) {
+        clearInterval(window._premiumCountdownTimer);
+        window._premiumCountdownTimer = null;
+      }
+      const remaining = d.remaining;
+      const maxVal = d.max;
+      countEl.textContent = `${remaining}/${maxVal}`;
+      countEl.style.color = remaining === 0 ? '#ef4444' : '#fff';
+
+      if(d.is_google) {
+        statusEl.textContent = '✅ Login Google (10x/hari)';
+        statusEl.style.color = 'var(--success)';
+      } else if(d.is_discord) {
+        statusEl.textContent = '🎮 Login Discord (2x/hari)';
+        statusEl.style.color = '#5865F2';
+      } else {
+        statusEl.textContent = '👤 Guest Mode (2x/hari)';
+        statusEl.style.color = 'var(--gray)';
+      }
+    }
+  } catch(e) {
+    console.error('Gagal fetch limits:', e);
+  }
+}
+
+function startPremiumCountdown(el, expiryStr) {
+  // Hentikan timer lama kalau ada
+  if(window._premiumCountdownTimer) clearInterval(window._premiumCountdownTimer);
+
+  function tick() {
+    const expiry = new Date(expiryStr);
+    const now = new Date();
+    const diff = expiry - now;
+
+    if(diff <= 0) {
+      el.textContent = '👑 Premium Expired';
+      el.style.color = '#ef4444';
+      clearInterval(window._premiumCountdownTimer);
+      updateLimitDisplay(); // refresh status
+      return;
     }
 
-    function setTemplate(val) {
-        document.getElementById('speed').value = val;
-        document.getElementById('pitch').value = val;
-        updateUI();
-    }
+    const days    = Math.floor(diff / (1000 * 60 * 60 * 24));
+    const hours   = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
 
-    async function fetchHistory() {
-        let res = await fetch('/history');
-        let data = await res.json();
-        let box = document.getElementById('history-box');
-        box.innerHTML = '';
-        data.reverse().forEach(h => {
-            box.innerHTML += `[${h.time}] ${h.filename} | ${h.status} | AssetID: ${h.asset_id || '-'}\n`;
-        });
-    }
+    let timeStr = '';
+    if(days > 0)    timeStr = `${days}h ${hours}j ${minutes}m`;
+    else if(hours > 0) timeStr = `${hours}j ${minutes}m ${seconds}d`;
+    else             timeStr = `${minutes}m ${seconds}d`;
 
-    async function clearHistory() {
-        if(confirm("Are you sure?")) {
-            await fetch('/clear_history', { method: 'POST' });
-            fetchHistory();
-        }
-    }
+    el.innerHTML = `👑 Premium · <span style="color:#f59e0b;font-weight:900;">${timeStr}</span>`;
+    el.style.color = '#fafafa';
+  }
 
-    document.getElementById('uploadForm').onsubmit = async (e) => {
-        e.preventDefault();
-        
-        let fd = new FormData();
-        fd.append('api_key', document.getElementById('api_key').value);
-        fd.append('creator_type', document.getElementById('creator_type').value);
-        fd.append('creator_id', document.getElementById('creator_id').value);
-        fd.append('speed', document.getElementById('speed').value);
-        fd.append('pitch', document.getElementById('pitch').value);
-        fd.append('vol', document.getElementById('vol').value);
-        fd.append('yt_url', document.getElementById('yt_url').value);
-        
-        let files = document.getElementById('audio_files').files;
-        for(let i=0; i<files.length; i++) {
-            fd.append('audio_files', files[i]);
-        }
-        
-        if(files.length === 0 && !document.getElementById('yt_url').value.trim()) {
-            alert("Please select files or enter YouTube links!");
-            return;
-        }
+  tick();
+  window._premiumCountdownTimer = setInterval(tick, 1000);
+}
 
-        document.getElementById('uploadBtn').style.display = 'none';
-        document.getElementById('loading').style.display = 'block';
+// Panggil saat halaman load
+updateLimitDisplay();
+// Auto-refresh limit setiap 30 detik
+setInterval(updateLimitDisplay, 30000);
 
-        try {
-            await fetch('/upload', { method: 'POST', body: fd });
-            fetchHistory();
-            document.getElementById('audio_files').value = '';
-            document.getElementById('yt_url').value = '';
-            alert("Upload Process Completed!");
-        } catch(err) {
-            alert("Error: " + err);
-        } finally {
-            document.getElementById('uploadBtn').style.display = 'block';
-            document.getElementById('loading').style.display = 'none';
-        }
-    };
+// ── REALTIME TOTAL USERS ─────────────────────────────────────────────────────
+let _lastTotalUsers = parseInt((document.getElementById('totalUsersCount')||{textContent:'0'}).textContent) || 0;
 
-    // Initial load
-    fetchHistory();
+function animateCount(el, from, to) {
+  if (from === to) return;
+  const duration = 800;
+  const start = performance.now();
+  function step(now) {
+    const progress = Math.min((now - start) / duration, 1);
+    const ease = 1 - Math.pow(1 - progress, 3);
+    el.textContent = Math.round(from + (to - from) * ease);
+    if (progress < 1) requestAnimationFrame(step);
+    else el.textContent = to;
+  }
+  requestAnimationFrame(step);
+}
+
+async function pollTotalUsers() {
+  try {
+    const r = await fetch('/api/total-users');
+    const d = await r.json();
+    // Update all total user elements (hub page may have different IDs)
+    ['totalUsersCount', 'totalUsersCountSprite'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el && d.total !== _lastTotalUsers) {
+        animateCount(el, _lastTotalUsers, d.total);
+      }
+    });
+    if (d.total !== _lastTotalUsers) _lastTotalUsers = d.total;
+  } catch(e) {}
+}
+
+// Poll setiap 10 detik
+pollTotalUsers();
+setInterval(pollTotalUsers, 10000);
+
+// ── renderFiles / renderYT helpers (called from startUpload cleanup) ──
+function renderFiles(m) {
+  const el = document.getElementById('list'+cap(m));
+  if(el) el.innerHTML = '';
+}
+function renderYT(m) {
+  const el = document.getElementById('ytQueue'+cap(m));
+  if(el) el.innerHTML = '';
+}
+
 </script>
 </body>
 </html>
