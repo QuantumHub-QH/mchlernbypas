@@ -1,1005 +1,193 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>MCHLERN TOOLS — Roblox Audio Uploader PRO</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Orbitron:wght@500;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
-<script src="https://accounts.google.com/gsi/client" async defer></script>
-<style>
-* { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color: transparent; }
-:root {
-  --bg: #020202;
-  --bg-2: #070709;
-  --bg-3: #0e0e12;
-  --panel: rgba(10,10,14,0.85);
-  --panel-solid: #0a0a0e;
-  --panel-2: rgba(16,16,22,0.9);
-  --panel-border: rgba(255,30,60,0.15);
-  --panel-border-hover: rgba(255,30,60,0.35);
-  --red: #ff0a2e;
-  --red-bright: #ff1f4d;
-  --red-hot: #ff3366;
-  --red-dim: #8a0018;
-  --red-glow: rgba(255,10,46,0.35);
-  --red-glow-strong: rgba(255,10,46,0.55);
-  --red-soft: rgba(255,10,46,0.08);
-  --white: #ffffff;
-  --gray: #888899;
-  --gray-2: #555566;
-  --gray-dark: #2a2a35;
-  --success: #00e676;
-  --danger: #ff0033;
-  --gold: #ffb700;
-  --glass-shadow: 0 8px 32px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,10,46,0.08) inset, 0 0 40px rgba(255,10,46,0.03) inset;
-  --glass-shadow-hover: 0 12px 48px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,10,46,0.2) inset, 0 0 60px rgba(255,10,46,0.06) inset;
-  --radius: 14px;
-  --radius-sm: 10px;
-}
-html { scroll-behavior: smooth; }
-body {
-  font-family: 'Inter', sans-serif;
-  background: var(--bg);
-  color: var(--white);
-  min-height: 100vh;
-  position: relative;
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-  overflow-x: hidden;
-}
-/* ── SCANLINE OVERLAY ── */
-.scanlines {
-  position: fixed; inset: 0; z-index: 9999; pointer-events: none;
-  background: repeating-linear-gradient(0deg,
-    transparent 0px,
-    transparent 2px,
-    rgba(0,0,0,0.03) 2px,
-    rgba(0,0,0,0.03) 4px
-  );
-  opacity: 0.6;
-}
-/* ── DYNAMIC BG ── */
-.bg-pulse {
-  position: fixed; inset: 0; z-index: -3;
-  background:
-    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(255,10,46,0.12), transparent 70%),
-    radial-gradient(ellipse 60% 40% at 80% 110%, rgba(255,10,46,0.08), transparent 60%),
-    radial-gradient(ellipse 50% 30% at 10% 50%, rgba(255,10,46,0.05), transparent 50%);
-  animation: bgPulse 8s ease-in-out infinite alternate;
-}
-@keyframes bgPulse {
-  0% { opacity: 0.7; transform: scale(1); }
-  100% { opacity: 1; transform: scale(1.05); }
-}
-.bg-grid {
-  position: fixed; inset: 0; z-index: -2;
-  background-image:
-    linear-gradient(rgba(255,10,46,0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,10,46,0.04) 1px, transparent 1px);
-  background-size: 60px 60px;
-  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 70%);
-  -webkit-mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 70%);
-}
-.bg-vignette {
-  position: fixed; inset: 0; z-index: -1;
-  background: radial-gradient(ellipse 70% 60% at 50% 50%, transparent 0%, rgba(0,0,0,0.6) 100%);
-}
-/* ── LOADING SCREEN ── */
-.loading-screen {
-  position: fixed; inset: 0; z-index: 10000;
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  background: linear-gradient(180deg, #050505 0%, #0a0005 50%, #050505 100%);
-  transition: opacity 0.8s cubic-bezier(0.4,0,0.2,1);
-}
-.load-logo {
-  font-family: 'Orbitron', sans-serif;
-  font-size: clamp(28px, 6vw, 52px);
-  font-weight: 900;
-  letter-spacing: 4px;
-  color: var(--white);
-  text-shadow: 0 0 20px var(--red-glow), 0 0 60px var(--red-glow-strong), 0 0 100px rgba(255,10,46,0.15);
-  margin-bottom: 40px;
-  animation: logoPulse 2s ease-in-out infinite;
-}
-@keyframes logoPulse {
-  0%,100% { text-shadow: 0 0 20px var(--red-glow), 0 0 60px var(--red-glow-strong); }
-  50% { text-shadow: 0 0 40px var(--red-glow-strong), 0 0 80px rgba(255,10,46,0.5), 0 0 120px rgba(255,10,46,0.2); }
-}
-.load-sub {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 11px;
-  letter-spacing: 6px;
-  color: var(--red-bright);
-  text-transform: uppercase;
-  margin-bottom: 48px;
-  opacity: 0.7;
-}
-.load-bar-wrap {
-  width: min(420px, 80vw);
-  height: 6px;
-  background: rgba(255,255,255,0.03);
-  border-radius: 3px;
-  overflow: hidden;
-  position: relative;
-  box-shadow: 0 0 20px rgba(255,10,46,0.1);
-}
-.load-bar-wrap::before {
-  content: '';
-  position: absolute; inset: 0;
-  background: linear-gradient(90deg, transparent, rgba(255,10,46,0.15), transparent);
-  animation: loadShimmer 2s infinite;
-}
-@keyframes loadShimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
-}
-.load-bar {
-  height: 100%; width: 0%;
-  background: linear-gradient(90deg, var(--red-dim), var(--red), var(--red-hot));
-  border-radius: 3px;
-  box-shadow: 0 0 20px var(--red-glow), 0 0 40px var(--red-glow-strong);
-  transition: width 0.15s linear;
-  position: relative;
-}
-.load-bar::after {
-  content: '';
-  position: absolute; top: 0; right: 0; bottom: 0; width: 60px;
-  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
-  animation: barTip 1s ease-in-out infinite;
-}
-@keyframes barTip {
-  0%,100% { opacity: 0; transform: translateX(-10px); }
-  50% { opacity: 1; transform: translateX(0); }
-}
-.load-text {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 11px;
-  color: var(--gray);
-  margin-top: 20px;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  min-height: 18px;
-}
-.load-glitch {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 10px;
-  color: var(--red-dim);
-  margin-top: 12px;
-  letter-spacing: 3px;
-  opacity: 0;
-  animation: glitchFade 0.3s ease forwards;
-}
-@keyframes glitchFade {
-  to { opacity: 0.5; }
-}
-/* ── HUB PAGE ── */
-.hub-container {
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  min-height: 100vh; padding: 40px 20px; position: relative;
-}
-.hub-badge {
-  display: inline-block; padding: 6px 16px; border-radius: 100px;
-  background: rgba(255,10,46,0.08); border: 1px solid rgba(255,10,46,0.2);
-  color: var(--red-bright); font-size: 11px; font-weight: 700; letter-spacing: 3px;
-  text-transform: uppercase; margin-bottom: 32px;
-  animation: badgeGlow 3s ease-in-out infinite;
-}
-@keyframes badgeGlow {
-  0%,100% { box-shadow: 0 0 10px rgba(255,10,46,0.05); }
-  50% { box-shadow: 0 0 25px rgba(255,10,46,0.15), 0 0 50px rgba(255,10,46,0.05); }
-}
-.hub-title {
-  font-family: 'Orbitron', sans-serif;
-  font-size: clamp(36px, 8vw, 72px);
-  font-weight: 900;
-  text-align: center;
-  line-height: 1.1;
-  letter-spacing: 2px;
-  background: linear-gradient(180deg, #fff 0%, #aaa 100%);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  margin-bottom: 8px;
-}
-.hub-subtitle {
-  font-family: 'Orbitron', sans-serif;
-  font-size: clamp(11px, 2.5vw, 14px);
-  color: var(--red-bright);
-  letter-spacing: 6px;
-  text-transform: uppercase;
-  text-align: center;
-  margin-bottom: 48px;
-  text-shadow: 0 0 20px var(--red-glow);
-}
-.hub-tools {
-  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 24px; width: 100%; max-width: 640px;
-}
-@media (max-width: 560px) {
-  .hub-tools { grid-template-columns: 1fr; }
-}
-.hub-card {
-  background: var(--panel);
-  border: 1px solid var(--panel-border);
-  border-radius: var(--radius);
-  padding: 36px 28px;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.35s cubic-bezier(0.4,0,0.2,1);
-  position: relative;
-  overflow: hidden;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-.hub-card::before {
-  content: ''; position: absolute; inset: 0;
-  background: linear-gradient(135deg, rgba(255,10,46,0.06), transparent 60%);
-  opacity: 0; transition: opacity 0.35s ease;
-}
-.hub-card:hover::before { opacity: 1; }
-.hub-card:hover {
-  border-color: var(--panel-border-hover);
-  box-shadow: var(--glass-shadow-hover), 0 0 60px rgba(255,10,46,0.08);
-  transform: translateY(-4px);
-}
-.hub-card-icon {
-  font-size: 40px; margin-bottom: 16px;
-  filter: drop-shadow(0 0 15px rgba(255,10,46,0.3));
-  transition: transform 0.35s ease;
-}
-.hub-card:hover .hub-card-icon { transform: scale(1.1); }
-.hub-card-title {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 18px; font-weight: 700;
-  margin-bottom: 8px; position: relative;
-}
-.hub-card-desc {
-  font-size: 13px; color: var(--gray); line-height: 1.5; position: relative;
-}
-.hub-card .coming-soon {
-  position: absolute; top: 12px; right: 12px;
-  font-size: 9px; font-weight: 700; letter-spacing: 1px;
-  padding: 3px 8px; border-radius: 4px;
-  background: rgba(255,10,46,0.12); color: var(--red-bright);
-  border: 1px solid rgba(255,10,46,0.2);
-}
-/* ── APP CONTAINER ── */
-.app-container {
-  display: none;
-  grid-template-columns: 300px 1fr;
-  gap: 20px;
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: 20px;
-  position: relative;
-  z-index: 1;
-}
-@media (max-width: 1024px) {
-  .app-container { grid-template-columns: 260px 1fr; gap: 16px; padding: 16px; }
-}
-@media (max-width: 860px) {
-  .app-container { grid-template-columns: 1fr; padding: 12px; }
-}
-/* ── SIDEBAR ── */
-.sidebar {
-  display: flex; flex-direction: column; gap: 16px;
-  position: sticky; top: 20px; height: fit-content;
-}
-@media (max-width: 860px) {
-  .sidebar { position: relative; top: 0; }
-}
-.sidebar-header {
-  display: flex; align-items: center; gap: 12px;
-  padding: 16px 20px;
-  background: var(--panel);
-  border: 1px solid var(--panel-border);
-  border-radius: var(--radius);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-.sidebar-logo {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 18px; font-weight: 800; letter-spacing: 1px;
-}
-.sidebar-logo span { color: var(--red-bright); }
-.back-btn {
-  margin-left: auto;
-  background: transparent; border: 1px solid var(--panel-border);
-  color: var(--gray); font-size: 11px; padding: 6px 12px; border-radius: 8px;
-  cursor: pointer; transition: all 0.2s ease;
-}
-.back-btn:hover { border-color: var(--red-bright); color: var(--red-bright); background: var(--red-soft); }
-.glass-panel {
-  background: var(--panel);
-  border: 1px solid var(--panel-border);
-  border-radius: var(--radius);
-  padding: 20px;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  box-shadow: var(--glass-shadow);
-  transition: all 0.3s ease;
-}
-.glass-panel:hover {
-  border-color: var(--panel-border-hover);
-  box-shadow: var(--glass-shadow-hover);
-}
-.section-title {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 11px; font-weight: 700; letter-spacing: 2px;
-  text-transform: uppercase; color: var(--red-bright);
-  margin-bottom: 16px;
-  text-shadow: 0 0 10px var(--red-glow);
-}
-.input-field {
-  width: 100%;
-  background: rgba(0,0,0,0.4);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: var(--radius-sm);
-  padding: 12px 14px;
-  color: var(--white);
-  font-size: 13px;
-  font-family: 'Inter', sans-serif;
-  outline: none;
-  transition: all 0.25s ease;
-}
-.input-field:focus {
-  border-color: var(--red-bright);
-  box-shadow: 0 0 0 3px rgba(255,10,46,0.1), 0 0 20px rgba(255,10,46,0.08);
-  background: rgba(0,0,0,0.5);
-}
-.input-field::placeholder { color: var(--gray-2); }
-select.input-field { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888899' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 34px; }
-/* ── BUTTONS ── */
-.btn {
-  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-  padding: 12px 20px; border-radius: var(--radius-sm);
-  font-size: 13px; font-weight: 700; letter-spacing: 0.3px;
-  cursor: pointer; border: none; outline: none;
-  transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
-  font-family: 'Inter', sans-serif;
-  white-space: nowrap;
-}
-.btn:active { transform: scale(0.97); }
-.btn-red-glow {
-  background: linear-gradient(135deg, var(--red-dim), var(--red));
-  color: var(--white);
-  box-shadow: 0 4px 16px rgba(255,10,46,0.25), 0 0 0 1px rgba(255,10,46,0.3) inset;
-}
-.btn-red-glow:hover {
-  background: linear-gradient(135deg, var(--red), var(--red-hot));
-  box-shadow: 0 6px 24px rgba(255,10,46,0.4), 0 0 30px rgba(255,10,46,0.15), 0 0 0 1px rgba(255,10,46,0.4) inset;
-  transform: translateY(-1px);
-}
-.btn-full {
-  background: linear-gradient(135deg, var(--red-dim), var(--red));
-  color: var(--white);
-  box-shadow: 0 4px 20px rgba(255,10,46,0.3), 0 0 0 1px rgba(255,10,46,0.3) inset;
-  width: 100%;
-}
-.btn-full:hover {
-  background: linear-gradient(135deg, var(--red), var(--red-hot));
-  box-shadow: 0 6px 28px rgba(255,10,46,0.45), 0 0 40px rgba(255,10,46,0.15), 0 0 0 1px rgba(255,10,46,0.4) inset;
-  transform: translateY(-1px);
-}
-.btn-outline {
-  background: transparent;
-  border: 1px solid rgba(255,255,255,0.1);
-  color: var(--gray);
-  padding: 8px 14px; font-size: 12px;
-}
-.btn-outline:hover {
-  border-color: var(--red-bright); color: var(--red-bright);
-  background: var(--red-soft); box-shadow: 0 0 15px rgba(255,10,46,0.08);
-}
-.btn-danger {
-  background: rgba(255,0,51,0.08);
-  border: 1px solid rgba(255,0,51,0.2);
-  color: #ff3366;
-  padding: 8px 14px; font-size: 12px;
-}
-.btn-danger:hover {
-  background: rgba(255,0,51,0.15);
-  border-color: rgba(255,0,51,0.4);
-  box-shadow: 0 0 15px rgba(255,0,51,0.1);
-}
-.btn-sm { padding: 8px 14px; font-size: 12px; }
-.btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
-/* ── SPINNER ── */
-.spinner {
-  width: 16px; height: 16px;
-  border: 2px solid rgba(255,255,255,0.1);
-  border-top-color: var(--red-bright);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-  display: inline-block;
-  box-shadow: 0 0 8px rgba(255,10,46,0.3);
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-/* ── DRAG DROP ── */
-.drop-zone {
-  border: 2px dashed rgba(255,10,46,0.2);
-  border-radius: var(--radius);
-  padding: 36px 24px;
-  text-align: center;
-  background: rgba(255,10,46,0.02);
-  transition: all 0.35s ease;
-  cursor: pointer;
-  position: relative;
-  overflow: hidden;
-}
-.drop-zone::before {
-  content: ''; position: absolute; inset: 0;
-  background: radial-gradient(circle at center, rgba(255,10,46,0.04), transparent 70%);
-  opacity: 0; transition: opacity 0.35s ease;
-}
-.drop-zone:hover::before { opacity: 1; }
-.drop-zone:hover {
-  border-color: var(--red-bright);
-  background: rgba(255,10,46,0.04);
-  box-shadow: 0 0 30px rgba(255,10,46,0.06);
-}
-.drop-zone.dragover {
-  border-color: var(--red-bright);
-  background: rgba(255,10,46,0.06);
-  box-shadow: 0 0 40px rgba(255,10,46,0.1);
-  transform: scale(1.01);
-}
-.drop-zone-icon { font-size: 36px; margin-bottom: 12px; opacity: 0.7; transition: all 0.3s ease; }
-.drop-zone:hover .drop-zone-icon { opacity: 1; transform: scale(1.1); filter: drop-shadow(0 0 10px rgba(255,10,46,0.3)); }
-.drop-zone-text { font-size: 13px; color: var(--gray); font-weight: 500; }
-.drop-zone-hint { font-size: 11px; color: var(--gray-2); margin-top: 6px; }
-/* ── FILE ITEM ── */
-.file-item {
-  display: flex; align-items: center; gap: 10px;
-  padding: 10px 14px;
-  background: rgba(0,0,0,0.3);
-  border: 1px solid rgba(255,255,255,0.04);
-  border-radius: var(--radius-sm);
-  margin-bottom: 8px;
-  transition: all 0.2s ease;
-}
-.file-item:hover {
-  border-color: rgba(255,10,46,0.15);
-  background: rgba(255,10,46,0.03);
-}
-.file-item input { flex: 1; min-width: 0; }
-/* ── YT CARD ── */
-.yt-card {
-  display: flex; align-items: center; gap: 12px;
-  padding: 10px 14px;
-  background: rgba(0,0,0,0.3);
-  border: 1px solid rgba(255,255,255,0.04);
-  border-radius: var(--radius-sm);
-  margin-bottom: 8px;
-  transition: all 0.2s ease;
-}
-.yt-card:hover { border-color: rgba(255,10,46,0.15); }
-.yt-thumb { width: 64px; height: 48px; border-radius: 8px; object-fit: cover; flex-shrink: 0; }
-.yt-info { flex: 1; min-width: 0; }
-.yt-title { font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px; }
-/* ── SLIDERS ── */
-.slider-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
-.slider-label { font-size: 12px; color: var(--gray); font-weight: 600; width: 60px; flex-shrink: 0; }
-input[type="range"] {
-  -webkit-appearance: none; appearance: none; flex: 1; height: 5px;
-  background: rgba(255,255,255,0.06); border-radius: 3px; outline: none;
-}
-input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none; width: 18px; height: 18px;
-  background: linear-gradient(135deg, var(--red), var(--red-hot));
-  border-radius: 50%; cursor: pointer;
-  box-shadow: 0 0 10px var(--red-glow), 0 0 20px var(--red-glow-strong);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
-}
-input[type="range"]::-webkit-slider-thumb:hover {
-  transform: scale(1.2);
-  box-shadow: 0 0 15px var(--red-glow-strong), 0 0 30px rgba(255,10,46,0.4);
-}
-input[type="range"]::-moz-range-thumb {
-  width: 18px; height: 18px; border: none;
-  background: linear-gradient(135deg, var(--red), var(--red-hot));
-  border-radius: 50%; cursor: pointer;
-  box-shadow: 0 0 10px var(--red-glow);
-}
-.slider-val {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 12px; font-weight: 700; color: var(--red-bright);
-  width: 44px; text-align: right; flex-shrink: 0;
-  text-shadow: 0 0 8px var(--red-glow);
-}
-/* ── RECOMMENDATION BOX ── */
-.rec-box {
-  padding: 12px 16px; border-radius: var(--radius-sm);
-  border: 1px solid; font-size: 12px; font-weight: 600;
-  transition: all 0.3s ease;
-}
-/* ── TABS ── */
-.tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
-.tab-btn {
-  padding: 10px 20px; border-radius: var(--radius-sm);
-  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);
-  color: var(--gray); font-size: 13px; font-weight: 600;
-  cursor: pointer; transition: all 0.25s ease;
-  font-family: 'Inter', sans-serif;
-}
-.tab-btn:hover { border-color: rgba(255,10,46,0.2); color: var(--white); background: rgba(255,10,46,0.04); }
-.tab-btn.active {
-  background: linear-gradient(135deg, rgba(255,10,46,0.15), rgba(255,10,46,0.05));
-  border-color: rgba(255,10,46,0.3); color: var(--red-bright);
-  box-shadow: 0 0 20px rgba(255,10,46,0.08);
-}
-/* ── UPLOAD PROGRESS ── */
-.upload-progress-wrap {
-  background: var(--panel-solid);
-  border: 1px solid rgba(255,10,46,0.15);
-  border-radius: var(--radius);
-  padding: 20px;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 40px rgba(255,10,46,0.04);
-  animation: progAppear 0.4s cubic-bezier(0.4,0,0.2,1);
-}
-@keyframes progAppear {
-  from { opacity: 0; transform: translateY(10px) scale(0.98); }
-  to { opacity: 1; transform: translateY(0) scale(1); }
-}
-.upload-progress-header {
-  display: flex; align-items: center; gap: 10px;
-  margin-bottom: 14px;
-}
-.upload-progress-title {
-  flex: 1; font-size: 13px; font-weight: 700; color: var(--white);
-  letter-spacing: 0.3px;
-}
-.upload-progress-pct {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 20px; font-weight: 800; color: var(--red-bright);
-  text-shadow: 0 0 15px var(--red-glow-strong);
-  min-width: 60px; text-align: right;
-}
-/* KEREN PROGRESS BAR */
-.upload-progress-track {
-  height: 10px;
-  background: rgba(0,0,0,0.5);
-  border-radius: 5px;
-  overflow: hidden;
-  position: relative;
-  box-shadow: inset 0 1px 3px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.03);
-}
-.upload-progress-track::before {
-  content: '';
-  position: absolute; inset: 0;
-  background: repeating-linear-gradient(
-    90deg,
-    transparent 0px,
-    transparent 8px,
-    rgba(0,0,0,0.2) 8px,
-    rgba(0,0,0,0.2) 10px
-  );
-  z-index: 2;
-}
-.upload-progress-fill {
-  height: 100%; width: 0%;
-  background: linear-gradient(90deg, var(--red-dim), var(--red), var(--red-hot), var(--red));
-  background-size: 200% 100%;
-  border-radius: 5px;
-  position: relative;
-  z-index: 1;
-  transition: width 0.15s linear;
-  box-shadow: 0 0 15px var(--red-glow), 0 0 30px rgba(255,10,46,0.2);
-  animation: progStripes 1.5s linear infinite, progGlow 2s ease-in-out infinite alternate;
-}
-@keyframes progStripes {
-  0% { background-position: 0% 0; }
-  100% { background-position: 200% 0; }
-}
-@keyframes progGlow {
-  0% { box-shadow: 0 0 15px var(--red-glow), 0 0 30px rgba(255,10,46,0.2); }
-  100% { box-shadow: 0 0 25px var(--red-glow-strong), 0 0 50px rgba(255,10,46,0.3), 0 0 80px rgba(255,10,46,0.1); }
-}
-.upload-progress-fill.done {
-  background: linear-gradient(90deg, #004d1a, var(--success)) !important;
-  box-shadow: 0 0 15px rgba(0,230,118,0.3), 0 0 30px rgba(0,230,118,0.15) !important;
-  animation: none !important;
-}
-.upload-progress-fill.err {
-  background: linear-gradient(90deg, #4d0000, var(--danger)) !important;
-  box-shadow: 0 0 15px rgba(255,0,51,0.3), 0 0 30px rgba(255,0,51,0.15) !important;
-  animation: none !important;
-}
-.upload-progress-file {
-  font-size: 12px; color: var(--gray); margin-top: 10px;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  font-weight: 500;
-}
-.upload-progress-stats {
-  display: flex; justify-content: space-between;
-  font-size: 11px; color: var(--gray-2); margin-top: 8px;
-  font-family: 'JetBrains Mono', monospace;
-}
-.upload-progress-mini {
-  display: flex; gap: 6px; margin-top: 14px; flex-wrap: wrap;
-}
-.upload-progress-chip {
-  width: 28px; height: 28px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 11px; font-weight: 700; color: var(--gray-2);
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.06);
-  transition: all 0.35s cubic-bezier(0.4,0,0.2,1);
-}
-.upload-progress-chip.active {
-  background: linear-gradient(135deg, var(--red-dim), var(--red));
-  border-color: var(--red-bright); color: var(--white);
-  box-shadow: 0 0 15px var(--red-glow), 0 0 25px rgba(255,10,46,0.2);
-  animation: chipPulse 1.5s ease-in-out infinite;
-}
-@keyframes chipPulse {
-  0%,100% { box-shadow: 0 0 15px var(--red-glow), 0 0 25px rgba(255,10,46,0.2); }
-  50% { box-shadow: 0 0 25px var(--red-glow-strong), 0 0 40px rgba(255,10,46,0.3); }
-}
-.upload-progress-chip.done {
-  background: linear-gradient(135deg, #004d1a, var(--success));
-  border-color: var(--success); color: var(--white);
-  box-shadow: 0 0 10px rgba(0,230,118,0.2);
-}
-.upload-progress-chip.fail {
-  background: linear-gradient(135deg, #4d0000, var(--danger));
-  border-color: var(--danger); color: var(--white);
-  box-shadow: 0 0 10px rgba(255,0,51,0.2);
-}
-/* ── STATUS BAR ── */
-.status-bar {
-  padding: 12px 16px; border-radius: var(--radius-sm);
-  font-size: 12px; font-weight: 600;
-  background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.04);
-}
-/* ── HISTORY TABLE ── */
-.table-responsive { overflow-x: auto; border-radius: var(--radius-sm); }
-table { width: 100%; border-collapse: collapse; font-size: 12px; }
- th {
-  background: rgba(255,10,46,0.06);
-  color: var(--red-bright);
-  font-weight: 700;
-  text-align: left;
-  padding: 12px 14px;
-  font-size: 10px;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  border-bottom: 1px solid rgba(255,10,46,0.1);
-}
-td { padding: 12px 14px; border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: middle; }
-tr:hover td { background: rgba(255,10,46,0.02); }
-.status-badge {
-  display: inline-block; padding: 4px 10px; border-radius: 6px;
-  font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
-  text-transform: uppercase;
-}
-.bg-green { background: rgba(0,230,118,0.1); color: var(--success); border: 1px solid rgba(0,230,118,0.2); }
-.bg-red { background: rgba(255,0,51,0.1); color: #ff3366; border: 1px solid rgba(255,0,51,0.2); }
-.copy-badge {
-  display: inline-flex; align-items: center; gap: 4px;
-  padding: 4px 10px; border-radius: 6px;
-  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
-  font-size: 11px; font-family: 'JetBrains Mono', monospace;
-  cursor: pointer; transition: all 0.2s ease; color: var(--white);
-}
-.copy-badge:hover { border-color: var(--red-bright); background: var(--red-soft); color: var(--red-bright); }
-/* ── ROBLOX PROFILE ── */
-.profile-card {
-  display: flex; align-items: center; gap: 12px;
-  padding: 14px;
-  background: rgba(0,0,0,0.3);
-  border-radius: var(--radius-sm);
-  border: 1px solid rgba(255,255,255,0.04);
-}
-.profile-avatar { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,10,46,0.2); box-shadow: 0 0 15px rgba(255,10,46,0.1); }
-.profile-info { flex: 1; min-width: 0; }
-.profile-name { font-size: 14px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.profile-type { font-size: 11px; color: var(--gray); }
-/* ── AUDIO PREVIEW ── */
-audio { width: 100%; border-radius: var(--radius-sm); margin-top: 12px; }
-audio::-webkit-media-controls-panel { background: var(--panel-2); }
-audio::-webkit-media-controls-current-time-display,
-audio::-webkit-media-controls-time-remaining-display { color: var(--white); font-family: 'JetBrains Mono', monospace; }
-/* ── LIMIT INFO ── */
-.limit-info { display: flex; align-items: center; gap: 8px; font-size: 12px; }
-.limit-info b { font-family: 'Orbitron', sans-serif; font-size: 14px; }
-/* ── SPRITE PREVIEW ── */
-#spritePreviewArea img {
-  max-width: 100%; border: 1px solid var(--panel-border);
-  border-radius: var(--radius-sm); background: #000;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-}
-/* ── TEMPLATE CHIPS ── */
-.template-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
-.template-chip {
-  padding: 6px 14px; border-radius: 100px;
-  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
-  color: var(--gray); font-size: 11px; font-weight: 600;
-  cursor: pointer; transition: all 0.2s ease;
-}
-.template-chip:hover { border-color: rgba(255,10,46,0.2); color: var(--white); background: rgba(255,10,46,0.04); }
-.template-chip.active {
-  background: linear-gradient(135deg, rgba(255,10,46,0.15), rgba(255,10,46,0.05));
-  border-color: rgba(255,10,46,0.3); color: var(--red-bright);
-  box-shadow: 0 0 15px rgba(255,10,46,0.08);
-}
-/* ── TOGGLE BYPASS ── */
-.bypass-toggle {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 14px 16px;
-  background: rgba(255,10,46,0.04);
-  border: 1px solid rgba(255,10,46,0.1);
-  border-radius: var(--radius-sm);
-  margin-bottom: 16px;
-  cursor: pointer;
-  transition: all 0.25s ease;
-}
-.bypass-toggle:hover {
-  border-color: rgba(255,10,46,0.2);
-  background: rgba(255,10,46,0.06);
-}
-.bypass-toggle-left { display: flex; align-items: center; gap: 10px; }
-.bypass-toggle-icon { font-size: 18px; }
-.bypass-toggle-text { font-size: 13px; font-weight: 700; }
-.bypass-toggle-desc { font-size: 11px; color: var(--gray); }
-.bypass-toggle-switch {
-  width: 44px; height: 24px; border-radius: 12px;
-  background: var(--gray-dark); position: relative;
-  transition: background 0.3s ease;
-  flex-shrink: 0;
-}
-.bypass-toggle-switch::after {
-  content: ''; position: absolute; top: 2px; left: 2px;
-  width: 20px; height: 20px; border-radius: 50%;
-  background: var(--white); box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-  transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
-}
-.bypass-toggle.active .bypass-toggle-switch { background: var(--red); box-shadow: 0 0 15px var(--red-glow); }
-.bypass-toggle.active .bypass-toggle-switch::after { transform: translateX(20px); }
-/* ── MOBILE RESPONSIVE ── */
-@media (max-width: 860px) {
-  .hub-title { font-size: 32px; }
-  .hub-subtitle { font-size: 10px; letter-spacing: 3px; }
-  .hub-card { padding: 28px 20px; }
-  .file-item { flex-wrap: wrap; }
-  .file-item > div:first-child { width: 100% !important; white-space: normal !important; margin-bottom: 6px; }
-  .yt-card { flex-wrap: wrap; }
-  .yt-thumb { width: 100%; height: auto; aspect-ratio: 16/9; }
-  .tabs { gap: 4px; }
-  .tab-btn { padding: 8px 14px; font-size: 12px; }
-  .slider-row { flex-wrap: wrap; }
-  .slider-label { width: 100%; margin-bottom: 4px; }
-  .upload-progress-pct { font-size: 16px; }
-  .btn { padding: 10px 16px; font-size: 12px; }
-}
-@media (max-width: 480px) {
-  .hub-title { font-size: 26px; }
-  .hub-card-title { font-size: 15px; }
-  .sidebar-header { padding: 12px 14px; }
-  .sidebar-logo { font-size: 14px; }
-  .glass-panel { padding: 14px; }
-  .drop-zone { padding: 24px 16px; }
-  .drop-zone-icon { font-size: 28px; }
-  .upload-progress-wrap { padding: 14px; }
-  .upload-progress-chip { width: 24px; height: 24px; font-size: 10px; }
-  .template-chips { gap: 6px; }
-  .template-chip { padding: 5px 10px; font-size: 10px; }
-}
-/* ── SCROLLBAR ── */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(255,10,46,0.2); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(255,10,46,0.35); }
-/* ── ANIMATIONS ── */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-.fade-in { animation: fadeIn 0.5s cubic-bezier(0.4,0,0.2,1) forwards; }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roblox Audio Uploader - MCHLERN (Web)</title>
+    <style>
+        body { background-color: #121212; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; }
+        h1 { color: #00ffcc; text-align: center; }
+        .container { max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+        .card { background-color: #1e1e1e; border: 1px solid #333; border-radius: 8px; padding: 20px; }
+        .card h2 { margin-top: 0; font-size: 1.2rem; border-bottom: 1px solid #444; padding-bottom: 10px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input[type="text"], input[type="password"], select, textarea { width: 100%; padding: 10px; background-color: #2b2b2b; border: 1px solid #444; color: white; border-radius: 4px; box-sizing: border-box; }
+        input[type="range"] { width: 100%; }
+        .slider-container { display: flex; justify-content: space-between; align-items: center; margin-top: 5px; }
+        button { background-color: #444; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; transition: 0.2s; }
+        button:hover { background-color: #666; }
+        .btn-upload { background-color: #107c10; width: 100%; font-size: 1.1rem; font-weight: bold; padding: 15px; margin-top: 10px; }
+        .btn-upload:hover { background-color: #0a500a; }
+        .btn-danger { background-color: #b83535; }
+        .btn-danger:hover { background-color: #d64949; }
+        .templates { display: flex; gap: 10px; margin-bottom: 15px; }
+        #history-box { background-color: #121212; border: 1px solid #444; height: 200px; overflow-y: auto; padding: 10px; border-radius: 4px; font-family: monospace; white-space: pre-wrap; }
+        #loading { display: none; text-align: center; color: #00aaff; margin-top: 10px; font-weight: bold; }
+        .recommendation { color: #00ffcc; font-weight: bold; margin-top: 15px; text-align: center; }
+    </style>
 </head>
 <body>
-<!-- Scanline overlay -->
-<div class="scanlines"></div>
-<!-- Dynamic backgrounds -->
-<div class="bg-pulse"></div>
-<div class="bg-grid"></div>
-<div class="bg-vignette"></div>
-<!-- LOADING SCREEN -->
-<div class="loading-screen" id="loadingScreen">
-  <div class="load-logo">MCHLERN</div>
-  <div class="load-sub">Roblox Audio Uploader PRO</div>
-  <div class="load-bar-wrap">
-    <div class="load-bar" id="loadBar"></div>
-  </div>
-  <div class="load-text" id="loadText">INITIALIZING...</div>
-  <div class="load-glitch" id="loadGlitch" style="display:none;"></div>
+
+<div class="container">
+    <h1>Roblox Audio Uploader - MCHLERN</h1>
+    
+    <form id="uploadForm">
+        <div class="card">
+            <h2>1. API CONFIGURATION</h2>
+            <div class="form-group">
+                <label>API Key:</label>
+                <input type="password" id="api_key" required>
+            </div>
+            <div style="display: flex; gap: 20px;">
+                <div class="form-group" style="flex: 1;">
+                    <label>Creator Type:</label>
+                    <select id="creator_type">
+                        <option value="User">User</option>
+                        <option value="Group">Group</option>
+                    </select>
+                </div>
+                <div class="form-group" style="flex: 2;">
+                    <label>Creator ID:</label>
+                    <input type="text" id="creator_id" required>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>2. AUDIO MODIFIER SETTINGS</h2>
+            <label>Bypass Templates:</label>
+            <div class="templates">
+                <button type="button" onclick="setTemplate(1.5)">1.5x</button>
+                <button type="button" onclick="setTemplate(1.6)">1.6x</button>
+                <button type="button" onclick="setTemplate(2.3)">2.3x</button>
+                <button type="button" onclick="setTemplate(2.5)">2.5x</button>
+                <button type="button" onclick="setTemplate(1.0)" class="btn-danger">Reset</button>
+            </div>
+            
+            <div class="form-group">
+                <label>Speed (Tempo): <span id="speed_val">1.00</span></label>
+                <input type="range" id="speed" min="0.5" max="3.0" step="0.01" value="1.0" oninput="updateUI()">
+            </div>
+            <div class="form-group">
+                <label>Pitch: <span id="pitch_val">1.00</span></label>
+                <input type="range" id="pitch" min="0.5" max="3.0" step="0.01" value="1.0" oninput="updateUI()">
+            </div>
+            <div class="form-group">
+                <label>Volume: <span id="vol_val">1.00</span></label>
+                <input type="range" id="vol" min="0.1" max="3.0" step="0.01" value="1.0" oninput="document.getElementById('vol_val').innerText = this.value">
+            </div>
+            
+            <div class="recommendation" id="rec_label">Rec. In-Game PlaybackSpeed: 1.00</div>
+        </div>
+
+        <div class="card">
+            <h2>3. UPLOAD CONTROLS</h2>
+            <div class="form-group">
+                <label>Select Local Audio Files (.mp3, .ogg):</label>
+                <input type="file" id="audio_files" multiple accept=".mp3, .ogg" style="color:white;">
+            </div>
+            <div style="text-align: center; margin: 10px 0; color: #666;">-- OR --</div>
+            <div class="form-group">
+                <label>Paste YouTube Link(s) (One per line):</label>
+                <textarea id="yt_url" rows="4"></textarea>
+            </div>
+            <button type="submit" class="btn-upload" id="uploadBtn">START UPLOAD</button>
+            <div id="loading">Processing & Uploading... Please wait!</div>
+        </div>
+    </form>
+
+    <div class="card">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #444; padding-bottom: 10px; margin-bottom: 10px;">
+            <h2 style="border: none; margin: 0; padding: 0;">UPLOAD HISTORY</h2>
+            <button type="button" class="btn-danger" onclick="clearHistory()">Clear History</button>
+        </div>
+        <div id="history-box"></div>
+    </div>
 </div>
-<!-- HUB PAGE -->
-<div class="hub-container" id="hubPage">
-  <div class="hub-badge">v3.0 PRO</div>
-  <div class="hub-title">MCHLERN<br>TOOLS</div>
-  <div class="hub-subtitle">Roblox Audio Uploader PRO</div>
-  <div class="hub-tools">
-    <div class="hub-card" onclick="switchTool('audio')">
-      <div class="hub-card-icon">🎵</div>
-      <div class="hub-card-title">Audio Uploader</div>
-      <div class="hub-card-desc">Upload audio ke Roblox dengan bypass & normal mode. Support file lokal & YouTube.</div>
-    </div>
-    <div class="hub-card" onclick="switchTool('sprite')">
-      <div class="hub-card-icon">🖼️</div>
-      <div class="hub-card-title">Spritesheet Generator</div>
-      <div class="hub-card-desc">Generate spritesheet dari file video atau YouTube untuk decal Roblox.</div>
-    </div>
-  </div>
-</div>
-<!-- MAIN APP -->
-<div class="app-container" id="mainApp">
-  <!-- SIDEBAR -->
-  <div class="sidebar" id="sidebar">
-    <div class="sidebar-header">
-      <div class="sidebar-logo">MCHL<span style="color:var(--red-bright)">ERN</span></div>
-      <button class="back-btn" onclick="switchTool('hub')">← Kembali</button>
-    </div>
-    <div class="glass-panel">
-      <div class="section-title">🔐 Akun Roblox</div>
-      <input type="password" class="input-field" id="apiKey" placeholder="API Key" style="margin-bottom:10px;">
-      <input type="text" class="input-field" id="creatorId" placeholder="Creator ID" style="margin-bottom:10px;">
-      <select class="input-field" id="creatorType" style="margin-bottom:12px;">
-        <option value="User">User</option>
-        <option value="Group">Group</option>
-      </select>
-      <button class="btn btn-red-glow" style="width:100%; margin-bottom:10px;" onclick="checkAccount()" id="btnCheckAcc">🔍 Konek Akun</button>
-      <button class="btn btn-outline" style="width:100%;" onclick="saveAccount()">💾 Simpan Akun</button>
-      <div class="profile-card" id="robloxProfile" style="display:none; margin-top:14px;">
-        <img src="" class="profile-avatar" id="robloxAvatar">
-        <div class="profile-info">
-          <div class="profile-name" id="robloxName">-</div>
-          <div class="profile-type">Terverifikasi</div>
-        </div>
-      </div>
-    </div>
-    <div class="glass-panel">
-      <div class="section-title">📊 Limit Upload</div>
-      <div class="limit-info">
-        <span>Sisa:</span>
-        <b id="limitCount" style="color:var(--white);">—</b>
-      </div>
-      <div style="margin-top:8px; font-size:11px; color:var(--gray);" id="loginStatus">Memuat...</div>
-      <div style="margin-top:12px;">
-        <div id="g_id_onload" data-client_id="YOUR_GOOGLE_CLIENT_ID" data-callback="handleCredentialResponse" data-auto_prompt="false"></div>
-        <div class="g_id_signin" data-type="standard" data-size="medium" data-theme="filled_black" data-text="signin_with" data-shape="pill" data-logo_alignment="left" data-width="250"></div>
-      </div>
-    </div>
-    <div class="glass-panel" id="bypassPanel" style="display:none;">
-      <div class="section-title">⚡ Bypass Settings</div>
-      <div class="slider-row"><span class="slider-label">Speed</span><input type="range" id="speedSlider" min="0.5" max="2" step="0.01" value="1" oninput="onSlide('speed',this.value)"><span class="slider-val" id="speedVal">1.00</span></div>
-      <div class="slider-row"><span class="slider-label">Pitch</span><input type="range" id="pitchSlider" min="0.5" max="2" step="0.01" value="1" oninput="onSlide('pitch',this.value)"><span class="slider-val" id="pitchVal">1.00</span></div>
-      <div class="slider-row"><span class="slider-label">Volume</span><input type="range" id="volSlider" min="0.1" max="2" step="0.01" value="1" oninput="onSlide('vol',this.value)"><span class="slider-val" id="volVal">1.00</span></div>
-      <div class="template-chips">
-        <div class="template-chip" onclick="applyTemplate(1.05)">+5%</div>
-        <div class="template-chip" onclick="applyTemplate(1.10)">+10%</div>
-        <div class="template-chip" onclick="applyTemplate(1.25)">+25%</div>
-        <div class="template-chip" onclick="applyTemplate(1.50)">+50%</div>
-      </div>
-      <div class="rec-box" id="recLabel" style="border-color:rgba(0,230,118,0.2); color:var(--success); background:rgba(0,230,118,0.05);">Rec. PlaybackSpeed: 1.00</div>
-    </div>
-  </div>
-  <!-- CONTENT -->
-  <div class="content" id="contentArea">
-    <!-- AUDIO CONTENT -->
-    <div id="audioContent">
-      <div class="tabs">
-        <button class="tab-btn active" id="tabMain" onclick="switchTab('main')">🎵 Upload Audio</button>
-        <button class="tab-btn" id="tabBypass" onclick="switchTab('bypass')">⚡ Mode Bypass</button>
-      </div>
-      <div id="mainTabPanel">
-        <div class="glass-panel" style="margin-bottom:16px;">
-          <div class="section-title">📁 Upload File Audio</div>
-          <div class="drop-zone" id="dzMain" onclick="document.getElementById('fileMain').click()" ondragover="onDragOver(event,'main')" ondragleave="onDragLeave('main')" ondrop="onDrop(event,'main')">
-            <div class="drop-zone-icon">📂</div>
-            <div class="drop-zone-text">Drag & drop file audio di sini</div>
-            <div class="drop-zone-hint">atau klik untuk browse (MP3, WAV, OGG)</div>
-            <input type="file" id="fileMain" style="display:none;" accept="audio/*" multiple onchange="onFileSelect(this,'main')">
-          </div>
-          <div id="listMain" style="margin-top:12px;"></div>
-          <div style="display:flex; gap:10px; margin-top:16px; flex-wrap:wrap;">
-            <button class="btn btn-full" style="flex:1; min-width:140px;" id="upNormal" onclick="normalUpload()">🚀 Upload Normal</button>
-            <button class="btn btn-outline" style="flex:1; min-width:140px;" onclick="resetBypass();startUpload('bypass')">⚡ Upload Bypass</button>
-          </div>
-        </div>
-        <div class="glass-panel" style="margin-bottom:16px;">
-          <div class="section-title">▶️ YouTube</div>
-          <div style="display:flex; gap:10px; margin-bottom:12px; flex-wrap:wrap;">
-            <input type="text" class="input-field" id="ytMain" placeholder="Paste link YouTube..." style="flex:1; min-width:200px;">
-            <button class="btn btn-red-glow" onclick="fetchYT('main')" id="btnYtMain">Fetch</button>
-          </div>
-          <div id="ytQueueMain"></div>
-        </div>
-        <div class="glass-panel" style="margin-bottom:16px;">
-          <div class="section-title">🔊 Preview</div>
-          <audio id="prevMain" controls style="display:none;"></audio>
-        </div>
-        <div class="status-bar" id="statusMain" style="display:none; margin-bottom:16px;"></div>
-      </div>
-      <div id="bypassTabPanel" style="display:none;">
-        <div class="glass-panel" style="margin-bottom:16px;">
-          <div style="padding:40px 20px; text-align:center;">
-            <div style="font-size:48px; margin-bottom:16px; filter:drop-shadow(0 0 20px var(--red-glow));">⚡</div>
-            <div style="font-family:'Orbitron',sans-serif; font-size:18px; font-weight:700; margin-bottom:8px;">Mode Bypass</div>
-            <div style="font-size:13px; color:var(--gray); margin-bottom:24px;">Modifikasi audio sebelum upload untuk menghindari deteksi copyright.</div>
-            <button class="btn btn-full" style="max-width:300px; margin:0 auto; display:block;" onclick="document.getElementById('tabMain').click(); document.getElementById('bypassPanel').style.display='block';">Aktifkan Bypass Settings</button>
-          </div>
-        </div>
-      </div>
-      <div class="glass-panel history-panel">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
-          <div class="section-title" style="margin:0;">📜 History Upload</div>
-          <div style="display:flex; gap:10px;">
-            <button class="btn btn-outline btn-sm" onclick="copyAllIds()">📋 Copy All IDs</button>
-            <button class="btn btn-danger btn-sm" onclick="clearHistory()">🗑 Clear</button>
-          </div>
-        </div>
-        <div class="table-responsive">
-          <table>
-            <thead><tr><th>Waktu</th><th>Judul</th><th>Mode</th><th>Status</th><th>Asset ID</th></tr></thead>
-            <tbody id="historyTbody">
-              <tr><td colspan="5" style="text-align:center; padding:30px; color:var(--gray);">Belum ada aktivitas upload.</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-    <!-- SPRITE CONTENT -->
-    <div id="spriteContent" style="display:none;">
-      <div class="glass-panel" style="margin-bottom:16px;">
-        <div class="section-title">🖼️ Spritesheet Generator</div>
-        <div class="drop-zone" id="dzSprite" onclick="document.getElementById('fileSprite').click()" ondragover="onDragOver(event,'sprite')" ondragleave="onDragLeave('sprite')" ondrop="onDropSprite(event)">
-          <div class="drop-zone-icon">🎬</div>
-          <div class="drop-zone-text">Drop video file di sini</div>
-          <div class="drop-zone-hint">MP4, WEBM, MOV — Max 50MB</div>
-          <input type="file" id="fileSprite" style="display:none;" accept="video/*" onchange="onFileSelectSprite(this)">
-        </div>
-        <div id="listSprite" style="margin-top:12px;"></div>
-      </div>
-      <div class="glass-panel" style="margin-bottom:16px;">
-        <div class="section-title">▶️ YouTube to Spritesheet</div>
-        <div style="margin-bottom:12px;">
-          <input type="text" class="input-field" id="ytSprite" placeholder="Paste link YouTube video...">
-        </div>
-        <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
-          <input type="number" class="input-field" id="ytStart" placeholder="Start (detik)" style="width:120px;" min="0" step="0.1">
-          <span style="color:var(--gray-2);">-</span>
-          <input type="number" class="input-field" id="ytEnd" placeholder="End (detik)" style="width:120px;" min="0" step="0.1">
-          <button class="btn btn-red-glow" onclick="fetchYTSprite()" id="btnYtSprite">Generate & Preview</button>
-        </div>
-      </div>
-      <div id="spritePreviewArea" style="display:none; margin-top:24px; text-align:center;">
-        <div style="font-size:12px; font-weight:700; margin-bottom:8px; color:var(--success);">✅ Preview Spritesheet</div>
-        <img id="imgSpritePreview" src="" alt="Spritesheet Preview">
-        <div style="display:flex; gap:10px; margin-top:16px; justify-content:center;">
-          <button class="btn btn-full upload-btn" onclick="uploadSprite()" id="btnUploadSprite">🚀 Upload ke Roblox (Decal)</button>
-        </div>
-      </div>
-      <div class="status-bar" id="statusSprite" style="margin-top:16px; display:none;"></div>
-      <div class="glass-panel history-panel" style="margin-top:24px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
-          <div class="section-title" style="margin:0;">📜 History Spritesheet</div>
-          <div style="display:flex; gap:10px;">
-            <button class="btn btn-outline btn-sm" onclick="copyAllIdsSprite()">📋 Copy All IDs</button>
-            <button class="btn btn-danger btn-sm" onclick="clearHistorySprite()">🗑 Clear</button>
-          </div>
-        </div>
-        <div class="table-responsive">
-          <table>
-            <thead><tr><th>Waktu</th><th>Judul</th><th>Status</th><th>Decal ID</th></tr></thead>
-            <tbody id="historyTbodySprite">
-              <tr><td colspan="4" style="text-align:center; padding:30px; color:var(--gray);">Belum ada aktivitas.</td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+
 <script>
+    function updateUI() {
+        let speed = document.getElementById('speed').value;
+        let pitch = document.getElementById('pitch').value;
+        document.getElementById('speed_val').innerText = parseFloat(speed).toFixed(2);
+        document.getElementById('pitch_val').innerText = parseFloat(pitch).toFixed(2);
+        
+        let rec = (1.0 / speed).toFixed(2);
+        let recLabel = document.getElementById('rec_label');
+        if (speed !== pitch) {
+            recLabel.innerText = `Rec. In-Game PlaybackSpeed: ${rec} (Pitch mismatch!)`;
+            recLabel.style.color = "#ffcc00";
+        } else {
+            recLabel.innerText = `Rec. In-Game PlaybackSpeed: ${rec}`;
+            recLabel.style.color = "#00ffcc";
+        }
+    }
+
+    function setTemplate(val) {
+        document.getElementById('speed').value = val;
+        document.getElementById('pitch').value = val;
+        updateUI();
+    }
+
+    async function fetchHistory() {
+        let res = await fetch('/history');
+        let data = await res.json();
+        let box = document.getElementById('history-box');
+        box.innerHTML = '';
+        data.reverse().forEach(h => {
+            box.innerHTML += `[${h.time}] ${h.filename} | ${h.status} | AssetID: ${h.asset_id || '-'}\n`;
+        });
+    }
+
+    async function clearHistory() {
+        if(confirm("Are you sure?")) {
+            await fetch('/clear_history', { method: 'POST' });
+            fetchHistory();
+        }
+    }
+
+    document.getElementById('uploadForm').onsubmit = async (e) => {
+        e.preventDefault();
+        
+        let fd = new FormData();
+        fd.append('api_key', document.getElementById('api_key').value);
+        fd.append('creator_type', document.getElementById('creator_type').value);
+        fd.append('creator_id', document.getElementById('creator_id').value);
+        fd.append('speed', document.getElementById('speed').value);
+        fd.append('pitch', document.getElementById('pitch').value);
+        fd.append('vol', document.getElementById('vol').value);
+        fd.append('yt_url', document.getElementById('yt_url').value);
+        
+        let files = document.getElementById('audio_files').files;
+        for(let i=0; i<files.length; i++) {
+            fd.append('audio_files', files[i]);
+        }
+        
+        if(files.length === 0 && !document.getElementById('yt_url').value.trim()) {
+            alert("Please select files or enter YouTube links!");
+            return;
+        }
+
+        document.getElementById('uploadBtn').style.display = 'none';
+        document.getElementById('loading').style.display = 'block';
+
+        try {
+            await fetch('/upload', { method: 'POST', body: fd });
+            fetchHistory();
+            document.getElementById('audio_files').value = '';
+            document.getElementById('yt_url').value = '';
+            alert("Upload Process Completed!");
+        } catch(err) {
+            alert("Error: " + err);
+        } finally {
+            document.getElementById('uploadBtn').style.display = 'block';
+            document.getElementById('loading').style.display = 'none';
+        }
+    };
+
+    // Initial load
+    fetchHistory();
+</script>
+</body>
+</html>
