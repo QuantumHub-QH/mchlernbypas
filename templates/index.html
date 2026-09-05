@@ -36,45 +36,7 @@ function isVideo(url) {
   return /\.(mp4|webm|mov|avi|mkv)$/i.test(url);
 }
 
-function renderFreeAssets() {
-  let grid = document.getElementById('freeAssetsGrid');
-  grid.innerHTML = '';
-  if(freeAssetsList.length === 0) {
-    grid.innerHTML = '<div style="color:#888; grid-column:1/-1; text-align:center; padding:40px;">Tidak ada aset gratis saat ini.</div>';
-    return;
-  }
-  freeAssetsList.forEach(asset => {
-    let card = document.createElement('div');
-    card.style = 'background:#111; border:1px solid #222; border-radius:12px; overflow:hidden; display:flex; flex-direction:column;';
-    let mediaHtml = '';
-    if(asset.file_url && isVideo(asset.file_url)) {
-      mediaHtml = `<video src="${asset.file_url}" style="width:100%;height:140px;object-fit:cover;border-bottom:1px solid #222;" muted loop playsinline onmouseover="this.play()" onmouseout="this.pause()"></video>`;
-    } else if(asset.file_url && /\.(jpg|jpeg|png|gif|webp)$/i.test(asset.file_url)) {
-      mediaHtml = `<img src="${asset.file_url}" style="width:100%;height:140px;object-fit:cover;border-bottom:1px solid #222;">`;
-    } else {
-      mediaHtml = `<div style="height:80px; background:#0a0a0a; display:flex; align-items:center; justify-content:center; font-size:32px; border-bottom:1px solid #222;">📦</div>`;
-    }
-    card.innerHTML = `
-      ${mediaHtml}
-      <div style="padding:15px; display:flex; flex-direction:column; gap:8px; flex:1;">
-        <div style="font-weight:900; font-size:14px; color:#00e5ff; text-transform:uppercase;">${asset.title}</div>
-        ${asset.description ? `<div style="font-size:11px; color:#888; line-height:1.5;">${asset.description}</div>` : ''}
-        <div id="asset_rating_${asset.id}" style="color:#ffcc00; font-size:11px; font-weight:bold;">☆☆☆☆☆</div>
-        <div style="display:flex; gap:8px; margin-top:auto; padding-top:8px;">
-          <a href="${asset.file_url}" download style="flex:1; background:#00e5ff; color:#000; text-align:center; padding:8px; border-radius:5px; font-weight:bold; text-decoration:none; font-size:11px;">⬇ DOWNLOAD</a>
-          <button onclick="openComments('asset', ${asset.id})" style="flex:1; background:#222; color:#fff; border:1px solid #333; padding:8px; border-radius:5px; font-weight:bold; cursor:pointer; font-size:11px;">💬 KOMENTAR</button>
-        </div>
-      </div>
-    `;
-    grid.appendChild(card);
-    fetch(`/api/comments/asset/${asset.id}`).then(r=>r.json()).then(data => {
-      let avg = Math.round(data.average);
-      let stars = "★".repeat(avg) + "☆".repeat(5-avg);
-      let el = document.getElementById(`asset_rating_${asset.id}`);
-      if(el) el.innerHTML = `${stars} ${data.average}/5 (${data.comments.length} ulasan)`;
-    }).catch(()=>{});
-  });
-}
+
 
 // ==================== COMMENTS ====================
 let currentCommentTarget = {type:null, id:null};
@@ -246,96 +208,7 @@ function openDetail(item, type) {
 
 
 // ==================== OVERRIDE RENDER FUNCTIONS ====================
-function renderStore() {
-  const grid = document.getElementById('storeGrid');
-  const filtered = _currentFilter === 'ALL' ? _allProducts : _allProducts.filter(p => p.category === _currentFilter);
-  if(!filtered.length) {
-    grid.innerHTML = `<div style="text-align:center; padding:60px; color:#444; grid-column:1/-1;"><div style="font-size:40px; margin-bottom:12px;">😔</div><div>Belum ada produk di kategori ini.</div></div>`;
-    return;
-  }
-  
-  grid.innerHTML = '';
-  filtered.forEach(p => {
-    let card = document.createElement('div');
-    card.className = "store-card";
-    
-    let firstUrl = (p.image_url || "").split(',')[0];
-    let mediaHtml = '';
-    if(isVideo(firstUrl)) {
-        mediaHtml = `<video src="${firstUrl}" style="height:140px; width:100%; object-fit:cover; border-bottom:1px solid #333;" muted loop playsinline onmouseover="this.play()" onmouseout="this.pause()"></video>`;
-    } else if (firstUrl) {
-        mediaHtml = `<div style="height:140px; background:#111 url('${firstUrl}') center/cover no-repeat; border-bottom:1px solid #333;"></div>`;
-    } else {
-        mediaHtml = `<div style="height:140px; background:#111; display:flex; align-items:center; justify-content:center; font-size:32px; border-bottom:1px solid #333;">📦</div>`;
-    }
-    
-    card.innerHTML = `
-      ${mediaHtml}
-      <div class="store-card-body" style="cursor:pointer;" onclick="openDetail(${JSON.stringify(p).replace(/"/g, '&quot;')}, 'product')">
-        <div class="store-card-cat">${p.category}</div>
-        <div class="store-card-title">${p.title}</div>
-        <div id="product_rating_card_${p.id}" style="color:#ffcc00; font-size:12px; font-weight:bold; margin-top:4px;">☆ ☆ ☆ ☆ ☆</div>
-        <div style="flex:1"></div>
-        <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-top:10px;">
-          <div class="store-card-price">${p.price}</div>
-        </div>
-        <button style="margin-top:10px; width:100%; background:#222; color:#fff; border:1px solid #444; padding:8px; border-radius:5px; font-weight:bold; font-size:11px;">LIHAT DETAIL</button>
-      </div>
-    `;
-    grid.appendChild(card);
-    
-    fetch(`/api/comments/product/${p.id}`).then(r=>r.json()).then(data => {
-        let stars = "★".repeat(Math.round(data.average)) + "☆".repeat(5-Math.round(data.average));
-        let el = document.getElementById(`product_rating_card_${p.id}`);
-        if(el) el.innerHTML = `${stars} (${data.comments.length})`;
-    }).catch(()=>{});
-  });
-}
 
-function renderFreeAssets() {
-  let grid = document.getElementById('freeAssetsGrid');
-  grid.innerHTML = '';
-  
-  if(freeAssetsList.length === 0) {
-    grid.innerHTML = '<div style="color:#888; grid-column:1/-1; text-align:center; padding:40px;">Tidak ada aset gratis saat ini.</div>';
-    return;
-  }
-  
-  freeAssetsList.forEach(asset => {
-    let card = document.createElement('div');
-    card.style = 'background:#111; border:1px solid #222; border-radius:12px; overflow:hidden; display:flex; flex-direction:column; cursor:pointer;';
-    card.onclick = () => openDetail(asset, 'asset');
-    
-    let firstUrl = (asset.media_url || asset.file_url || "").split(',')[0];
-    let mediaHtml = '';
-    if(firstUrl && isVideo(firstUrl)) {
-      mediaHtml = `<video src="${firstUrl}" style="width:100%;height:140px;object-fit:cover;border-bottom:1px solid #222;" muted loop playsinline onmouseover="this.play()" onmouseout="this.pause()"></video>`;
-    } else if(firstUrl && /\.(jpg|jpeg|png|gif|webp)$/i.test(firstUrl)) {
-      mediaHtml = `<img src="${firstUrl}" style="width:100%;height:140px;object-fit:cover;border-bottom:1px solid #222;">`;
-    } else {
-      mediaHtml = `<div style="height:140px; background:#0a0a0a; display:flex; align-items:center; justify-content:center; font-size:32px; border-bottom:1px solid #222;">📦</div>`;
-    }
-    
-    card.innerHTML = `
-      ${mediaHtml}
-      <div style="padding:15px; display:flex; flex-direction:column; gap:8px; flex:1;">
-        <div style="font-weight:900; font-size:14px; color:#00e5ff; text-transform:uppercase;">${asset.title}</div>
-        <div id="asset_rating_card_${asset.id}" style="color:#ffcc00; font-size:11px; font-weight:bold;">☆☆☆☆☆</div>
-        <div style="display:flex; gap:8px; margin-top:auto; padding-top:8px;">
-          <button style="flex:1; background:#222; color:#fff; border:1px solid #333; padding:8px; border-radius:5px; font-weight:bold; font-size:11px;">LIHAT DETAIL</button>
-        </div>
-      </div>
-    `;
-    grid.appendChild(card);
-    
-    fetch(`/api/comments/asset/${asset.id}`).then(r=>r.json()).then(data => {
-      let avg = Math.round(data.average);
-      let stars = "★".repeat(avg) + "☆".repeat(5-avg);
-      let el = document.getElementById(`asset_rating_card_${asset.id}`);
-      if(el) el.innerHTML = `${stars} (${data.comments.length})`;
-    }).catch(()=>{});
-  });
-}
 
 </script>
 <style>
@@ -2014,35 +1887,47 @@ function renderStore() {
     grid.innerHTML = `<div style="text-align:center; padding:60px; color:#444; grid-column:1/-1;"><div style="font-size:40px; margin-bottom:12px;">😔</div><div>Belum ada produk di kategori ini.</div></div>`;
     return;
   }
-  grid.innerHTML = filtered.map(p => `
-    <div class="store-card">
-      <div style="height:140px; background:#111 url('${p.image_url}') center/cover no-repeat; border-bottom:1px solid #333;"></div>
-      <div class="store-card-body">
+  
+  grid.innerHTML = '';
+  filtered.forEach(p => {
+    let card = document.createElement('div');
+    card.className = "store-card";
+    
+    // Cari URL media preview
+    let firstMedia = (p.image_url || '').split(',').map(u => u.trim()).filter(u => u)[0] || '';
+    
+    let mediaHtml = '';
+    if(firstMedia && /\.(mp4|webm|mov|avi|mkv)$/i.test(firstMedia)) {
+      mediaHtml = `<video src="${firstMedia}" style="height:160px; width:100%; object-fit:cover; border-bottom:1px solid #333; display:block;" muted loop playsinline onmouseover="this.play()" onmouseout="this.pause()"></video>`;
+    } else if (firstMedia && /\.(jpg|jpeg|png|gif|webp)$/i.test(firstMedia)) {
+      mediaHtml = `<div style="height:160px; background:#111 url('${firstMedia}') center/cover no-repeat; border-bottom:1px solid #333;"></div>`;
+    } else {
+      mediaHtml = `<div style="height:160px; background:#111; display:flex; align-items:center; justify-content:center; font-size:32px; border-bottom:1px solid #333;">📦</div>`;
+    }
+    
+    card.innerHTML = `
+      ${mediaHtml}
+      <div class="store-card-body" style="cursor:pointer;" onclick="openDetail(${JSON.stringify(p).replace(/"/g, '&quot;')}, 'product')">
         <div class="store-card-cat">${p.category}</div>
         <div class="store-card-title">${p.title}</div>
-        <div id="product_rating_${p.id}" style="color:#ffcc00; font-size:12px; font-weight:bold; margin-top:4px;">Loading rating...</div>
-        ${p.description ? `<div style="font-size:11px; color:#aaa; margin:6px 0; line-height:1.4; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; text-overflow:ellipsis;">${p.description}</div>` : ''}
+        <div id="product_rating_card_${p.id}" style="color:#ffcc00; font-size:12px; font-weight:bold; margin-top:4px;">☆ ☆ ☆ ☆ ☆</div>
         <div style="flex:1"></div>
-        <button onclick="openComments('product', ${p.id})" style="width:100%; background:#222; color:#fff; border:1px solid #444; padding:8px; border-radius:5px; font-weight:bold; cursor:pointer; font-size:11px; margin-bottom:10px; margin-top:8px;">💬 BACA / TAMBAH KOMENTAR</button>
-        <div style="display:flex; justify-content:space-between; align-items:flex-end;">
+        <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-top:10px;">
           <div class="store-card-price">${p.price}</div>
         </div>
-        <a href="https://discord.com/users/1309112913331748915" target="_blank" class="store-card-btn">ORDER DISCORD →</a>
+        <button style="margin-top:10px; width:100%; background:#222; color:#fff; border:1px solid #444; padding:8px; border-radius:5px; font-weight:bold; font-size:11px;">LIHAT DETAIL</button>
       </div>
-    </div>
-  `).join('');
-
-  filtered.forEach(p => {
-    fetch(`/api/comments/product/${p.id}`)
-      .then(r => r.json())
-      .then(data => {
+    `;
+    grid.appendChild(card);
+    
+    fetch(`/api/comments/product/${p.id}`).then(r=>r.json()).then(data => {
         let stars = "★".repeat(Math.round(data.average)) + "☆".repeat(5-Math.round(data.average));
-        let el = document.getElementById(`product_rating_${p.id}`);
-        if(el) el.innerHTML = `${stars} (${data.comments.length} ulasan)`;
-      })
-      .catch(e => console.error(e));
+        let el = document.getElementById(`product_rating_card_${p.id}`);
+        if(el) el.innerHTML = `${stars} (${data.comments.length})`;
+    }).catch(()=>{});
   });
 }
+
 
 // ── COMMENTS / FLOATING ────────────────────────────────────────────────────
 let _currentRating = 5;
@@ -2145,30 +2030,60 @@ function renderFreeAssets() {
   grid.innerHTML = '';
   
   if(freeAssetsList.length === 0) {
-    grid.innerHTML = '<div style="color:#888; grid-column:1/-1; text-align:center;">Tidak ada aset gratis saat ini.</div>';
+    grid.innerHTML = '<div style="color:#888; grid-column:1/-1; text-align:center; padding:40px;">Tidak ada aset gratis saat ini.</div>';
     return;
   }
   
   freeAssetsList.forEach(asset => {
     let card = document.createElement('div');
-    card.style = 'background:#111; border:1px solid #333; border-radius:12px; padding:15px; position:relative; display:flex; flex-direction:column; gap:10px;';
+    card.style = 'background:#111; border:1px solid #222; border-radius:12px; overflow:hidden; display:flex; flex-direction:column; cursor:pointer;';
+    card.onclick = () => openDetail(asset, 'asset');
+    
+    // Cari URL media preview (foto/video)
+    let firstMedia = (asset.media_url || '').split(',').map(u => u.trim()).filter(u => u)[0] || '';
+    // Fallback ke file_url jika media_url kosong dan file itu adalah gambar/video
+    if(!firstMedia) {
+      let firstFile = (asset.file_url || '').split(',').map(u => u.trim()).filter(u => u)[0] || '';
+      if(/\.(jpg|jpeg|png|gif|webp|mp4|webm|mov)$/i.test(firstFile)) firstMedia = firstFile;
+    }
+    
+    let mediaHtml = '';
+    if(firstMedia && /\.(mp4|webm|mov|avi|mkv)$/i.test(firstMedia)) {
+      mediaHtml = `<video src="${firstMedia}" style="width:100%;height:160px;object-fit:cover;border-bottom:1px solid #222;display:block;" muted loop playsinline onmouseover="this.play()" onmouseout="this.pause()"></video>`;
+    } else if(firstMedia && /\.(jpg|jpeg|png|gif|webp)$/i.test(firstMedia)) {
+      mediaHtml = `<img src="${firstMedia}" style="width:100%;height:160px;object-fit:cover;border-bottom:1px solid #222;display:block;">`;
+    } else {
+      // Tidak ada media preview — tampilkan icon sesuai tipe file
+      let firstFile = (asset.file_url || '').split(',')[0] || '';
+      let icon = '📦';
+      if(/\.(mp3|wav|ogg|flac|aac)$/i.test(firstFile)) icon = '🎵';
+      else if(/\.(lua|rbxl|rbxm)$/i.test(firstFile)) icon = '🔧';
+      else if(/\.(zip|rar|7z)$/i.test(firstFile)) icon = '📁';
+      mediaHtml = `<div style="height:100px; background:#0d0d0d; display:flex; align-items:center; justify-content:center; font-size:40px; border-bottom:1px solid #222;">${icon}</div>`;
+    }
+    
+    let fileCount = (asset.file_url || '').split(',').filter(u => u.trim()).length;
     
     card.innerHTML = `
-      <div style="font-weight:900; font-size:16px; color:#00e5ff; text-transform:uppercase;">${asset.title}</div>
-      <div style="font-size:12px; color:#aaa; flex:1;">${asset.description}</div>
-      <div id="asset_rating_${asset.id}" style="color:#ffcc00; font-size:12px; font-weight:bold;">Loading rating...</div>
-      <div style="display:flex; gap:10px; margin-top:10px;">
-        <a href="${asset.file_url}" target="_blank" style="flex:1; background:#00e5ff; color:#000; text-align:center; padding:8px; border-radius:5px; font-weight:bold; text-decoration:none; font-size:12px;">DOWNLOAD</a>
-        <button onclick="openComments('asset', ${asset.id})" style="flex:1; background:#333; color:#fff; border:none; padding:8px; border-radius:5px; font-weight:bold; cursor:pointer; font-size:12px;">💬 KOMENTAR</button>
+      ${mediaHtml}
+      <div style="padding:12px; display:flex; flex-direction:column; gap:6px; flex:1;">
+        <div style="font-weight:900; font-size:13px; color:#00e5ff; text-transform:uppercase; line-height:1.3;">${asset.title}</div>
+        ${asset.description ? `<div style="font-size:11px; color:#888; line-height:1.4;">${asset.description}</div>` : ''}
+        <div id="asset_rating_${asset.id}" style="color:#ffcc00; font-size:11px; font-weight:bold;">☆☆☆☆☆</div>
+        <div style="display:flex; gap:6px; margin-top:auto; padding-top:6px;">
+          <a href="${(asset.file_url||'').split(',')[0]}" download onclick="event.stopPropagation()" style="flex:1; background:#00e5ff; color:#000; text-align:center; padding:7px; border-radius:5px; font-weight:bold; text-decoration:none; font-size:11px;">⬇ DOWNLOAD${fileCount>1?' ('+fileCount+')':''}</a>
+          <button onclick="event.stopPropagation(); openComments('asset', ${asset.id})" style="flex:1; background:#1a1a1a; color:#fff; border:1px solid #333; padding:7px; border-radius:5px; font-weight:bold; cursor:pointer; font-size:11px;">💬 KOMENTAR</button>
+        </div>
       </div>
     `;
     grid.appendChild(card);
     
     fetch(`/api/comments/asset/${asset.id}`).then(r=>r.json()).then(data => {
-      let stars = "★".repeat(Math.round(data.average)) + "☆".repeat(5-Math.round(data.average));
+      let avg = Math.round(data.average);
+      let stars = "★".repeat(avg) + "☆".repeat(5-avg);
       let el = document.getElementById(`asset_rating_${asset.id}`);
       if(el) el.innerHTML = `${stars} (${data.comments.length})`;
-    });
+    }).catch(()=>{});
   });
 }
 
