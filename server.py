@@ -877,7 +877,6 @@ def admin_panel():
             if "file" in request.files:
                 f = request.files["file"]
                 if f.filename:
-                    import time
                     fname = f"{int(time.time())}_{f.filename}"
                     f.save(os.path.join(ASSETS_DIR, fname))
                     file_url = f"/free_asset/{fname}"
