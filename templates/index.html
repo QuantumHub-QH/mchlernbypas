@@ -192,7 +192,7 @@ function openDetail(item, type) {
     let mediaContainer = document.getElementById('detailMediaContainer');
     mediaContainer.innerHTML = '';
     
-    let urlStr = type === 'product' ? item.image_url : item.file_url;
+    let urlStr = type === 'product' ? item.image_url : item.media_url || item.file_url;
     let urls = (urlStr || "").split(',').filter(u => u.trim() !== "");
     
     if(urls.length === 0) {
@@ -296,7 +296,7 @@ function renderFreeAssets() {
     card.style = 'background:#111; border:1px solid #222; border-radius:12px; overflow:hidden; display:flex; flex-direction:column; cursor:pointer;';
     card.onclick = () => openDetail(asset, 'asset');
     
-    let firstUrl = (asset.file_url || "").split(',')[0];
+    let firstUrl = (asset.media_url || asset.file_url || "").split(',')[0];
     let mediaHtml = '';
     if(firstUrl && isVideo(firstUrl)) {
       mediaHtml = `<video src="${firstUrl}" style="width:100%;height:140px;object-fit:cover;border-bottom:1px solid #222;" muted loop playsinline onmouseover="this.play()" onmouseout="this.pause()"></video>`;
