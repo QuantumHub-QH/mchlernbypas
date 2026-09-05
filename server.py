@@ -385,20 +385,38 @@ def process_audio(input_path, speed=1.0, pitch=1.0, vol=1.0, with_intro=True):
     ext = ".mp3"
     out_name = f"{uuid.uuid4().hex}{ext}"
     out_path = os.path.join(TEMP_DIR, out_name)
-    tempo = speed / pitch if pitch != 0 else 1.0
+
+    # asetrate mengubah pitch TANPA mengubah tempo playback.
+    # Tapi hasilnya sample-rate berubah, jadi harus diikuti aresample ke 44100
+    # LALU atempo untuk koreksi speed (pitch naik → tempo ikut naik, atempo kompensasi).
+    # Ini menjaga DURASI audio tetap sama.
+    # Rumus: asetrate=44100*pitch, atempo=speed/pitch, aresample=44100
+    # Jika pitch=1 dan speed=1 → tidak ada perubahan apapun, durasi utuh.
+    pitch_safe = max(0.1, pitch)
+    tempo = (speed / pitch_safe)
+    # atempo hanya support 0.5–100.0, tapi kita clamp dulu
+    tempo = max(0.5, min(100.0, tempo))
 
     if with_intro and os.path.exists(INTRO_PATH):
         filt = (
             f"[0:a]aformat=sample_fmts=fltp:sample_rates=44100:channel_layouts=stereo[a0];"
             f"[1:a]aformat=sample_fmts=fltp:sample_rates=44100:channel_layouts=stereo[a1];"
-            f"[a0][a1]concat=n=2:v=0:a=1,aresample=44100,asetrate=44100*{pitch},"
-            f"atempo={tempo},volume={vol}[out]"
+            f"[a0][a1]concat=n=2:v=0:a=1,"
+            f"asetrate=44100*{pitch_safe},atempo={tempo},aresample=44100,"
+            f"volume={vol}[out]"
         )
         cmd = [FFMPEG, "-y", "-i", INTRO_PATH, "-i", input_path,
-               "-filter_complex", filt, "-map", "[out]", out_path]
+               "-filter_complex", filt, "-map", "[out]",
+               "-q:a", "2", out_path]
     else:
-        filt = f"aresample=44100,asetrate=44100*{pitch},atempo={tempo},volume={vol}"
-        cmd = [FFMPEG, "-y", "-i", input_path, "-filter:a", filt, out_path]
+        filt = (
+            f"asetrate=44100*{pitch_safe},"
+            f"atempo={tempo},"
+            f"aresample=44100,"
+            f"volume={vol}"
+        )
+        cmd = [FFMPEG, "-y", "-i", input_path, "-filter:a", filt,
+               "-q:a", "2", out_path]
 
     subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     return out_path, out_name
@@ -406,20 +424,27 @@ def process_audio(input_path, speed=1.0, pitch=1.0, vol=1.0, with_intro=True):
 def process_preview(input_path, speed=1.0, pitch=1.0, vol=1.0):
     out_name = f"prev_{uuid.uuid4().hex}.mp3"
     out_path = os.path.join(TEMP_DIR, out_name)
-    tempo = speed / pitch if pitch != 0 else 1.0
+    pitch_safe = max(0.1, pitch)
+    tempo = max(0.5, min(100.0, speed / pitch_safe))
 
     if os.path.exists(INTRO_PATH):
         filt = (
             f"[0:a]aformat=sample_fmts=fltp:sample_rates=44100:channel_layouts=stereo[a0];"
             f"[1:a]atrim=duration=12,aformat=sample_fmts=fltp:sample_rates=44100:channel_layouts=stereo[a1];"
-            f"[a0][a1]concat=n=2:v=0:a=1,aresample=44100,asetrate=44100*{pitch},"
-            f"atempo={tempo},volume={vol}[out]"
+            f"[a0][a1]concat=n=2:v=0:a=1,"
+            f"asetrate=44100*{pitch_safe},atempo={tempo},aresample=44100,"
+            f"volume={vol}[out]"
         )
         cmd = [FFMPEG, "-y", "-i", INTRO_PATH, "-i", input_path,
-               "-filter_complex", filt, "-map", "[out]", out_path]
+               "-filter_complex", filt, "-map", "[out]", "-q:a", "2", out_path]
     else:
-        filt = f"aresample=44100,asetrate=44100*{pitch},atempo={tempo},volume={vol}"
-        cmd = [FFMPEG, "-y", "-i", input_path, "-t", "15", "-filter:a", filt, out_path]
+        filt = (
+            f"asetrate=44100*{pitch_safe},"
+            f"atempo={tempo},"
+            f"aresample=44100,"
+            f"volume={vol}"
+        )
+        cmd = [FFMPEG, "-y", "-i", input_path, "-t", "15", "-filter:a", filt, "-q:a", "2", out_path]
 
     subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     return out_path, out_name
@@ -1008,7 +1033,8 @@ def admin_panel():
                     </select>
                     <input type="text" name="price" placeholder="Harga (contoh: Rp 50.000)" required style="padding:10px; border-radius:5px; border:1px solid #555; background:#000; color:#fff;">
                     <textarea name="description" placeholder="Deskripsi Produk..." rows="3" style="padding:10px; border-radius:5px; border:1px solid #555; background:#000; color:#fff; font-family:sans-serif;"></textarea>
-                    <input type="file" name="image" accept="image/*" required style="padding:10px; border-radius:5px; border:1px solid #555; background:#000; color:#fff;">
+                    <label style="color:#aaa; font-size:11px;">Foto / Video Produk (wajib):</label>
+                    <input type="file" name="image" accept="image/*,video/*" required style="padding:10px; border-radius:5px; border:1px solid #555; background:#000; color:#fff;">
                     <button type="submit" style="background:#f59e0b; color:#000; font-weight:bold; padding:10px 20px; border:none; border-radius:5px; cursor:pointer;">Tambah Produk</button>
                 </form>
                 
