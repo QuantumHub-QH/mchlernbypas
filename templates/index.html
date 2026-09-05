@@ -11,11 +11,14 @@
 // ==================== FREE ASSETS ====================
 let freeAssetsList = [];
 
+// Ambil username Discord dari Jinja2 (dikirim server)
+const _discordUser   = {{ discord_user | tojson }};
+const _discordAvatar = {{ discord_avatar | tojson }};
+
 async function openFreeAssets() {
   document.getElementById('hubPage').style.display = 'none';
   document.getElementById('mainApp').style.display = 'none';
   document.getElementById('freeAssetsModal').style.display = 'flex';
-  
   try {
     let res = await fetch('/api/free-assets');
     freeAssetsList = await res.json();
@@ -25,38 +28,51 @@ async function openFreeAssets() {
 
 function closeFreeAssets() {
   document.getElementById('freeAssetsModal').style.display = 'none';
-  document.getElementById('hubPage').style.display = 'block';
+  document.getElementById('hubPage').style.display = 'flex';
+}
+
+function isVideo(url) {
+  if(!url) return false;
+  return /\.(mp4|webm|mov|avi|mkv)$/i.test(url);
 }
 
 function renderFreeAssets() {
   let grid = document.getElementById('freeAssetsGrid');
   grid.innerHTML = '';
-  
   if(freeAssetsList.length === 0) {
-    grid.innerHTML = '<div style="color:#888; grid-column:1/-1; text-align:center;">Tidak ada aset gratis saat ini.</div>';
+    grid.innerHTML = '<div style="color:#888; grid-column:1/-1; text-align:center; padding:40px;">Tidak ada aset gratis saat ini.</div>';
     return;
   }
-  
   freeAssetsList.forEach(asset => {
     let card = document.createElement('div');
-    card.style = 'background:#111; border:1px solid #333; border-radius:12px; padding:15px; position:relative; display:flex; flex-direction:column; gap:10px;';
-    
+    card.style = 'background:#111; border:1px solid #222; border-radius:12px; overflow:hidden; display:flex; flex-direction:column;';
+    let mediaHtml = '';
+    if(asset.file_url && isVideo(asset.file_url)) {
+      mediaHtml = `<video src="${asset.file_url}" style="width:100%;height:140px;object-fit:cover;border-bottom:1px solid #222;" muted loop playsinline onmouseover="this.play()" onmouseout="this.pause()"></video>`;
+    } else if(asset.file_url && /\.(jpg|jpeg|png|gif|webp)$/i.test(asset.file_url)) {
+      mediaHtml = `<img src="${asset.file_url}" style="width:100%;height:140px;object-fit:cover;border-bottom:1px solid #222;">`;
+    } else {
+      mediaHtml = `<div style="height:80px; background:#0a0a0a; display:flex; align-items:center; justify-content:center; font-size:32px; border-bottom:1px solid #222;">📦</div>`;
+    }
     card.innerHTML = `
-      <div style="font-weight:900; font-size:16px; color:#00e5ff; text-transform:uppercase;">${asset.title}</div>
-      <div style="font-size:12px; color:#aaa; flex:1;">${asset.description}</div>
-      <div id="asset_rating_${asset.id}" style="color:#ffcc00; font-size:12px; font-weight:bold;">Loading rating...</div>
-      <div style="display:flex; gap:10px; margin-top:10px;">
-        <a href="${asset.file_url}" target="_blank" style="flex:1; background:#00e5ff; color:#000; text-align:center; padding:8px; border-radius:5px; font-weight:bold; text-decoration:none; font-size:12px;">DOWNLOAD</a>
-        <button onclick="openComments('asset', ${asset.id})" style="flex:1; background:#333; color:#fff; border:none; padding:8px; border-radius:5px; font-weight:bold; cursor:pointer; font-size:12px;">💬 KOMENTAR</button>
+      ${mediaHtml}
+      <div style="padding:15px; display:flex; flex-direction:column; gap:8px; flex:1;">
+        <div style="font-weight:900; font-size:14px; color:#00e5ff; text-transform:uppercase;">${asset.title}</div>
+        ${asset.description ? `<div style="font-size:11px; color:#888; line-height:1.5;">${asset.description}</div>` : ''}
+        <div id="asset_rating_${asset.id}" style="color:#ffcc00; font-size:11px; font-weight:bold;">☆☆☆☆☆</div>
+        <div style="display:flex; gap:8px; margin-top:auto; padding-top:8px;">
+          <a href="${asset.file_url}" download style="flex:1; background:#00e5ff; color:#000; text-align:center; padding:8px; border-radius:5px; font-weight:bold; text-decoration:none; font-size:11px;">⬇ DOWNLOAD</a>
+          <button onclick="openComments('asset', ${asset.id})" style="flex:1; background:#222; color:#fff; border:1px solid #333; padding:8px; border-radius:5px; font-weight:bold; cursor:pointer; font-size:11px;">💬 KOMENTAR</button>
+        </div>
       </div>
     `;
     grid.appendChild(card);
-    
     fetch(`/api/comments/asset/${asset.id}`).then(r=>r.json()).then(data => {
-      let stars = "★".repeat(Math.round(data.average)) + "☆".repeat(5-Math.round(data.average));
+      let avg = Math.round(data.average);
+      let stars = "★".repeat(avg) + "☆".repeat(5-avg);
       let el = document.getElementById(`asset_rating_${asset.id}`);
-      if(el) el.innerHTML = `${stars} (${data.comments.length})`;
-    });
+      if(el) el.innerHTML = `${stars} ${data.average}/5 (${data.comments.length} ulasan)`;
+    }).catch(()=>{});
   });
 }
 
@@ -66,6 +82,10 @@ let currentCommentTarget = {type:null, id:null};
 function openComments(type, id) {
   currentCommentTarget = {type, id};
   document.getElementById('commentsOverlay').style.display = 'flex';
+  let nameInput = document.getElementById('commentUsername');
+  if(nameInput && _discordUser && !nameInput.value) {
+    nameInput.value = _discordUser;
+  }
   loadComments();
 }
 
@@ -76,27 +96,33 @@ function closeComments() {
 async function loadComments() {
   let list = document.getElementById('commentsList');
   list.innerHTML = '<div style="color:#888; text-align:center; padding:20px;">Loading...</div>';
-  
   try {
-    let url = currentCommentTarget.type === 'product' ? `/api/comments/product/${currentCommentTarget.id}` : `/api/comments/asset/${currentCommentTarget.id}`;
+    let url = currentCommentTarget.type === 'product'
+      ? `/api/comments/product/${currentCommentTarget.id}`
+      : `/api/comments/asset/${currentCommentTarget.id}`;
     let res = await fetch(url);
     let data = await res.json();
-    
     list.innerHTML = '';
     if(data.comments.length === 0) {
-      list.innerHTML = '<div style="color:#888; text-align:center; padding:20px;">Belum ada komentar.</div>';
+      list.innerHTML = '<div style="color:#888; text-align:center; padding:20px;">Belum ada komentar. Jadilah yang pertama! ✍️</div>';
     } else {
+      let avg = Math.round(data.average);
+      let topStars = "★".repeat(avg) + "☆".repeat(5-avg);
+      let topDiv = document.createElement('div');
+      topDiv.style = 'background:#111; padding:10px; border-radius:8px; margin-bottom:12px; text-align:center;';
+      topDiv.innerHTML = `<div style="color:#ffcc00; font-size:18px;">${topStars}</div><div style="color:#aaa; font-size:11px;">${data.average}/5 — ${data.comments.length} ulasan</div>`;
+      list.appendChild(topDiv);
       data.comments.forEach(c => {
         let stars = "★".repeat(c.rating) + "☆".repeat(5-c.rating);
         let div = document.createElement('div');
-        div.style = 'background:rgba(255,255,255,0.05); padding:10px; border-radius:8px; margin-bottom:10px; border:1px solid #222;';
+        div.style = 'background:rgba(255,255,255,0.04); padding:10px; border-radius:8px; margin-bottom:8px; border:1px solid #1a1a1a;';
         div.innerHTML = `
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
-            <div style="font-weight:bold; color:#fff; font-size:12px;">${c.username}</div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+            <div style="font-weight:bold; color:#fff; font-size:12px;">🎮 ${c.username}</div>
             <div style="color:#ffcc00; font-size:10px;">${stars}</div>
           </div>
-          <div style="font-size:11px; color:#aaa; margin-bottom:5px;">${c.content}</div>
-          <div style="font-size:9px; color:#555;">${c.created_at}</div>
+          <div style="font-size:11px; color:#bbb; margin-bottom:4px; line-height:1.5;">${c.content}</div>
+          <div style="font-size:9px; color:#444;">${c.created_at}</div>
         `;
         list.appendChild(div);
       });
@@ -105,18 +131,17 @@ async function loadComments() {
 }
 
 async function submitComment() {
-  let username = document.getElementById('commentUsername').value.trim() || 'Anonim';
+  let usernameInput = document.getElementById('commentUsername');
+  let username = (usernameInput ? usernameInput.value.trim() : '') || _discordUser || 'Anonim';
   let content = document.getElementById('commentContent').value.trim();
-  let rating = document.getElementById('commentRating').value;
-  
+  let rating = parseInt(document.getElementById('commentRating').value);
+  let avatar = _discordAvatar || '';
   if(!content) { alert('Isi komentar dulu!'); return; }
-  
   let payload = {
-    username, content, rating: parseInt(rating),
+    username, avatar, content, rating,
     product_id: currentCommentTarget.type === 'product' ? currentCommentTarget.id : null,
-    asset_id: currentCommentTarget.type === 'asset' ? currentCommentTarget.id : null
+    asset_id:   currentCommentTarget.type === 'asset'   ? currentCommentTarget.id : null
   };
-  
   try {
     let res = await fetch('/api/comments/add', {
       method: 'POST',
@@ -127,16 +152,8 @@ async function submitComment() {
     if(data.success) {
       document.getElementById('commentContent').value = '';
       loadComments();
-      if(currentCommentTarget.type === 'product' && document.getElementById('storeModal').style.display !== 'none') {
-        let currentTab = document.querySelector('.store-tab.active-tab');
-        if (currentTab) {
-            let cat = currentTab.textContent === 'Semua' ? 'all' : currentTab.textContent;
-            filterStore(cat, currentTab);
-        }
-      }
-      if(currentCommentTarget.type === 'asset' && document.getElementById('freeAssetsModal').style.display !== 'none') {
-        renderFreeAssets();
-      }
+      if(currentCommentTarget.type === 'product') renderStore();
+      if(currentCommentTarget.type === 'asset') renderFreeAssets();
     }
   } catch(e) { console.error(e); }
 }
