@@ -41,7 +41,7 @@ os.makedirs(DATA_DIR, exist_ok=True)
 
 # ── DATABASE SETUP ────────────────────────────────────────────────────────────
 def init_db():
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, timeout=10)
     c = conn.cursor()
     c.execute('''CREATE TABLE IF NOT EXISTS usage (
                     identifier TEXT,
@@ -115,7 +115,7 @@ init_db()
 
 def get_usage(identifier):
     today = str(date.today())
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, timeout=10)
     c = conn.cursor()
     c.execute("SELECT count FROM usage WHERE identifier=? AND upload_date=?", (identifier, today))
     row = c.fetchone()
@@ -124,7 +124,7 @@ def get_usage(identifier):
 
 def increment_usage(identifier):
     today = str(date.today())
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, timeout=10)
     c = conn.cursor()
     c.execute("SELECT count FROM usage WHERE identifier=? AND upload_date=?", (identifier, today))
     row = c.fetchone()
@@ -170,7 +170,7 @@ def check_limits(token, client_ip, discord_id=None):
         max_limit = 2
         
     # Cek Premium (cek juga via Discord ID kalau ada)
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, timeout=10)
     c = conn.cursor()
     c.execute("SELECT expiry_date FROM premium WHERE identifier=?", (identifier,))
     row = c.fetchone()
@@ -251,7 +251,7 @@ def callback_discord():
 
     # Daftarkan user ke tabel users (INSERT OR IGNORE supaya tidak duplikat)
     try:
-        conn = sqlite3.connect(DB_PATH)
+        conn = sqlite3.connect(DB_PATH, timeout=10)
         c = conn.cursor()
         c.execute(
             "INSERT OR IGNORE INTO users (discord_id, discord_username, discord_avatar, joined_at) VALUES (?, ?, ?, ?)",
@@ -284,7 +284,7 @@ def track_user_activity():
 
 @app.route("/api/comments", methods=["GET", "POST"])
 def api_comments():
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, timeout=10)
     c = conn.cursor()
     if request.method == "POST":
         data = request.json
@@ -301,7 +301,7 @@ def api_comments():
 
 @app.route("/api/products", methods=["GET"])
 def api_products():
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, timeout=10)
     c = conn.cursor()
     c.execute("SELECT id, category, title, price, image_url, description FROM products ORDER BY id DESC")
     rows = c.fetchall()
@@ -310,7 +310,7 @@ def api_products():
 
 @app.route("/api/categories", methods=["GET"])
 def api_categories():
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, timeout=10)
     c = conn.cursor()
     c.execute("SELECT name FROM categories ORDER BY name ASC")
     rows = c.fetchall()
@@ -334,7 +334,7 @@ threading.Thread(target=cleanup_old_files, daemon=True).start()
 # ── HELPER: Total Users ───────────────────────────────────────────────────────
 def get_total_users():
     try:
-        conn = sqlite3.connect(DB_PATH)
+        conn = sqlite3.connect(DB_PATH, timeout=10)
         c = conn.cursor()
         c.execute("SELECT COUNT(*) FROM users")
         count = c.fetchone()[0]
@@ -477,7 +477,7 @@ def get_limits():
     # Ambil expiry premium untuk ditampilkan ke user
     premium_expiry = None
     if max_limit > 100:
-        conn = sqlite3.connect(DB_PATH)
+        conn = sqlite3.connect(DB_PATH, timeout=10)
         c = conn.cursor()
         c.execute("SELECT expiry_date FROM premium WHERE identifier=?", (identifier,))
         row = c.fetchone()
@@ -566,7 +566,7 @@ def fetch_yt():
     is_tiktok = "tiktok.com" in url
     
     ydl_opts = {
-        "format": "ba/b/best/bestvideo+bestaudio",
+        "format": "ba[ext=m4a]/bestaudio/b/best",
         "postprocessors": [{"key": "FFmpegExtractAudio", "preferredcodec": "mp3"}],
         "outtmpl": os.path.join(TEMP_DIR, dl_name),
         "ffmpeg_location": FFMPEG,
@@ -614,7 +614,7 @@ def api_preview():
     try:
         if url:
             # Menggunakan yt-dlp untuk mendapatkan URL video langsung
-            ydl_opts = {'format': 'worst[ext=mp4]/worst', 'quiet': True, 'extractor_args': {"youtube": {"client": ["WEB_CREATOR", "ANDROID_VR", "WEB"]}}}
+            ydl_opts = {'format': 'best[ext=mp4][height<=480]/bestvideo[ext=mp4]/best', 'quiet': True, 'extractor_args': {"youtube": {"client": ["WEB_CREATOR", "ANDROID_VR", "WEB"]}}}
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 info = ydl.extract_info(url, download=False)
                 # Ambil URL asli video
@@ -650,7 +650,7 @@ def generate_spritesheet():
     try:
         if url:
             # Menggunakan yt-dlp untuk mendapatkan URL video langsung
-            ydl_opts = {'format': 'worst[ext=mp4]/worst', 'quiet': True}
+            ydl_opts = {'format': 'best[ext=mp4][height<=480]/bestvideo[ext=mp4]/best', 'quiet': True}
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                 info = ydl.extract_info(url, download=False)
                 # Ambil URL asli video (jika ada list format, ambil yang pertama/terburuk yg ada URL-nya)
@@ -804,7 +804,7 @@ def serve_free_asset(filename):
 
 @app.route("/api/comments/product/<int:product_id>", methods=["GET"])
 def api_product_comments(product_id):
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, timeout=10)
     c = conn.cursor()
     c.execute("SELECT id, username, avatar, content, rating, created_at FROM comments WHERE product_id=? ORDER BY id DESC LIMIT 50", (product_id,))
     rows = c.fetchall()
@@ -816,7 +816,7 @@ def api_product_comments(product_id):
 
 @app.route("/api/comments/asset/<int:asset_id>", methods=["GET"])
 def api_asset_comments(asset_id):
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, timeout=10)
     c = conn.cursor()
     c.execute("SELECT id, username, avatar, content, rating, created_at FROM comments WHERE asset_id=? ORDER BY id DESC LIMIT 50", (asset_id,))
     rows = c.fetchall()
@@ -829,7 +829,7 @@ def api_asset_comments(asset_id):
 @app.route("/api/comments/add", methods=["POST"])
 def api_comments_add():
     data = request.json
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, timeout=10)
     c = conn.cursor()
     c.execute("""
         INSERT INTO comments (username, avatar, content, rating, created_at, product_id, asset_id) 
@@ -849,12 +849,12 @@ def api_comments_add():
 
 @app.route("/api/free-assets", methods=["GET"])
 def api_get_free_assets():
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, timeout=10)
     c = conn.cursor()
-    c.execute("SELECT id, title, description, file_url, created_at FROM free_assets ORDER BY id DESC")
+    c.execute("SELECT id, title, description, file_url, media_url, created_at FROM free_assets ORDER BY id DESC")
     rows = c.fetchall()
     conn.close()
-    return jsonify([{"id": r[0], "title": r[1], "description": r[2] or "", "file_url": r[3], "created_at": r[4]} for r in rows])
+    return jsonify([{"id": r[0], "title": r[1], "description": r[2] or "", "file_url": r[3], "media_url": r[4], "created_at": r[5]} for r in rows])
 
 @app.route("/admin-panel-rahasia", methods=["GET", "POST"])
 def admin_panel():
@@ -871,7 +871,7 @@ def admin_panel():
             days = 7 if duration == "week" else 30
             expiry = (datetime.now() + timedelta(days=days)).isoformat()
             
-            conn = sqlite3.connect(DB_PATH)
+            conn = sqlite3.connect(DB_PATH, timeout=10)
             c = conn.cursor()
             c.execute("INSERT OR REPLACE INTO premium (identifier, expiry_date) VALUES (?, ?)", (identifier, expiry))
             conn.commit()
@@ -879,7 +879,7 @@ def admin_panel():
             return redirect("/admin-panel-rahasia")
         elif request.form.get("action") == "delete":
             identifier = request.form.get("identifier")
-            conn = sqlite3.connect(DB_PATH)
+            conn = sqlite3.connect(DB_PATH, timeout=10)
             c = conn.cursor()
             c.execute("DELETE FROM premium WHERE identifier=?", (identifier,))
             conn.commit()
@@ -901,7 +901,7 @@ def admin_panel():
             
             image_url_str = ",".join(image_urls)
             
-            conn = sqlite3.connect(DB_PATH)
+            conn = sqlite3.connect(DB_PATH, timeout=10)
             c = conn.cursor()
             c.execute("INSERT INTO products (category, title, price, image_url, description) VALUES (?, ?, ?, ?, ?)", (category, title, price, image_url_str, desc))
             conn.commit()
@@ -909,7 +909,7 @@ def admin_panel():
             return redirect("/admin-panel-rahasia")
         elif request.form.get("action") == "delete_product":
             pid = request.form.get("product_id")
-            conn = sqlite3.connect(DB_PATH)
+            conn = sqlite3.connect(DB_PATH, timeout=10)
             c = conn.cursor()
             c.execute("DELETE FROM products WHERE id=?", (pid,))
             conn.commit()
@@ -920,24 +920,32 @@ def admin_panel():
             title = request.form.get("title").strip()
             desc = request.form.get("description", "").strip()
             
+            media_urls = []
+            if "media" in request.files:
+                for f in request.files.getlist("media"):
+                    if f.filename:
+                        fname = f"m_{int(time.time())}_{f.filename}"
+                        f.save(os.path.join(ASSETS_DIR, fname))
+                        media_urls.append(f"/free_asset/{fname}")
+            media_url_str = ",".join(media_urls)
+            
             file_urls = []
             for f in request.files.getlist("file"):
                 if f.filename:
-                    fname = f"{int(time.time())}_{f.filename}"
+                    fname = f"f_{int(time.time())}_{f.filename}"
                     f.save(os.path.join(ASSETS_DIR, fname))
                     file_urls.append(f"/free_asset/{fname}")
-            
             file_url_str = ",".join(file_urls)
             
-            conn = sqlite3.connect(DB_PATH)
+            conn = sqlite3.connect(DB_PATH, timeout=10)
             c = conn.cursor()
-            c.execute("INSERT INTO free_assets (title, description, file_url, created_at) VALUES (?, ?, ?, ?)", (title, desc, file_url_str, datetime.now().isoformat()))
+            c.execute("INSERT INTO free_assets (title, description, file_url, media_url, created_at) VALUES (?, ?, ?, ?, ?)", (title, desc, file_url_str, media_url_str, datetime.now().isoformat()))
             conn.commit()
             conn.close()
             return redirect("/admin-panel-rahasia")
         elif request.form.get("action") == "delete_free_asset":
             asset_id = request.form.get("asset_id")
-            conn = sqlite3.connect(DB_PATH)
+            conn = sqlite3.connect(DB_PATH, timeout=10)
             c = conn.cursor()
             c.execute("DELETE FROM free_assets WHERE id=?", (asset_id,))
             conn.commit()
@@ -946,7 +954,7 @@ def admin_panel():
         elif request.form.get("action") == "add_category":
             cat_name = request.form.get("category_name").strip().upper()
             if cat_name:
-                conn = sqlite3.connect(DB_PATH)
+                conn = sqlite3.connect(DB_PATH, timeout=10)
                 c = conn.cursor()
                 try:
                     c.execute("INSERT INTO categories (name) VALUES (?)", (cat_name,))
@@ -957,7 +965,7 @@ def admin_panel():
             return redirect("/admin-panel-rahasia")
         elif request.form.get("action") == "delete_category":
             cat_id = request.form.get("category_id")
-            conn = sqlite3.connect(DB_PATH)
+            conn = sqlite3.connect(DB_PATH, timeout=10)
             c = conn.cursor()
             c.execute("DELETE FROM categories WHERE id=?", (cat_id,))
             conn.commit()
@@ -975,7 +983,7 @@ def admin_panel():
         </body>
         """
         
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(DB_PATH, timeout=10)
     c = conn.cursor()
     c.execute("SELECT identifier, expiry_date FROM premium")
     premiums = c.fetchall()
@@ -1128,6 +1136,9 @@ def admin_panel():
                     <input type="hidden" name="action" value="add_free_asset">
                     <input type="text" name="title" placeholder="Nama Asset (contoh: Efek Suara Tembakan)" required style="padding:10px; border-radius:5px; border:1px solid #555; background:#000; color:#fff;">
                     <textarea name="description" placeholder="Deskripsi Asset..." rows="3" style="padding:10px; border-radius:5px; border:1px solid #555; background:#000; color:#fff; font-family:sans-serif;"></textarea>
+                    <label style="color:#aaa; font-size:11px;">Media Preview (Foto/Video, Optional):</label>
+                    <input type="file" name="media" accept="image/*,video/*" multiple style="padding:10px; border-radius:5px; border:1px solid #555; background:#000; color:#fff;">
+                    <label style="color:#aaa; font-size:11px;">File Asli (Zip/Lua/Rbxl, Wajib):</label>
                     <input type="file" name="file" multiple required style="padding:10px; border-radius:5px; border:1px solid #555; background:#000; color:#fff;">
                     <button type="submit" style="background:#06b6d4; color:#000; font-weight:bold; padding:10px 20px; border:none; border-radius:5px; cursor:pointer;">Upload Asset</button>
                 </form>
