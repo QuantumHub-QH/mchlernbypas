@@ -172,18 +172,28 @@ function openDetail(item, type) {
         document.getElementById('detailPrice').textContent = item.price;
         document.getElementById('detailPrice').style.display = 'block';
         document.getElementById('detailOrderBtn').style.display = 'block';
-        document.getElementById('detailDownloadBtn').style.display = 'none';
         document.getElementById('detailCategory').style.color = '#ff0000';
         document.querySelector('#detailModal > div').style.borderColor = '#ff0000';
+        
+        // Jika produk punya file download, tampilkan tombol download juga
+        let prodFiles = (item.file_url || "").split(',').filter(u => u);
+        if(prodFiles.length > 0) {
+            document.getElementById('detailDownloadBtn').style.display = 'block';
+            document.getElementById('detailDownloadBtn').href = prodFiles[0];
+            document.getElementById('detailDownloadBtn').textContent = '⬇ DOWNLOAD FILE';
+        } else {
+            document.getElementById('detailDownloadBtn').style.display = 'none';
+        }
     } else {
         document.getElementById('detailPrice').style.display = 'none';
         document.getElementById('detailOrderBtn').style.display = 'none';
         document.getElementById('detailDownloadBtn').style.display = 'block';
+        document.getElementById('detailDownloadBtn').textContent = '⬇ DOWNLOAD';
         document.getElementById('detailCategory').style.color = '#00e5ff';
         document.querySelector('#detailModal > div').style.borderColor = '#00e5ff';
         
-        let urls = (item.file_url || "").split(',').filter(u=>u);
-        document.getElementById('detailDownloadBtn').href = urls.length > 0 ? urls[0] : '#';
+        let dlUrls = (item.file_url || "").split(',').filter(u => u);
+        document.getElementById('detailDownloadBtn').href = dlUrls.length > 0 ? dlUrls[0] : '#';
     }
     
     document.getElementById('detailCommentBtn').onclick = () => openComments(type, item.id);
