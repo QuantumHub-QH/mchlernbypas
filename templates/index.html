@@ -952,9 +952,11 @@ tr:hover td { background: rgba(255,255,255,0.02); }
       </div>
       
       <div id="spritePreviewArea" style="display:none; margin-top:24px; text-align:center;">
-        <div style="font-size:12px; font-weight:700; margin-bottom:8px; color:var(--success);">✅ Preview Spritesheet</div>
-        <img id="imgSpritePreview" src="" style="max-width:100%; border:1px solid #333; border-radius:8px; background:#000;">
-        <div style="display:flex; gap:10px; margin-top:16px;">
+        <div style="background:#0d1117; border:1px solid #ff0000; border-radius:12px; padding:20px;">
+          <div style="font-size:36px; margin-bottom:8px;">🎞️</div>
+          <div style="font-size:14px; font-weight:900; color:#fff; margin-bottom:4px;">SPRITESHEET SIAP!</div>
+          <div style="font-size:11px; color:#888; margin-bottom:16px;">128×128 per frame · 7×8 grid · Siap upload ke Roblox</div>
+          <img id="imgSpritePreview" src="" style="display:none;">
           <button class="btn btn-full upload-btn" onclick="uploadSprite()" id="btnUploadSprite">🚀 Upload ke Roblox (Decal)</button>
         </div>
       </div>
@@ -1089,20 +1091,33 @@ function handleSpriteFile(f) {
 async function generateSpriteLocal() {
   if(!state.sprite.file) return;
   const st = document.getElementById('statusSprite');
-  st.innerHTML = '<span class="spinner" style="display:inline-block;vertical-align:middle;margin-right:8px;"></span> Generating Spritesheet dari file lokal...';
-  
+  st.style.display = 'block';
+
+  // Animated progress bar while waiting
+  let fakeP = 0;
+  setProgressBar('statusSprite', 0, 'Uploading file...');
+  const iv = setInterval(() => {
+    fakeP += Math.random() * 8;
+    if(fakeP > 88) fakeP = 88;
+    setProgressBar('statusSprite', Math.round(fakeP), fakeP < 30 ? 'Uploading file...' : fakeP < 65 ? 'Generating spritesheet (FFmpeg)...' : 'Finishing up...');
+  }, 400);
+
   const fd = new FormData();
   fd.append('file', state.sprite.file);
   try {
     const r = await fetch('/api/generate-spritesheet', {method:'POST', body:fd});
     const d = await r.json();
+    clearInterval(iv);
     if(d.error) throw new Error(d.error);
-    
+    setProgressBar('statusSprite', 100, '✅ Spritesheet berhasil dibuat!');
     state.sprite.generatedUrl = d.url;
+    // Hide actual image, just show upload button
+    document.getElementById('imgSpritePreview').style.display = 'none';
     document.getElementById('imgSpritePreview').src = d.url;
     document.getElementById('spritePreviewArea').style.display = 'block';
-    st.innerHTML = '<span style="color:var(--success)">✅ Spritesheet berhasil dibuat!</span>';
+    setTimeout(() => { st.style.display = 'none'; }, 3000);
   } catch(e) {
+    clearInterval(iv);
     st.innerHTML = `<span style="color:#ff0000;">❌ Gagal: ${e.message}</span>`;
   }
 }
@@ -1116,8 +1131,18 @@ async function fetchYTSprite() {
   const btn = document.getElementById('btnYtSprite');
   const st = document.getElementById('statusSprite');
   btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
-  st.innerHTML = '<span class="spinner" style="display:inline-block;vertical-align:middle;margin-right:8px;"></span> Mengunduh & Generate dari YouTube... (Bisa memakan waktu)';
-  
+  st.style.display = 'block';
+
+  // Animated fake progress
+  let fakeP = 0;
+  setProgressBar('statusSprite', 0, 'Mengunduh dari YouTube...');
+  const iv = setInterval(() => {
+    fakeP += Math.random() * 5;
+    if(fakeP > 85) fakeP = 85;
+    const label = fakeP < 20 ? 'Mengunduh dari YouTube...' : fakeP < 55 ? 'Memproses video (yt-dlp)...' : fakeP < 80 ? 'Generating spritesheet (FFmpeg)...' : 'Hampir selesai...';
+    setProgressBar('statusSprite', Math.round(fakeP), label);
+  }, 500);
+
   const fd = new FormData();
   fd.append('url', url);
   fd.append('start', start);
@@ -1126,14 +1151,17 @@ async function fetchYTSprite() {
   try {
     const r = await fetch('/api/generate-spritesheet', {method:'POST', body:fd});
     const d = await r.json();
+    clearInterval(iv);
     if(d.error) throw new Error(d.error);
-    
+    setProgressBar('statusSprite', 100, '✅ Spritesheet dari YouTube berhasil!');
     state.sprite.title = "YT_Spritesheet";
     state.sprite.generatedUrl = d.url;
+    document.getElementById('imgSpritePreview').style.display = 'none';
     document.getElementById('imgSpritePreview').src = d.url;
     document.getElementById('spritePreviewArea').style.display = 'block';
-    st.innerHTML = '<span style="color:var(--success)">✅ Spritesheet dari YouTube berhasil dibuat!</span>';
+    setTimeout(() => { st.style.display = 'none'; }, 3000);
   } catch(e) {
+    clearInterval(iv);
     st.innerHTML = `<span style="color:#ff0000;">❌ Gagal: ${e.message}</span>`;
   } finally {
     btn.disabled = false; btn.innerHTML = 'Generate & Preview';
@@ -1612,25 +1640,30 @@ function renderYT(m) {
   if(el) el.innerHTML = '';
 }
 
-// ── STORE ──────────────────────────────────────────────────────────────────
+// ── STORE ─────────────────────────────────────────────────────────────────────
 let _allProducts = [];
 let _currentFilter = 'ALL';
 
 async function openStore() {
   document.getElementById('storeModal').style.display = 'flex';
-  if(_allProducts.length === 0) {
-    try {
-      const r = await fetch('/api/products');
-      _allProducts = await r.json();
-    } catch(e) { _allProducts = []; }
-  }
+  try {
+    const r = await fetch('/api/products');
+    _allProducts = await r.json();
+    const cr = await fetch('/api/categories');
+    const cats = await cr.json();
+    let tabsHtml = `<button class="store-tab ${_currentFilter === 'ALL' ? 'active-tab' : ''}" onclick="filterStore('ALL', this)">🎵 Semua</button>`;
+    cats.forEach(c => {
+      tabsHtml += `<button class="store-tab ${_currentFilter === c ? 'active-tab' : ''}" onclick="filterStore('${c}', this)">🔥 ${c}</button>`;
+    });
+    document.getElementById('storeTabs').innerHTML = tabsHtml;
+  } catch(e) { _allProducts = []; }
   renderStore();
 }
 
-function filterStore(cat) {
+function filterStore(cat, el) {
   _currentFilter = cat;
   document.querySelectorAll('.store-tab').forEach(t => t.classList.remove('active-tab'));
-  event.target.classList.add('active-tab');
+  if(el) el.classList.add('active-tab'); else if(event && event.target) event.target.classList.add('active-tab');
   renderStore();
 }
 
@@ -1638,16 +1671,20 @@ function renderStore() {
   const grid = document.getElementById('storeGrid');
   const filtered = _currentFilter === 'ALL' ? _allProducts : _allProducts.filter(p => p.category === _currentFilter);
   if(!filtered.length) {
-    grid.innerHTML = `<div style="text-align:center; padding:60px; color:#444; grid-column:1/-1;"><div style="font-size:40px; margin-bottom:12px;">📭</div><div>Belum ada produk di kategori ini.</div></div>`;
+    grid.innerHTML = `<div style="text-align:center; padding:60px; color:#444; grid-column:1/-1;"><div style="font-size:40px; margin-bottom:12px;">😔</div><div>Belum ada produk di kategori ini.</div></div>`;
     return;
   }
   grid.innerHTML = filtered.map(p => `
     <div class="store-card">
-      <img src="${p.image_url || 'https://via.placeholder.com/200x200/111111/ff0000?text=NO+IMG'}" alt="${p.title}">
+      <div style="height:140px; background:#111 url('${p.image_url}') center/cover no-repeat; border-bottom:1px solid #333;"></div>
       <div class="store-card-body">
         <div class="store-card-cat">${p.category}</div>
         <div class="store-card-title">${p.title}</div>
-        <div class="store-card-price">${p.price}</div>
+        ${p.description ? `<div style="font-size:11px; color:#aaa; margin:6px 0; line-height:1.4; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; text-overflow:ellipsis;">${p.description}</div>` : ''}
+        <div style="flex:1"></div>
+        <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-top:10px;">
+          <div class="store-card-price">${p.price}</div>
+        </div>
         <a href="https://discord.com/users/1309112913331748915" target="_blank" class="store-card-btn">ORDER DISCORD →</a>
       </div>
     </div>
@@ -1733,7 +1770,7 @@ function setProgressBar(statusId, pct, label) {
 
 <!-- ══ GLOBAL OVERLAYS (always visible, outside all tool sections) ══ -->
 
-<!-- ── STORE MODAL ── -->
+    <!-- ── STORE MODAL ── -->
 <div id="storeModal" onclick="if(event.target===this)this.style.display='none'" style="
   display:none; position:fixed; inset:0; background:rgba(0,0,0,0.92);
   z-index:10000; justify-content:center; align-items:flex-start;
@@ -1744,13 +1781,7 @@ function setProgressBar(statusId, pct, label) {
     <h2 style="font-family:'Outfit',sans-serif; font-weight:900; font-size:28px; color:#fff; margin-bottom:4px;">🎵 MCHLERN <span style="color:#ff0000;">STORE</span></h2>
     <p style="color:#666; font-size:12px; letter-spacing:2px; margin-bottom:24px;">ALBUM ROBLOX SIAP PAKAI — ORDER VIA DISCORD</p>
     <div id="storeTabs" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:24px;">
-      <button class="store-tab active-tab" onclick="filterStore('ALL')">🎵 Semua</button>
-      <button class="store-tab" onclick="filterStore('ALBUM FUNKOT')">⚡ FUNKOT</button>
-      <button class="store-tab" onclick="filterStore('ALBUM DJ')">🎧 DJ</button>
-      <button class="store-tab" onclick="filterStore('ALBUM GALAU')">💔 GALAU</button>
-      <button class="store-tab" onclick="filterStore('ALBUM BKB')">🎤 BKB</button>
-      <button class="store-tab" onclick="filterStore('ALBUM JAWA')">🌿 JAWA</button>
-      <button class="store-tab" onclick="filterStore('ALBUM SUNDA')">🏔️ SUNDA</button>
+      <button class="store-tab active-tab" onclick="filterStore('ALL', this)">🎵 Semua</button>
     </div>
     <div id="storeGrid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:16px;">
       <div style="text-align:center; padding:40px; color:#666; grid-column:1/-1;">
