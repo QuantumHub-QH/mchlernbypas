@@ -85,6 +85,14 @@ def init_db():
         c.execute("ALTER TABLE products ADD COLUMN description TEXT")
     except sqlite3.OperationalError:
         pass
+    try:
+        c.execute("ALTER TABLE comments ADD COLUMN product_id INTEGER")
+    except sqlite3.OperationalError:
+        pass
+    try:
+        c.execute("ALTER TABLE comments ADD COLUMN asset_id INTEGER")
+    except sqlite3.OperationalError:
+        pass
     c.execute('''CREATE TABLE IF NOT EXISTS free_assets (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     title TEXT,
@@ -92,6 +100,10 @@ def init_db():
                     file_url TEXT,
                     filename TEXT,
                     created_at TEXT
+                 )''')
+    c.execute('''CREATE TABLE IF NOT EXISTS categories (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    name TEXT UNIQUE
                  )''')
     conn.commit()
     conn.close()
