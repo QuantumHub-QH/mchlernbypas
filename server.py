@@ -93,17 +93,22 @@ def init_db():
         c.execute("ALTER TABLE comments ADD COLUMN asset_id INTEGER")
     except sqlite3.OperationalError:
         pass
+    try:
+        c.execute("ALTER TABLE products ADD COLUMN file_url TEXT")
+    except sqlite3.OperationalError:
+        pass
+    try:
+        c.execute("ALTER TABLE free_assets ADD COLUMN media_url TEXT")
+    except sqlite3.OperationalError:
+        pass
     c.execute('''CREATE TABLE IF NOT EXISTS free_assets (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     title TEXT,
                     description TEXT,
                     file_url TEXT,
                     filename TEXT,
+                    media_url TEXT,
                     created_at TEXT
-                 )''')
-    c.execute('''CREATE TABLE IF NOT EXISTS categories (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    name TEXT UNIQUE
                  )''')
     conn.commit()
     conn.close()
@@ -303,10 +308,10 @@ def api_comments():
 def api_products():
     conn = sqlite3.connect(DB_PATH, timeout=10)
     c = conn.cursor()
-    c.execute("SELECT id, category, title, price, image_url, description FROM products ORDER BY id DESC")
+    c.execute("SELECT id, category, title, price, image_url, description, file_url FROM products ORDER BY id DESC")
     rows = c.fetchall()
     conn.close()
-    return jsonify([{"id": r[0], "category": r[1], "title": r[2], "price": r[3], "image_url": r[4], "description": r[5] or ""} for r in rows])
+    return jsonify([{"id": r[0], "category": r[1], "title": r[2], "price": r[3], "image_url": r[4], "description": r[5] or "", "file_url": r[6]} for r in rows])
 
 @app.route("/api/categories", methods=["GET"])
 def api_categories():
@@ -646,49 +651,83 @@ def generate_spritesheet():
 
     output_filename = f"sprite_{uuid.uuid4().hex}.png"
     output_path = os.path.join(TEMP_DIR, output_filename)
+    tmp_video = None
 
     try:
         if url:
-            # Menggunakan yt-dlp untuk mendapatkan URL video langsung
-            ydl_opts = {'format': 'best[ext=mp4][height<=480]/bestvideo[ext=mp4]/best', 'quiet': True}
+            # Download video dulu ke file temp (agar FFmpeg tidak perlu akses URL langsung)
+            tmp_video = os.path.join(TEMP_DIR, f"yt_sprite_{uuid.uuid4().hex}.mp4")
+            ydl_opts = {
+                "format": "best[ext=mp4][height<=480]/best[ext=mp4]/best",
+                "outtmpl": tmp_video,
+                "quiet": True,
+                "no_warnings": True,
+                "extractor_args": {"youtube": {"client": ["WEB_CREATOR", "ANDROID_VR", "WEB"]}},
+                "http_headers": {
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+                    "Referer": "https://www.youtube.com/",
+                },
+            }
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                info = ydl.extract_info(url, download=False)
-                # Ambil URL asli video (jika ada list format, ambil yang pertama/terburuk yg ada URL-nya)
-                video_url = info.get("url") or info.get("entries", [{}])[0].get("url")
-                if not video_url: return jsonify({"error": "Gagal ekstrak URL video."}), 400
-                
-                # Gunakan FFmpeg untuk trim & tile
-                cmd = [
-                    FFMPEG, "-y", 
-                    "-ss", str(start_time), "-t", str(duration),
-                    "-i", video_url,
-                    "-vf", "fps=6.2,scale=128:128,tile=7x8", 
-                    "-vframes", "1", 
-                    output_path
-                ]
-                subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        elif "file" in request.files:
-            f = request.files["file"]
-            tmp_gif = os.path.join(TEMP_DIR, f"tmp_{uuid.uuid4().hex}.gif")
-            f.save(tmp_gif)
+                info = ydl.extract_info(url, download=True)
+                if not info:
+                    return jsonify({"error": "Gagal ambil info video dari YouTube"}), 400
+                # yt-dlp bisa nulis file dengan nama berbeda — cari file yang ada
+                actual_video = ydl.prepare_filename(info)
+                # Cek ekstensi: yt-dlp mungkin nulis .webm dll
+                for ext in [".mp4", ".webm", ".mkv", ".m4v", ""]:
+                    candidate = actual_video.rsplit(".", 1)[0] + ext if ext else actual_video
+                    if os.path.exists(candidate):
+                        tmp_video = candidate
+                        break
+
+            if not os.path.exists(tmp_video):
+                return jsonify({"error": "Video tidak berhasil didownload"}), 500
+
+            # Proses dengan FFmpeg dari file lokal — jauh lebih stabil
             cmd = [
-                FFMPEG, "-y", "-i", tmp_gif,
-                "-vf", "fps=6.2,scale=128:128,tile=7x8", 
-                "-vframes", "1", 
+                FFMPEG, "-y",
+                "-ss", str(start_time), "-t", str(duration),
+                "-i", tmp_video,
+                "-vf", "fps=6.2,scale=128:128:force_original_aspect_ratio=decrease,pad=128:128:(ow-iw)/2:(oh-ih)/2,tile=7x8",
+                "-vframes", "1",
                 output_path
             ]
-            subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            os.remove(tmp_gif)
+            result = subprocess.run(cmd, capture_output=True, text=True)
+            if result.returncode != 0:
+                return jsonify({"error": f"FFmpeg error: {result.stderr[-300:]}"}), 500
+
+        elif "file" in request.files:
+            f = request.files["file"]
+            ext = os.path.splitext(f.filename)[1].lower() or ".gif"
+            tmp_local = os.path.join(TEMP_DIR, f"tmp_{uuid.uuid4().hex}{ext}")
+            f.save(tmp_local)
+            cmd = [
+                FFMPEG, "-y", "-i", tmp_local,
+                "-vf", "fps=6.2,scale=128:128:force_original_aspect_ratio=decrease,pad=128:128:(ow-iw)/2:(oh-ih)/2,tile=7x8",
+                "-vframes", "1",
+                output_path
+            ]
+            result = subprocess.run(cmd, capture_output=True, text=True)
+            try: os.remove(tmp_local)
+            except: pass
+            if result.returncode != 0:
+                return jsonify({"error": f"FFmpeg error: {result.stderr[-300:]}"}), 500
         else:
-            return jsonify({"error": "URL atau File wajib diisi!"}), 400
+            return jsonify({"error": "URL YouTube atau File wajib diisi!"}), 400
 
         if not os.path.exists(output_path):
-            return jsonify({"error": "Gagal generate spritesheet"}), 500
+            return jsonify({"error": "Gagal generate spritesheet — file output tidak ditemukan"}), 500
 
-        # Kembalikan URL menggunakan route /temp/ yang sudah ada
         return jsonify({"success": True, "file": output_filename, "url": f"/temp/{output_filename}"})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+    finally:
+        # Hapus video temp setelah selesai
+        if tmp_video and os.path.exists(tmp_video):
+            try: os.remove(tmp_video)
+            except: pass
+
 
 @app.route("/api/upload", methods=["POST"])
 def upload():
@@ -891,6 +930,7 @@ def admin_panel():
             price = request.form.get("price").strip()
             desc = request.form.get("description", "").strip()
             
+            # Media preview (foto/video)
             image_urls = []
             for f in request.files.getlist("image"):
                 if f.filename:
@@ -898,12 +938,21 @@ def admin_panel():
                     tmp_name = f"prod_{uuid.uuid4().hex}{ext}"
                     f.save(os.path.join(STORE_DIR, tmp_name))
                     image_urls.append(f"/store_img/{tmp_name}")
-            
             image_url_str = ",".join(image_urls)
+            
+            # File downloadable (zip/rbxl/dll)
+            file_dl_urls = []
+            for f in request.files.getlist("file_dl"):
+                if f.filename:
+                    ext = os.path.splitext(f.filename)[1]
+                    tmp_name = f"prodfile_{uuid.uuid4().hex}{ext}"
+                    f.save(os.path.join(STORE_DIR, tmp_name))
+                    file_dl_urls.append(f"/store_img/{tmp_name}")
+            file_url_str = ",".join(file_dl_urls)
             
             conn = sqlite3.connect(DB_PATH, timeout=10)
             c = conn.cursor()
-            c.execute("INSERT INTO products (category, title, price, image_url, description) VALUES (?, ?, ?, ?, ?)", (category, title, price, image_url_str, desc))
+            c.execute("INSERT INTO products (category, title, price, image_url, description, file_url) VALUES (?, ?, ?, ?, ?, ?)", (category, title, price, image_url_str, desc, file_url_str))
             conn.commit()
             conn.close()
             return redirect("/admin-panel-rahasia")
@@ -991,7 +1040,7 @@ def admin_panel():
     products = c.fetchall()
     c.execute("SELECT id, name FROM categories ORDER BY name ASC")
     categories = c.fetchall()
-    c.execute("SELECT id, title, description, file_url, filename FROM free_assets ORDER BY id DESC")
+    c.execute("SELECT id, title, description, file_url, media_url, created_at FROM free_assets ORDER BY id DESC")
     free_assets = c.fetchall()
     conn.close()
     
@@ -1065,8 +1114,10 @@ def admin_panel():
                     </select>
                     <input type="text" name="price" placeholder="Harga (contoh: Rp 50.000)" required style="padding:10px; border-radius:5px; border:1px solid #555; background:#000; color:#fff;">
                     <textarea name="description" placeholder="Deskripsi Produk..." rows="3" style="padding:10px; border-radius:5px; border:1px solid #555; background:#000; color:#fff; font-family:sans-serif;"></textarea>
-                    <label style="color:#aaa; font-size:11px;">Foto / Video Produk (wajib, bisa pilih lebih dari 1):</label>
-                    <input type="file" name="image" accept="image/*,video/*" multiple required style="padding:10px; border-radius:5px; border:1px solid #555; background:#000; color:#fff;">
+                    <label style="color:#aaa; font-size:11px;">📷 Media Preview - Foto / Video (bisa pilih lebih dari 1):</label>
+                    <input type="file" name="image" accept="image/*,video/*" multiple style="padding:10px; border-radius:5px; border:1px solid #555; background:#000; color:#fff;">
+                    <label style="color:#aaa; font-size:11px;">📦 File Produk (Zip / RBXL / dll, Optional):</label>
+                    <input type="file" name="file_dl" multiple style="padding:10px; border-radius:5px; border:1px solid #555; background:#000; color:#fff;">
                     <button type="submit" style="background:#f59e0b; color:#000; font-weight:bold; padding:10px 20px; border:none; border-radius:5px; cursor:pointer;">Tambah Produk</button>
                 </form>
                 
@@ -1146,13 +1197,25 @@ def admin_panel():
                 <h3 style="margin-top:0;">Daftar Free Assets</h3>
                 <div style="max-height:400px; overflow-y:auto;">
                     <table style="width:100%; border-collapse:collapse; text-align:left;">
-                        <tr style="border-bottom:1px solid #333;"><th style="padding:10px;">Judul</th><th style="padding:10px;">File</th><th style="padding:10px;">Aksi</th></tr>
+                        <tr style="border-bottom:1px solid #333;"><th style="padding:10px;">Preview</th><th style="padding:10px;">Judul</th><th style="padding:10px;">File</th><th style="padding:10px;">Tanggal</th><th style="padding:10px;">Aksi</th></tr>
     """
     for fa in free_assets:
+        # fa = (id, title, description, file_url, media_url, created_at)
+        preview_html = ""
+        media_url = fa[4] or ""
+        first_media = media_url.split(",")[0].strip() if media_url else ""
+        if first_media:
+            if any(first_media.lower().endswith(ext) for ext in [".jpg",".jpeg",".png",".gif",".webp"]):
+                preview_html = f'<img src="{first_media}" width="40" height="40" style="border-radius:4px; object-fit:cover;">'
+            elif any(first_media.lower().endswith(ext) for ext in [".mp4",".webm",".mov"]):
+                preview_html = f'<video src="{first_media}" width="60" height="40" style="border-radius:4px; object-fit:cover;" muted></video>'
+        file_count = len([u for u in (fa[3] or "").split(",") if u.strip()])
         html += f"""
                         <tr style="border-bottom:1px solid #222;">
+                            <td style="padding:10px;">{preview_html}</td>
                             <td style="padding:10px; font-weight:bold;">{fa[1]}</td>
-                            <td style="padding:10px; font-size:12px; color:#888;">{fa[4]}</td>
+                            <td style="padding:10px; font-size:11px; color:#888;">{file_count} file</td>
+                            <td style="padding:10px; font-size:11px; color:#555;">{(fa[5] or "")[:10]}</td>
                             <td style="padding:10px;">
                                 <form method="POST" style="margin:0;">
                                     <input type="hidden" name="action" value="delete_free_asset">
