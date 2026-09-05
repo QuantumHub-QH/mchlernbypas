@@ -990,7 +990,7 @@ def admin_panel():
                     <input type="text" name="title" placeholder="Nama Produk" required style="padding:10px; border-radius:5px; border:1px solid #555; background:#000; color:#fff;">
                     <select name="category" required style="padding:10px; border-radius:5px; border:1px solid #555; background:#000; color:#fff;">
                         <option value="">-- Pilih Kategori --</option>
-"
+    """
     for cat in categories:
         html += f'<option value="{cat[1]}">{cat[1]}</option>'
     html += """
@@ -1040,7 +1040,7 @@ def admin_panel():
                 <div style="max-height:200px; overflow-y:auto;">
                     <table style="width:100%; border-collapse:collapse; text-align:left;">
                         <tr style="border-bottom:1px solid #333;"><th style="padding:10px;">ID</th><th style="padding:10px;">Nama Kategori</th><th style="padding:10px;">Aksi</th></tr>
-"
+    """
     for c in categories:
         html += f"""
                         <tr style="border-bottom:1px solid #222;">
@@ -1075,7 +1075,7 @@ def admin_panel():
                 <div style="max-height:400px; overflow-y:auto;">
                     <table style="width:100%; border-collapse:collapse; text-align:left;">
                         <tr style="border-bottom:1px solid #333;"><th style="padding:10px;">Judul</th><th style="padding:10px;">File</th><th style="padding:10px;">Aksi</th></tr>
-"
+    """
     for fa in free_assets:
         html += f"""
                         <tr style="border-bottom:1px solid #222;">
