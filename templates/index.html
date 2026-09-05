@@ -77,31 +77,46 @@ body {
   .quota-card { padding: 12px; }
   .upload-grid { gap: 10px; }
 }
+/* ── MOBILE: 1 kolom rapi ── */
 @media(max-width: 600px) {
-  .app-container { 
-    grid-template-columns: 160px 1fr; 
-    padding: 6px; 
-    gap: 8px; 
+  .app-container {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
+    padding: 8px;
+    gap: 10px;
+    min-height: 0;
   }
+  .sidebar {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    min-width: 0;
+  }
+  .sidebar > .glass-panel:first-child {
+    grid-column: 1 / -1;
+  }
+  .sidebar > .glass-panel:first-child img { width: 48px !important; height: 48px !important; margin-bottom: 6px !important; }
+  .sidebar > .glass-panel:first-child .logo-title { font-size: 14px; }
+  .sidebar > .glass-panel:first-child .logo-sub { font-size: 8px; letter-spacing: 0.5px; margin-bottom: 6px; }
   .glass-panel { padding: 10px; border-radius: 10px; }
-  .logo-title { font-size: 13px; }
-  .logo-sub { font-size: 8px; letter-spacing: 0.5px; margin-bottom: 8px; }
-  .sidebar img[style*="width: 100px"] { width: 50px !important; height: 50px !important; margin-bottom: 8px !important; }
-  .section-title { font-size: 10px; margin-bottom: 8px; }
-  .input-field { padding: 6px 8px; font-size: 10px; }
-  .btn { font-size: 10px; padding: 7px 8px; min-height: 32px; }
-  .quota-number { font-size: 20px; }
+  .section-title { font-size: 11px; margin-bottom: 8px; }
+  .input-field { padding: 8px 10px; font-size: 12px; }
+  .btn { font-size: 11px; padding: 8px 10px; min-height: 36px; }
+  .quota-number { font-size: 22px; }
   .quota-text { font-size: 9px; }
   .quota-card { padding: 10px; margin-bottom: 8px; }
   .divider { margin: 10px 0; }
   .dropzone { padding: 16px 8px; }
-  .dz-icon { font-size: 24px !important; }
-  .dz-text { font-size: 10px !important; }
-  .upload-btn { font-size: 11px !important; padding: 10px !important; }
+  .dz-icon { font-size: 26px !important; }
+  .dz-text { font-size: 11px !important; }
+  .upload-btn { font-size: 12px !important; padding: 12px !important; }
   .top-bar-glow { flex-wrap: wrap; justify-content: center; gap: 6px; padding: 8px; }
-  .btn-premium-top { padding: 5px 8px; font-size: 9px; }
-  .topbar-name { font-size: 10px; }
-  .topbar-avatar { width: 24px !important; height: 24px !important; }
+  .btn-premium-top { padding: 6px 10px; font-size: 10px; }
+  .topbar-name { font-size: 11px; }
+  .topbar-avatar { width: 26px !important; height: 26px !important; }
+  /* table horizontal scroll on mobile */
+  .table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table { min-width: 420px; }
 }
 
 /* ── PANELS ── */
@@ -602,6 +617,31 @@ tr:hover td { background: rgba(255,255,255,0.02); }
     color: #ffffff;
     animation: glitch2 3.5s infinite steps(1);
   }
+
+  /* ── STORE TABS ── */
+  .store-tab { padding:8px 16px; border-radius:20px; border:1px solid #333; background:#111; color:#aaa; cursor:pointer; font-weight:700; font-size:12px; transition:all 0.2s; }
+  .store-tab:hover { border-color:#ff0000; color:#fff; }
+  .store-tab.active-tab { background:#ff0000; border-color:#ff0000; color:#fff; }
+  .store-card { background:#0f0f0f; border:1px solid #222; border-radius:14px; overflow:hidden; transition:all 0.25s; }
+  .store-card:hover { border-color:#ff0000; transform:translateY(-4px); box-shadow:0 8px 30px rgba(255,0,0,0.15); }
+  .store-card img { width:100%; aspect-ratio:1; object-fit:cover; display:block; }
+  .store-card-body { padding:12px; }
+  .store-card-cat { font-size:9px; color:#ff0000; font-weight:800; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px; }
+  .store-card-title { font-size:13px; font-weight:800; color:#fff; margin-bottom:6px; }
+  .store-card-price { font-size:14px; font-weight:900; color:#00ff88; }
+  .store-card-btn { display:block; width:100%; margin-top:10px; background:#ff0000; color:#fff; border:none; border-radius:8px; padding:8px; font-weight:800; cursor:pointer; font-size:12px; text-align:center; text-decoration:none; }
+
+  /* ── PROGRESS BAR ── */
+  @keyframes progressShine { 0%{background-position:-200% center} 100%{background-position:200% center} }
+  .progress-wrap { background:#111; border-radius:8px; overflow:hidden; height:8px; margin:10px 0; border:1px solid #333; }
+  .progress-bar { height:100%; width:0%; background:linear-gradient(90deg,#ff0000,#ff6600,#ff0000); background-size:200% auto; animation:progressShine 1.5s linear infinite; transition:width 0.3s ease; border-radius:8px; }
+
+  /* ── FLOATING COMMENT ── */
+  @keyframes floatIn { 0%{opacity:0;transform:translateX(120%)} 15%{opacity:1;transform:translateX(0)} 80%{opacity:1;transform:translateX(0)} 100%{opacity:0;transform:translateX(120%)} }
+  .float-comment { background:rgba(10,10,10,0.95); border:1px solid #ff0000; border-radius:12px; padding:10px 14px; margin-bottom:10px; display:flex; align-items:center; gap:10px; animation:floatIn 5s ease forwards; pointer-events:none; }
+  .float-comment-avatar { width:32px; height:32px; border-radius:50%; border:2px solid #ff0000; flex-shrink:0; object-fit:cover; }
+  .float-comment-text { font-size:12px; color:#fff; font-weight:600; line-height:1.4; }
+  .float-comment-user { font-size:10px; color:#ff0000; font-weight:800; }
 </style>
 
 <!-- ── HUB PAGE ── -->
@@ -613,24 +653,42 @@ tr:hover td { background: rgba(255,255,255,0.02); }
     <div style="font-size:12px; color:#666; text-transform:uppercase; letter-spacing:4px; margin-top:8px;">Pilih Tool yang Ingin Digunakan</div>
   </div>
 
-  <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:24px; max-width: 700px; width: 100%;">
+  <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:20px; max-width: 900px; width: 100%;">
     
     <!-- Audio Tools -->
     <div onclick="switchTool('audio')" style="background:var(--panel); border:1px solid var(--panel-border); border-radius:16px; padding:32px; text-align:center; cursor:pointer; transition:all 0.3s;" onmouseover="this.style.borderColor='#ff0000'" onmouseout="this.style.borderColor='var(--panel-border)'">
-      <div style="font-size:48px; margin-bottom:16px;">🎧</div>
-      <h3 style="color:#fff; font-size:20px; font-weight:800; margin-bottom:8px; font-family:'Outfit',sans-serif;">BYPASS AUDIO TOOLS</h3>
-      <p style="color:#888; font-size:12px; line-height:1.6;">Upload & Bypass filter audio Roblox. Dilengkapi dengan auto pitch, speed, dan volume adjustment.</p>
-    </div>
+      <div onclick="switchTool('audio')" style="background:#0a0a0a; border:1px solid #1a1a1a; border-radius:20px; padding:36px 28px; text-align:center; cursor:pointer; transition:all 0.3s; position:relative; overflow:hidden;"
+        onmouseover="this.style.borderColor='#ff0000'; this.style.boxShadow='0 0 40px rgba(255,0,0,0.15)'; this.style.transform='translateY(-4px)';"
+        onmouseout="this.style.borderColor='#1a1a1a'; this.style.boxShadow='none'; this.style.transform='translateY(0)';">
+        <div style="font-size:52px; margin-bottom:16px; line-height:1;">🎧</div>
+        <h3 style="color:#fff; font-size:18px; font-weight:900; margin-bottom:8px; font-family:'Outfit',sans-serif; text-transform:uppercase; letter-spacing:1px;">BYPASS<br>AUDIO TOOLS</h3>
+        <p style="color:#555; font-size:11px; line-height:1.7;">Upload & bypass filter audio Roblox. Auto pitch, speed & volume.</p>
+        <div style="margin-top:16px; display:inline-block; background:#ff0000; color:#fff; padding:8px 20px; border-radius:20px; font-size:11px; font-weight:800; letter-spacing:1px;">BUKA TOOL →</div>
+      </div>
 
-    <!-- Spritesheet Tools -->
-    <div onclick="switchTool('sprite')" style="background:var(--panel); border:1px solid var(--panel-border); border-radius:16px; padding:32px; text-align:center; cursor:pointer; transition:all 0.3s;" onmouseover="this.style.borderColor='#ff0000'" onmouseout="this.style.borderColor='var(--panel-border)'">
-      <div style="font-size:48px; margin-bottom:16px;">🎞️</div>
-      <h3 style="color:#fff; font-size:20px; font-weight:800; margin-bottom:8px; font-family:'Outfit',sans-serif;">SPRITESHEET TOOLS</h3>
-      <p style="color:#888; font-size:12px; line-height:1.6;">Ubah GIF & YouTube Video jadi Spritesheet (max 56 frames). Upload langsung sebagai Decal.</p>
-    </div>
+      <!-- Spritesheet Tools -->
+      <div onclick="switchTool('sprite')" style="background:#0a0a0a; border:1px solid #1a1a1a; border-radius:20px; padding:36px 28px; text-align:center; cursor:pointer; transition:all 0.3s; position:relative; overflow:hidden;"
+        onmouseover="this.style.borderColor='#ff0000'; this.style.boxShadow='0 0 40px rgba(255,0,0,0.15)'; this.style.transform='translateY(-4px)';"
+        onmouseout="this.style.borderColor='#1a1a1a'; this.style.boxShadow='none'; this.style.transform='translateY(0)';">
+        <div style="font-size:52px; margin-bottom:16px; line-height:1;">🎞️</div>
+        <h3 style="color:#fff; font-size:18px; font-weight:900; margin-bottom:8px; font-family:'Outfit',sans-serif; text-transform:uppercase; letter-spacing:1px;">SPRITESHEET<br>TOOLS</h3>
+        <p style="color:#555; font-size:11px; line-height:1.7;">Ubah GIF & YouTube ke Spritesheet 7×8. Upload decal otomatis.</p>
+        <div style="margin-top:16px; display:inline-block; background:#ff0000; color:#fff; padding:8px 20px; border-radius:20px; font-size:11px; font-weight:800; letter-spacing:1px;">BUKA TOOL →</div>
+      </div>
+
+      <!-- Store -->
+      <div onclick="openStore()" style="background:#0a0a0a; border:1px solid #1a1a1a; border-radius:20px; padding:36px 28px; text-align:center; cursor:pointer; transition:all 0.3s; position:relative; overflow:hidden;"
+        onmouseover="this.style.borderColor='#ff0000'; this.style.boxShadow='0 0 40px rgba(255,0,0,0.15)'; this.style.transform='translateY(-4px)';"
+        onmouseout="this.style.borderColor='#1a1a1a'; this.style.boxShadow='none'; this.style.transform='translateY(0)';">
+        <div style="font-size:52px; margin-bottom:16px; line-height:1;">🛒</div>
+        <h3 style="color:#fff; font-size:18px; font-weight:900; margin-bottom:8px; font-family:'Outfit',sans-serif; text-transform:uppercase; letter-spacing:1px;">MCHLERN<br>STORE</h3>
+        <p style="color:#555; font-size:11px; line-height:1.7;">Beli album Roblox siap pakai. Funkot, DJ, Galau, BKB, Jawa, Sunda.</p>
+        <div style="margin-top:16px; display:inline-block; background:#ff0000; color:#fff; padding:8px 20px; border-radius:20px; font-size:11px; font-weight:800; letter-spacing:1px;">LIHAT ALBUM →</div>
+      </div>
 
   </div>
 </div>
+
 
 <div class="app-container" id="mainApp" style="display:none;">
   <!-- ── SIDEBAR ── -->
@@ -730,6 +788,65 @@ tr:hover td { background: rgba(255,255,255,0.02); }
           <button onclick="document.getElementById('premiumModal').style.display='none'" style="background:transparent; border:2px solid rgba(255,255,255,0.2); color:#fff; padding:14px 28px; border-radius:12px; cursor:pointer; font-weight:800;">Tutup</button>
           <a href="https://discord.com/users/1309112913331748915" target="_blank" style="background:linear-gradient(135deg,#ffd700,#ff8c00); color:#000; padding:14px 28px; border-radius:12px; text-decoration:none; font-weight:900;">Pesan via Discord</a>
         </div>
+      </div>
+    </div>
+
+    <!-- ── STORE MODAL ── -->
+    <div id="storeModal" onclick="if(event.target===this)this.style.display='none'" style="
+      display:none; position:fixed; inset:0; background:rgba(0,0,0,0.92);
+      z-index:10000; justify-content:center; align-items:flex-start;
+      padding:20px; overflow-y:auto;
+    ">
+      <div style="background:#0a0a0a; border:1px solid #ff0000; border-radius:20px; padding:32px; max-width:860px; width:100%; margin-top:40px; position:relative;">
+        <button onclick="document.getElementById('storeModal').style.display='none'" style="position:absolute; top:16px; right:16px; background:#ff0000; border:none; color:#fff; font-weight:900; font-size:18px; width:36px; height:36px; border-radius:50%; cursor:pointer;">✕</button>
+        <h2 style="font-family:'Outfit',sans-serif; font-weight:900; font-size:28px; color:#fff; margin-bottom:4px;">🎵 MCHLERN <span style="color:#ff0000;">STORE</span></h2>
+        <p style="color:#666; font-size:12px; letter-spacing:2px; margin-bottom:24px;">ALBUM ROBLOX SIAP PAKAI — ORDER VIA DISCORD</p>
+
+        <!-- Category tabs -->
+        <div id="storeTabs" style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:24px;">
+          <button class="store-tab active-tab" onclick="filterStore('ALL')">🎵 Semua</button>
+          <button class="store-tab" onclick="filterStore('ALBUM FUNKOT')">⚡ FUNKOT</button>
+          <button class="store-tab" onclick="filterStore('ALBUM DJ')">🎧 DJ</button>
+          <button class="store-tab" onclick="filterStore('ALBUM GALAU')">💔 GALAU</button>
+          <button class="store-tab" onclick="filterStore('ALBUM BKB')">🎤 BKB</button>
+          <button class="store-tab" onclick="filterStore('ALBUM JAWA')">🌿 JAWA</button>
+          <button class="store-tab" onclick="filterStore('ALBUM SUNDA')">🏔️ SUNDA</button>
+        </div>
+
+        <div id="storeGrid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(200px, 1fr)); gap:16px;">
+          <div style="text-align:center; padding:40px; color:#666; grid-column:1/-1;">
+            <div style="font-size:32px; margin-bottom:8px;">⏳</div>
+            <div>Loading produk...</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── FLOATING COMMENTS OVERLAY ── -->
+    <div id="floatingComments" style="
+      position:fixed; top:80px; right:0; width:320px; max-width:90vw;
+      pointer-events:none; z-index:9998; overflow:hidden;
+    "></div>
+
+    <!-- ── COMMENT FORM (visible corner) ── -->
+    <div id="commentToggle" style="
+      position:fixed; bottom:20px; right:20px; z-index:9999;
+    ">
+      <button onclick="document.getElementById('commentForm').style.display=document.getElementById('commentForm').style.display==='none'?'block':'none'"
+        style="background:#ff0000; color:#fff; border:none; border-radius:50%; width:52px; height:52px; font-size:22px; cursor:pointer; box-shadow:0 4px 20px rgba(255,0,0,0.5);">
+        💬
+      </button>
+      <div id="commentForm" style="display:none; background:#0a0a0a; border:1px solid #ff0000; border-radius:16px; padding:16px; width:280px; position:absolute; bottom:60px; right:0; pointer-events:all;">
+        <div style="font-weight:800; font-size:13px; color:#ff0000; margin-bottom:10px;">Kasih Rating & Komentar 🔥</div>
+        <div style="display:flex; gap:6px; margin-bottom:8px;" id="starRating">
+          <span onclick="setRating(1)" style="font-size:22px; cursor:pointer; filter:grayscale(1);">⭐</span>
+          <span onclick="setRating(2)" style="font-size:22px; cursor:pointer; filter:grayscale(1);">⭐</span>
+          <span onclick="setRating(3)" style="font-size:22px; cursor:pointer; filter:grayscale(1);">⭐</span>
+          <span onclick="setRating(4)" style="font-size:22px; cursor:pointer; filter:grayscale(1);">⭐</span>
+          <span onclick="setRating(5)" style="font-size:22px; cursor:pointer; filter:grayscale(1);">⭐</span>
+        </div>
+        <textarea id="commentText" rows="3" placeholder="Tulis komentar..." style="width:100%; background:#111; border:1px solid #333; color:#fff; border-radius:8px; padding:8px; font-size:12px; resize:none; box-sizing:border-box;"></textarea>
+        <button onclick="submitComment()" style="margin-top:8px; width:100%; background:#ff0000; color:#fff; border:none; border-radius:8px; padding:10px; font-weight:800; cursor:pointer; font-size:12px;">Kirim ✉️</button>
       </div>
     </div>
 
@@ -1353,7 +1470,8 @@ async function startUpload(m) {
   
   const st = document.getElementById('statusMain'); st.style.display='block';
   for(let i=0; i<tasks.length; i++) {
-    st.innerHTML = `<span class="spinner" style="display:inline-block;vertical-align:middle;margin-right:8px;"></span> Mengupload [${i+1}/${tasks.length}]...`;
+    const pct = Math.round(((i) / tasks.length) * 90);
+    setProgressBar('statusMain', pct, `[${i+1}/${tasks.length}] Uploading "${tasks[i].title.slice(0,25)}..."`);
     const t = tasks[i];
     const fd = new FormData();
     fd.append('api_key', ak); fd.append('creator_id', ci); fd.append('creator_type', ct);
@@ -1379,7 +1497,9 @@ async function startUpload(m) {
       addHistory({time: new Date().toLocaleString(), title: t.title, mode: m.toUpperCase(), id: '-', status: 'Network Error', blocked: false});
     }
   }
-  st.style.display='none'; btn.disabled=false; btnOther.disabled=false;
+  setProgressBar('statusMain', 100, `✅ Selesai! ${tasks.length} file diproses.`);
+  setTimeout(() => { st.style.display='none'; }, 3000);
+  btn.disabled=false; btnOther.disabled=false;
   document.getElementById('listMain').innerHTML=''; document.getElementById('ytQueueMain').innerHTML='';
   state.main.files=[]; state.main.yt=[];
 }
@@ -1550,6 +1670,123 @@ function renderFiles(m) {
 function renderYT(m) {
   const el = document.getElementById('ytQueue'+cap(m));
   if(el) el.innerHTML = '';
+}
+
+// ── STORE ──────────────────────────────────────────────────────────────────
+let _allProducts = [];
+let _currentFilter = 'ALL';
+
+async function openStore() {
+  document.getElementById('storeModal').style.display = 'flex';
+  if(_allProducts.length === 0) {
+    try {
+      const r = await fetch('/api/products');
+      _allProducts = await r.json();
+    } catch(e) { _allProducts = []; }
+  }
+  renderStore();
+}
+
+function filterStore(cat) {
+  _currentFilter = cat;
+  document.querySelectorAll('.store-tab').forEach(t => t.classList.remove('active-tab'));
+  event.target.classList.add('active-tab');
+  renderStore();
+}
+
+function renderStore() {
+  const grid = document.getElementById('storeGrid');
+  const filtered = _currentFilter === 'ALL' ? _allProducts : _allProducts.filter(p => p.category === _currentFilter);
+  if(!filtered.length) {
+    grid.innerHTML = `<div style="text-align:center; padding:60px; color:#444; grid-column:1/-1;"><div style="font-size:40px; margin-bottom:12px;">📭</div><div>Belum ada produk di kategori ini.</div></div>`;
+    return;
+  }
+  grid.innerHTML = filtered.map(p => `
+    <div class="store-card">
+      <img src="${p.image_url || 'https://via.placeholder.com/200x200/111111/ff0000?text=NO+IMG'}" alt="${p.title}">
+      <div class="store-card-body">
+        <div class="store-card-cat">${p.category}</div>
+        <div class="store-card-title">${p.title}</div>
+        <div class="store-card-price">${p.price}</div>
+        <a href="https://discord.com/users/1309112913331748915" target="_blank" class="store-card-btn">ORDER DISCORD →</a>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ── COMMENTS / FLOATING ────────────────────────────────────────────────────
+let _currentRating = 5;
+
+function setRating(n) {
+  _currentRating = n;
+  const stars = document.querySelectorAll('#starRating span');
+  stars.forEach((s, i) => {
+    s.style.filter = i < n ? 'none' : 'grayscale(1)';
+  });
+}
+
+async function submitComment() {
+  const text = document.getElementById('commentText').value.trim();
+  if(!text) { alert('Tulis komentar dulu!'); return; }
+  const username = (document.querySelector('.topbar-name') || {textContent:'Anonymous'}).textContent || 'Anonymous';
+  const avatar = (document.querySelector('.topbar-avatar') || {src:''}).src || '';
+  try {
+    await fetch('/api/comments', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({username, avatar, content: text, rating: _currentRating})
+    });
+    document.getElementById('commentText').value = '';
+    document.getElementById('commentForm').style.display = 'none';
+    showFloatingComment({username, avatar, content: text, rating: _currentRating});
+    alert('Komentar terkirim! 🔥');
+  } catch(e) { alert('Gagal kirim komentar: '+e.message); }
+}
+
+function showFloatingComment(c) {
+  const container = document.getElementById('floatingComments');
+  if(!container) return;
+  const el = document.createElement('div');
+  el.className = 'float-comment';
+  const stars = '⭐'.repeat(c.rating || 5);
+  el.innerHTML = `
+    <img class="float-comment-avatar" src="${c.avatar || 'https://cdn.discordapp.com/embed/avatars/0.png'}" onerror="this.src='https://cdn.discordapp.com/embed/avatars/0.png'">
+    <div>
+      <div class="float-comment-user">${c.username} ${stars}</div>
+      <div class="float-comment-text">${c.content.slice(0,80)}</div>
+    </div>
+  `;
+  container.appendChild(el);
+  setTimeout(() => el.remove(), 5500);
+}
+
+async function pollComments() {
+  try {
+    const r = await fetch('/api/comments');
+    const comments = await r.json();
+    if(comments.length) {
+      // Show a random recent comment as floating bubble every poll
+      const c = comments[Math.floor(Math.random() * Math.min(comments.length, 5))];
+      showFloatingComment(c);
+    }
+  } catch(e) {}
+}
+
+// Start showing floating comments every 8 seconds
+setTimeout(() => { pollComments(); setInterval(pollComments, 8000); }, 3000);
+
+// ── UPLOAD PROGRESS BAR HELPER ─────────────────────────────────────────────
+// Attach progress bar to statusMain and statusSprite
+function setProgressBar(statusId, pct, label) {
+  const el = document.getElementById(statusId);
+  if(!el) return;
+  el.style.display = 'block';
+  el.innerHTML = `
+    <div style="display:flex; justify-content:space-between; margin-bottom:4px; font-size:12px; font-weight:700;">
+      <span>${label}</span><span style="color:#ff0000;">${pct}%</span>
+    </div>
+    <div class="progress-wrap"><div class="progress-bar" style="width:${pct}%;"></div></div>
+  `;
 }
 
 </script>
