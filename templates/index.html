@@ -3,559 +3,124 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Roblox Audio Uploader — MCHLERN</title>
+    <title>Roblox Audio Uploader - MCHLERN (Web)</title>
     <style>
-        /* RESET & GLOBAL */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            background: #0a0a0a;
-            color: #f0f0f0;
-            font-family: 'Segoe UI', Roboto, system-ui, sans-serif;
-            min-height: 100vh;
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-        }
-
-        .container {
-            max-width: 1000px;
-            width: 100%;
-            margin: 0 auto;
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
-        }
-
-        /* TYPOGRAPHY */
-        h1 {
-            font-size: 2.4rem;
-            font-weight: 800;
-            text-align: center;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            background: linear-gradient(135deg, #ff0033, #cc0000);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            text-shadow: 0 0 30px rgba(255, 0, 50, 0.3);
-            margin-bottom: 4px;
-        }
-
-        h1 small {
-            font-size: 1rem;
-            -webkit-text-fill-color: #888;
-            background: none;
-            display: block;
-            letter-spacing: 4px;
-            font-weight: 300;
-        }
-
-        /* CARDS */
-        .card {
-            background: #111;
-            border: 1px solid #2a2a2a;
-            border-radius: 16px;
-            padding: 24px 28px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(255, 255, 255, 0.03);
-            transition: border-color 0.3s;
-        }
-
-        .card:hover {
-            border-color: #ff0033;
-        }
-
-        .card h2 {
-            font-size: 1.1rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            color: #ff0033;
-            border-bottom: 2px solid #1f1f1f;
-            padding-bottom: 12px;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .card h2 i {
-            font-style: normal;
-            display: inline-block;
-            width: 6px;
-            height: 6px;
-            background: #ff0033;
-            border-radius: 50%;
-            box-shadow: 0 0 12px #ff0033;
-        }
-
-        /* FORM ELEMENTS */
-        .form-group {
-            margin-bottom: 18px;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 6px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            color: #aaa;
-            letter-spacing: 0.5px;
-        }
-
-        input[type="text"],
-        input[type="password"],
-        select,
-        textarea {
-            width: 100%;
-            padding: 12px 16px;
-            background: #1a1a1a;
-            border: 1px solid #333;
-            border-radius: 10px;
-            color: white;
-            font-size: 0.95rem;
-            transition: border 0.25s, box-shadow 0.25s;
-            outline: none;
-        }
-
-        input:focus,
-        select:focus,
-        textarea:focus {
-            border-color: #ff0033;
-            box-shadow: 0 0 0 3px rgba(255, 0, 51, 0.25);
-        }
-
-        select option {
-            background: #1a1a1a;
-        }
-
-        .row {
-            display: flex;
-            gap: 16px;
-            flex-wrap: wrap;
-        }
-
-        .row .form-group {
-            flex: 1;
-            min-width: 140px;
-        }
-
-        /* SLIDERS */
-        .slider-group {
-            margin-top: 8px;
-        }
-
-        .slider-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .slider-header span:first-child {
-            font-weight: 500;
-            color: #ccc;
-        }
-
-        .slider-header .value {
-            font-weight: 700;
-            color: #ff0033;
-            background: #1a1a1a;
-            padding: 2px 12px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            border: 1px solid #2a2a2a;
-        }
-
-        input[type="range"] {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 100%;
-            height: 6px;
-            background: #2a2a2a;
-            border-radius: 10px;
-            outline: none;
-            transition: background 0.3s;
-            margin-top: 6px;
-        }
-
-        input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            background: #ff0033;
-            cursor: pointer;
-            box-shadow: 0 0 16px rgba(255, 0, 51, 0.5);
-            transition: 0.15s;
-        }
-
-        input[type="range"]::-webkit-slider-thumb:hover {
-            transform: scale(1.15);
-        }
-
-        input[type="range"]::-moz-range-thumb {
-            width: 18px;
-            height: 18px;
-            border-radius: 50%;
-            background: #ff0033;
-            cursor: pointer;
-            border: none;
-            box-shadow: 0 0 16px rgba(255, 0, 51, 0.5);
-        }
-
-        /* BUTTONS */
-        .btn {
-            background: #222;
-            border: none;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: background 0.25s, transform 0.1s, box-shadow 0.25s;
-            font-size: 0.9rem;
-            letter-spacing: 0.5px;
-            border: 1px solid #333;
-        }
-
-        .btn:hover {
-            background: #333;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.6);
-        }
-
-        .btn-danger {
-            background: #4a0e0e;
-            border-color: #661111;
-            color: #ff8888;
-        }
-
-        .btn-danger:hover {
-            background: #661111;
-            border-color: #aa2222;
-        }
-
-        .templates {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 18px;
-        }
-
-        .templates .btn {
-            flex: 0 0 auto;
-            padding: 6px 16px;
-            font-size: 0.8rem;
-            background: #1a1a1a;
-            border-color: #333;
-        }
-
-        .templates .btn:hover {
-            background: #2a2a2a;
-            border-color: #ff0033;
-        }
-
-        .btn-upload {
-            background: #ff0033;
-            border: none;
-            color: #fff;
-            font-weight: 800;
-            font-size: 1.2rem;
-            padding: 16px;
-            width: 100%;
-            border-radius: 12px;
-            letter-spacing: 2px;
-            text-transform: uppercase;
-            box-shadow: 0 0 30px rgba(255, 0, 51, 0.25);
-            transition: 0.25s;
-            margin-top: 8px;
-            border: 1px solid #ff0033;
-        }
-
-        .btn-upload:hover {
-            background: #cc002a;
-            box-shadow: 0 0 50px rgba(255, 0, 51, 0.5);
-            transform: scale(1.02);
-        }
-
-        .btn-upload:disabled {
-            opacity: 0.5;
-            pointer-events: none;
-            filter: grayscale(0.5);
-        }
-
-        /* PROGRESS BAR */
-        #progress-container {
-            margin: 18px 0 8px;
-            display: none;
-        }
-
-        .progress-item {
-            background: #1a1a1a;
-            border-radius: 10px;
-            padding: 12px 16px;
-            margin-bottom: 10px;
-            border-left: 3px solid #ff0033;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-        }
-
-        .progress-header {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: #ccc;
-            margin-bottom: 4px;
-        }
-
-        .progress-bar-track {
-            width: 100%;
-            height: 8px;
-            background: #2a2a2a;
-            border-radius: 20px;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .progress-bar-fill {
-            height: 100%;
-            width: 0%;
-            background: linear-gradient(90deg, #ff0033, #ff3366, #ff0033);
-            background-size: 200% 100%;
-            border-radius: 20px;
-            transition: width 0.3s ease;
-            animation: shimmer 1.5s infinite linear;
-        }
-
-        @keyframes shimmer {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
-
-        .progress-status {
-            font-size: 0.7rem;
-            color: #888;
-            margin-top: 4px;
-            text-align: right;
-        }
-
-        /* RECOMMENDATION */
-        .recommendation {
-            background: #1a1a1a;
-            padding: 12px 16px;
-            border-radius: 10px;
-            border: 1px solid #2a2a2a;
-            text-align: center;
-            font-weight: 600;
-            font-size: 0.95rem;
-            margin-top: 16px;
-            color: #00ffcc;
-            transition: 0.3s;
-        }
-
-        .recommendation.warning {
-            color: #ffcc00;
-            border-color: #665500;
-        }
-
-        /* HISTORY */
-        #history-box {
-            background: #0a0a0a;
-            border: 1px solid #1f1f1f;
-            border-radius: 10px;
-            height: 200px;
-            overflow-y: auto;
-            padding: 14px;
-            font-family: 'Cascadia Code', 'Consolas', monospace;
-            font-size: 0.8rem;
-            line-height: 1.6;
-            color: #bbb;
-            white-space: pre-wrap;
-            word-break: break-all;
-        }
-
-        #history-box::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        #history-box::-webkit-scrollbar-track {
-            background: #111;
-        }
-
-        #history-box::-webkit-scrollbar-thumb {
-            background: #ff0033;
-            border-radius: 10px;
-        }
-
-        .history-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 2px solid #1f1f1f;
-            padding-bottom: 12px;
-            margin-bottom: 14px;
-        }
-
-        .history-header h2 {
-            border: none;
-            margin: 0;
-            padding: 0;
-        }
-
-        /* RESPONSIVE */
-        @media (max-width: 768px) {
-            body { padding: 12px; }
-            .card { padding: 18px 16px; }
-            h1 { font-size: 1.8rem; }
-            .row { flex-direction: column; gap: 8px; }
-            .row .form-group { min-width: auto; }
-            .templates .btn { flex: 1; text-align: center; }
-            .btn-upload { font-size: 1rem; padding: 14px; }
-        }
-
-        @media (max-width: 480px) {
-            h1 { font-size: 1.4rem; }
-            .card { padding: 14px 12px; }
-            input, select, textarea { padding: 10px 12px; font-size: 0.9rem; }
-        }
-
-        /* UTILITY */
-        .text-muted { color: #666; }
-        .mt-2 { margin-top: 12px; }
-        .mb-2 { margin-bottom: 12px; }
-        .flex { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-
-        /* GLOW & EFFECTS */
-        .glow-text {
-            text-shadow: 0 0 20px rgba(255, 0, 51, 0.3);
-        }
-        .border-glow {
-            box-shadow: 0 0 20px rgba(255, 0, 51, 0.05);
-        }
+        body { background-color: #121212; color: #fff; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; }
+        h1 { color: #00ffcc; text-align: center; }
+        .container { max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+        .card { background-color: #1e1e1e; border: 1px solid #333; border-radius: 8px; padding: 20px; }
+        .card h2 { margin-top: 0; font-size: 1.2rem; border-bottom: 1px solid #444; padding-bottom: 10px; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input[type="text"], input[type="password"], select, textarea { width: 100%; padding: 10px; background-color: #2b2b2b; border: 1px solid #444; color: white; border-radius: 4px; box-sizing: border-box; }
+        input[type="range"] { width: 100%; }
+        .slider-container { display: flex; justify-content: space-between; align-items: center; margin-top: 5px; }
+        button { background-color: #444; color: white; border: none; padding: 10px 15px; border-radius: 4px; cursor: pointer; transition: 0.2s; }
+        button:hover { background-color: #666; }
+        .btn-upload { background-color: #107c10; width: 100%; font-size: 1.1rem; font-weight: bold; padding: 15px; margin-top: 10px; }
+        .btn-upload:hover { background-color: #0a500a; }
+        .btn-danger { background-color: #b83535; }
+        .btn-danger:hover { background-color: #d64949; }
+        .templates { display: flex; gap: 10px; margin-bottom: 15px; }
+        #history-box { background-color: #121212; border: 1px solid #444; height: 200px; overflow-y: auto; padding: 10px; border-radius: 4px; font-family: monospace; white-space: pre-wrap; }
+        #loading { display: none; text-align: center; color: #00aaff; margin-top: 10px; font-weight: bold; }
+        .recommendation { color: #00ffcc; font-weight: bold; margin-top: 15px; text-align: center; }
     </style>
 </head>
 <body>
-<div class="container">
-    <h1>⏣ AUDIO UPLOADER <small>MCHLERN · ROBLOX</small></h1>
 
+<div class="container">
+    <h1>Roblox Audio Uploader - MCHLERN</h1>
+    
     <form id="uploadForm">
-        <!-- API CONFIG -->
         <div class="card">
-            <h2><i></i> 1. API CONFIGURATION</h2>
+            <h2>1. API CONFIGURATION</h2>
             <div class="form-group">
-                <label>API Key</label>
-                <input type="password" id="api_key" placeholder="Enter your Roblox API key" required>
+                <label>API Key:</label>
+                <input type="password" id="api_key" required>
             </div>
-            <div class="row">
-                <div class="form-group">
-                    <label>Creator Type</label>
+            <div style="display: flex; gap: 20px;">
+                <div class="form-group" style="flex: 1;">
+                    <label>Creator Type:</label>
                     <select id="creator_type">
                         <option value="User">User</option>
                         <option value="Group">Group</option>
                     </select>
                 </div>
-                <div class="form-group">
-                    <label>Creator ID</label>
-                    <input type="text" id="creator_id" placeholder="User or Group ID" required>
+                <div class="form-group" style="flex: 2;">
+                    <label>Creator ID:</label>
+                    <input type="text" id="creator_id" required>
                 </div>
             </div>
         </div>
 
-        <!-- AUDIO MODIFIER -->
         <div class="card">
-            <h2><i></i> 2. AUDIO MODIFIER</h2>
-            <label>Bypass Templates</label>
+            <h2>2. AUDIO MODIFIER SETTINGS</h2>
+            <label>Bypass Templates:</label>
             <div class="templates">
-                <button type="button" class="btn" onclick="setTemplate(1.5)">1.5x</button>
-                <button type="button" class="btn" onclick="setTemplate(1.6)">1.6x</button>
-                <button type="button" class="btn" onclick="setTemplate(2.3)">2.3x</button>
-                <button type="button" class="btn" onclick="setTemplate(2.5)">2.5x</button>
-                <button type="button" class="btn btn-danger" onclick="setTemplate(1.0)">Reset</button>
+                <button type="button" onclick="setTemplate(1.5)">1.5x</button>
+                <button type="button" onclick="setTemplate(1.6)">1.6x</button>
+                <button type="button" onclick="setTemplate(2.3)">2.3x</button>
+                <button type="button" onclick="setTemplate(2.5)">2.5x</button>
+                <button type="button" onclick="setTemplate(1.0)" class="btn-danger">Reset</button>
             </div>
-
-            <div class="slider-group">
-                <div class="slider-header">
-                    <span>Speed (Tempo)</span>
-                    <span class="value" id="speed_val">1.00</span>
-                </div>
+            
+            <div class="form-group">
+                <label>Speed (Tempo): <span id="speed_val">1.00</span></label>
                 <input type="range" id="speed" min="0.5" max="3.0" step="0.01" value="1.0" oninput="updateUI()">
             </div>
-
-            <div class="slider-group">
-                <div class="slider-header">
-                    <span>Pitch</span>
-                    <span class="value" id="pitch_val">1.00</span>
-                </div>
+            <div class="form-group">
+                <label>Pitch: <span id="pitch_val">1.00</span></label>
                 <input type="range" id="pitch" min="0.5" max="3.0" step="0.01" value="1.0" oninput="updateUI()">
             </div>
-
-            <div class="slider-group">
-                <div class="slider-header">
-                    <span>Volume</span>
-                    <span class="value" id="vol_val">1.00</span>
-                </div>
+            <div class="form-group">
+                <label>Volume: <span id="vol_val">1.00</span></label>
                 <input type="range" id="vol" min="0.1" max="3.0" step="0.01" value="1.0" oninput="document.getElementById('vol_val').innerText = this.value">
             </div>
-
-            <div class="recommendation" id="rec_label">⚡ Recommended In‑Game PlaybackSpeed: 1.00</div>
+            
+            <div class="recommendation" id="rec_label">Rec. In-Game PlaybackSpeed: 1.00</div>
         </div>
 
-        <!-- UPLOAD CONTROLS -->
         <div class="card">
-            <h2><i></i> 3. UPLOAD</h2>
+            <h2>3. UPLOAD CONTROLS</h2>
             <div class="form-group">
-                <label>Local Audio Files (.mp3, .ogg)</label>
+                <label>Select Local Audio Files (.mp3, .ogg):</label>
                 <input type="file" id="audio_files" multiple accept=".mp3, .ogg" style="color:white;">
             </div>
-            <div style="text-align:center; color:#555; margin:8px 0;">— OR —</div>
+            <div style="text-align: center; margin: 10px 0; color: #666;">-- OR --</div>
             <div class="form-group">
-                <label>YouTube Links (one per line)</label>
-                <textarea id="yt_url" rows="3" placeholder="https://youtu.be/..."></textarea>
+                <label>Paste YouTube Link(s) (One per line):</label>
+                <textarea id="yt_url" rows="4"></textarea>
             </div>
-
-            <button type="submit" class="btn-upload" id="uploadBtn">⬆ START UPLOAD</button>
-
-            <!-- PROGRESS CONTAINER -->
-            <div id="progress-container"></div>
-
-            <div id="loading" style="display:none; text-align:center; color:#ff0033; font-weight:700; margin-top:12px;">
-                <span style="display:inline-block; animation: pulse 1.2s infinite;">●</span> PROCESSING …
-            </div>
+            <button type="submit" class="btn-upload" id="uploadBtn">START UPLOAD</button>
+            <div id="loading">Processing & Uploading... Please wait!</div>
         </div>
     </form>
 
-    <!-- HISTORY -->
     <div class="card">
-        <div class="history-header">
-            <h2><i></i> UPLOAD HISTORY</h2>
-            <button type="button" class="btn btn-danger" onclick="clearHistory()">Clear</button>
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #444; padding-bottom: 10px; margin-bottom: 10px;">
+            <h2 style="border: none; margin: 0; padding: 0;">UPLOAD HISTORY</h2>
+            <button type="button" class="btn-danger" onclick="clearHistory()">Clear History</button>
         </div>
-        <div id="history-box">Loading history…</div>
+        <div id="history-box"></div>
     </div>
 </div>
 
 <script>
-    // ---------- UI HELPERS ----------
     function updateUI() {
-        const speed = parseFloat(document.getElementById('speed').value);
-        const pitch = parseFloat(document.getElementById('pitch').value);
-        document.getElementById('speed_val').innerText = speed.toFixed(2);
-        document.getElementById('pitch_val').innerText = pitch.toFixed(2);
-
-        const rec = (1.0 / speed).toFixed(2);
-        const recLabel = document.getElementById('rec_label');
+        let speed = document.getElementById('speed').value;
+        let pitch = document.getElementById('pitch').value;
+        document.getElementById('speed_val').innerText = parseFloat(speed).toFixed(2);
+        document.getElementById('pitch_val').innerText = parseFloat(pitch).toFixed(2);
+        
+        let rec = (1.0 / speed).toFixed(2);
+        let recLabel = document.getElementById('rec_label');
         if (speed !== pitch) {
-            recLabel.innerText = `⚠ Recommended In‑Game PlaybackSpeed: ${rec} (Pitch mismatch!)`;
-            recLabel.className = 'recommendation warning';
+            recLabel.innerText = `Rec. In-Game PlaybackSpeed: ${rec} (Pitch mismatch!)`;
+            recLabel.style.color = "#ffcc00";
         } else {
-            recLabel.innerText = `⚡ Recommended In‑Game PlaybackSpeed: ${rec}`;
-            recLabel.className = 'recommendation';
+            recLabel.innerText = `Rec. In-Game PlaybackSpeed: ${rec}`;
+            recLabel.style.color = "#00ffcc";
         }
     }
 
@@ -565,184 +130,63 @@
         updateUI();
     }
 
-    // ---------- HISTORY ----------
     async function fetchHistory() {
-        try {
-            const res = await fetch('/history');
-            const data = await res.json();
-            const box = document.getElementById('history-box');
-            box.innerHTML = '';
-            if (data.length === 0) {
-                box.innerText = 'No uploads yet.';
-                return;
-            }
-            data.reverse().forEach(h => {
-                box.innerHTML += `[${h.time}] ${h.filename} | ${h.status} | AssetID: ${h.asset_id || '-'}\n`;
-            });
-        } catch {
-            document.getElementById('history-box').innerText = 'Failed to load history.';
-        }
+        let res = await fetch('/history');
+        let data = await res.json();
+        let box = document.getElementById('history-box');
+        box.innerHTML = '';
+        data.reverse().forEach(h => {
+            box.innerHTML += `[${h.time}] ${h.filename} | ${h.status} | AssetID: ${h.asset_id || '-'}\n`;
+        });
     }
 
     async function clearHistory() {
-        if (!confirm('Clear all history?')) return;
-        await fetch('/clear_history', { method: 'POST' });
-        fetchHistory();
+        if(confirm("Are you sure?")) {
+            await fetch('/clear_history', { method: 'POST' });
+            fetchHistory();
+        }
     }
 
-    // ---------- PROGRESS BAR ----------
-    function createProgressItem(filename) {
-        const container = document.getElementById('progress-container');
-        container.style.display = 'block';
-
-        const item = document.createElement('div');
-        item.className = 'progress-item';
-        item.dataset.filename = filename;
-
-        item.innerHTML = `
-            <div class="progress-header">
-                <span>${filename}</span>
-                <span class="progress-percent">0%</span>
-            </div>
-            <div class="progress-bar-track">
-                <div class="progress-bar-fill" style="width:0%"></div>
-            </div>
-            <div class="progress-status">Preparing…</div>
-        `;
-        container.appendChild(item);
-        return item;
-    }
-
-    function updateProgressItem(item, percent, status) {
-        const fill = item.querySelector('.progress-bar-fill');
-        const percentLabel = item.querySelector('.progress-percent');
-        const statusLabel = item.querySelector('.progress-status');
-        fill.style.width = Math.min(percent, 100) + '%';
-        percentLabel.innerText = Math.round(percent) + '%';
-        if (status) statusLabel.innerText = status;
-    }
-
-    function clearProgress() {
-        const container = document.getElementById('progress-container');
-        container.innerHTML = '';
-        container.style.display = 'none';
-    }
-
-    // ---------- UPLOAD HANDLER (with XHR progress) ----------
     document.getElementById('uploadForm').onsubmit = async (e) => {
         e.preventDefault();
-
-        const apiKey = document.getElementById('api_key').value.trim();
-        const creatorType = document.getElementById('creator_type').value;
-        const creatorId = document.getElementById('creator_id').value.trim();
-        const speed = document.getElementById('speed').value;
-        const pitch = document.getElementById('pitch').value;
-        const vol = document.getElementById('vol').value;
-        const ytUrls = document.getElementById('yt_url').value.trim();
-        const files = document.getElementById('audio_files').files;
-
-        if (!apiKey || !creatorId) {
-            alert('Please fill in API Key and Creator ID.');
+        
+        let fd = new FormData();
+        fd.append('api_key', document.getElementById('api_key').value);
+        fd.append('creator_type', document.getElementById('creator_type').value);
+        fd.append('creator_id', document.getElementById('creator_id').value);
+        fd.append('speed', document.getElementById('speed').value);
+        fd.append('pitch', document.getElementById('pitch').value);
+        fd.append('vol', document.getElementById('vol').value);
+        fd.append('yt_url', document.getElementById('yt_url').value);
+        
+        let files = document.getElementById('audio_files').files;
+        for(let i=0; i<files.length; i++) {
+            fd.append('audio_files', files[i]);
+        }
+        
+        if(files.length === 0 && !document.getElementById('yt_url').value.trim()) {
+            alert("Please select files or enter YouTube links!");
             return;
         }
-        if (files.length === 0 && !ytUrls) {
-            alert('Please select local files or enter YouTube links.');
-            return;
-        }
 
-        // Disable button & show loading
-        const btn = document.getElementById('uploadBtn');
-        btn.disabled = true;
-        btn.innerText = '⏳ UPLOADING…';
+        document.getElementById('uploadBtn').style.display = 'none';
         document.getElementById('loading').style.display = 'block';
-        clearProgress();
 
-        // Prepare FormData
-        const fd = new FormData();
-        fd.append('api_key', apiKey);
-        fd.append('creator_type', creatorType);
-        fd.append('creator_id', creatorId);
-        fd.append('speed', speed);
-        fd.append('pitch', pitch);
-        fd.append('vol', vol);
-        fd.append('yt_url', ytUrls);
-        for (let f of files) fd.append('audio_files', f);
-
-        // We'll use XHR to track upload progress
-        const xhr = new XMLHttpRequest();
-        xhr.open('POST', '/upload');
-
-        // Create progress items for each file (local + yt)
-        const fileNames = [];
-        for (let f of files) fileNames.push(f.name);
-        if (ytUrls) {
-            const lines = ytUrls.split('\n').filter(l => l.trim());
-            lines.forEach((url, i) => {
-                fileNames.push(`YouTube ${i+1}: ${url.substring(0, 30)}${url.length>30?'…':''}`);
-            });
+        try {
+            await fetch('/upload', { method: 'POST', body: fd });
+            fetchHistory();
+            document.getElementById('audio_files').value = '';
+            document.getElementById('yt_url').value = '';
+            alert("Upload Process Completed!");
+        } catch(err) {
+            alert("Error: " + err);
+        } finally {
+            document.getElementById('uploadBtn').style.display = 'block';
+            document.getElementById('loading').style.display = 'none';
         }
-
-        const progressItems = fileNames.map(name => createProgressItem(name));
-        let currentIndex = 0;
-
-        // Track upload progress (overall)
-        xhr.upload.addEventListener('progress', (evt) => {
-            if (evt.lengthComputable) {
-                const totalPercent = (evt.loaded / evt.total) * 100;
-                // Distribute progress among items (simulate per-file)
-                // Since we don't know which file is being uploaded at the moment,
-                // we'll approximate by evenly distributing across all items.
-                // For better UX, we'll update all items with same overall percent,
-                // but we'll also show a "uploading" status.
-                const perItem = Math.min(totalPercent / progressItems.length, 100);
-                progressItems.forEach((item, idx) => {
-                    const itemPercent = Math.min((totalPercent - idx * (100/progressItems.length)), 100);
-                    updateProgressItem(item, Math.min(itemPercent, 100), 'Uploading…');
-                });
-                // Mark first as active if not done
-                if (progressItems.length > 0 && totalPercent < 100) {
-                    // just update status
-                }
-            }
-        });
-
-        xhr.onload = function() {
-            document.getElementById('loading').style.display = 'none';
-            btn.disabled = false;
-            btn.innerText = '⬆ START UPLOAD';
-            if (xhr.status === 200) {
-                // Mark all items as complete
-                progressItems.forEach(item => {
-                    updateProgressItem(item, 100, '✅ Done');
-                });
-                alert('Upload completed successfully!');
-                document.getElementById('audio_files').value = '';
-                document.getElementById('yt_url').value = '';
-                fetchHistory();
-                // Auto clear progress after delay
-                setTimeout(clearProgress, 4000);
-            } else {
-                // Error
-                progressItems.forEach(item => {
-                    updateProgressItem(item, 0, '❌ Failed');
-                });
-                alert('Upload failed. Check console for details.');
-            }
-        };
-
-        xhr.onerror = function() {
-            document.getElementById('loading').style.display = 'none';
-            btn.disabled = false;
-            btn.innerText = '⬆ START UPLOAD';
-            alert('Network error occurred.');
-            progressItems.forEach(item => updateProgressItem(item, 0, '❌ Error'));
-        };
-
-        xhr.send(fd);
     };
 
-    // ---------- INIT ----------
-    updateUI();
+    // Initial load
     fetchHistory();
 </script>
 </body>
