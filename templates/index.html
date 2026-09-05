@@ -6,1729 +6,1000 @@
 <title>MCHLERN TOOLS — Roblox Audio Uploader PRO</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Orbitron:wght@500;700;800;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
 * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color: transparent; }
 :root {
-  --bg: #050505;
-  --bg-2: #0a0a0c;
-  --panel: #0c0c0f;
-  --panel-2: #111114;
-  --panel-border: #1f1f24;
-  --panel-border-hover: #2e2e36;
-  --red: #ff1f4d;
-  --red-bright: #ff3d6e;
-  --red-dim: #b81538;
-  --red-glow: rgba(255,31,77,0.25);
-  --red-soft: rgba(255,31,77,0.12);
+  --bg: #020202;
+  --bg-2: #070709;
+  --bg-3: #0e0e12;
+  --panel: rgba(10,10,14,0.85);
+  --panel-solid: #0a0a0e;
+  --panel-2: rgba(16,16,22,0.9);
+  --panel-border: rgba(255,30,60,0.15);
+  --panel-border-hover: rgba(255,30,60,0.35);
+  --red: #ff0a2e;
+  --red-bright: #ff1f4d;
+  --red-hot: #ff3366;
+  --red-dim: #8a0018;
+  --red-glow: rgba(255,10,46,0.35);
+  --red-glow-strong: rgba(255,10,46,0.55);
+  --red-soft: rgba(255,10,46,0.08);
   --white: #ffffff;
-  --gray: #9a9aa3;
-  --gray-2: #6c6c75;
-  --gray-dark: #3a3a42;
-  --success: #22e07a;
-  --danger: #ff3d52;
-  --gold: #f59e0b;
-  --glass-shadow: 0 8px 40px rgba(0,0,0,0.6), 0 1px 0 rgba(255,255,255,0.03) inset;
-  --radius: 16px;
+  --gray: #888899;
+  --gray-2: #555566;
+  --gray-dark: #2a2a35;
+  --success: #00e676;
+  --danger: #ff0033;
+  --gold: #ffb700;
+  --glass-shadow: 0 8px 32px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,10,46,0.08) inset, 0 0 40px rgba(255,10,46,0.03) inset;
+  --glass-shadow-hover: 0 12px 48px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,10,46,0.2) inset, 0 0 60px rgba(255,10,46,0.06) inset;
+  --radius: 14px;
+  --radius-sm: 10px;
 }
-
 html { scroll-behavior: smooth; }
 body {
   font-family: 'Inter', sans-serif;
-  background: radial-gradient(1200px 600px at 80% -10%, rgba(255,31,77,0.08), transparent 60%),
-              radial-gradient(900px 500px at -10% 110%, rgba(255,31,77,0.06), transparent 60%),
-              var(--bg);
+  background: var(--bg);
   color: var(--white);
   min-height: 100vh;
   position: relative;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
+  overflow-x: hidden;
 }
-
-/* ── BACKGROUND ── */
-.bg-animation { display: none; }
+/* ── SCANLINE OVERLAY ── */
+.scanlines {
+  position: fixed; inset: 0; z-index: 9999; pointer-events: none;
+  background: repeating-linear-gradient(0deg,
+    transparent 0px,
+    transparent 2px,
+    rgba(0,0,0,0.03) 2px,
+    rgba(0,0,0,0.03) 4px
+  );
+  opacity: 0.6;
+}
+/* ── DYNAMIC BG ── */
+.bg-pulse {
+  position: fixed; inset: 0; z-index: -3;
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgba(255,10,46,0.12), transparent 70%),
+    radial-gradient(ellipse 60% 40% at 80% 110%, rgba(255,10,46,0.08), transparent 60%),
+    radial-gradient(ellipse 50% 30% at 10% 50%, rgba(255,10,46,0.05), transparent 50%);
+  animation: bgPulse 8s ease-in-out infinite alternate;
+}
+@keyframes bgPulse {
+  0% { opacity: 0.7; transform: scale(1); }
+  100% { opacity: 1; transform: scale(1.05); }
+}
 .bg-grid {
-  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1;
+  position: fixed; inset: 0; z-index: -2;
   background-image:
-    linear-gradient(rgba(255,31,77,0.06) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255,31,77,0.06) 1px, transparent 1px);
-  background-size: 56px 56px;
-  mask-image: radial-gradient(ellipse 100% 80% at 50% 40%, #000 40%, transparent 100%);
-  pointer-events: none;
+    linear-gradient(rgba(255,10,46,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,10,46,0.04) 1px, transparent 1px);
+  background-size: 60px 60px;
+  mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 70%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 80% at 50% 50%, black 30%, transparent 70%);
 }
-
-/* ── LAYOUT ── */
-.app-container {
-  display: grid;
-  grid-template-columns: 340px 1fr;
-  gap: 20px;
-  max-width: 1480px;
-  margin: 0 auto;
-  padding: 20px;
-  min-height: 100vh;
+.bg-vignette {
+  position: fixed; inset: 0; z-index: -1;
+  background: radial-gradient(ellipse 70% 60% at 50% 50%, transparent 0%, rgba(0,0,0,0.6) 100%);
 }
-@media(max-width: 1100px) {
-  .app-container { grid-template-columns: 300px 1fr; gap: 16px; padding: 14px; }
+/* ── LOADING SCREEN ── */
+.loading-screen {
+  position: fixed; inset: 0; z-index: 10000;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  background: linear-gradient(180deg, #050505 0%, #0a0005 50%, #050505 100%);
+  transition: opacity 0.8s cubic-bezier(0.4,0,0.2,1);
 }
-@media(max-width: 950px) {
-  .app-container { grid-template-columns: 1fr; padding: 10px; gap: 12px; }
-  .sidebar { order: 2; }
-  .main-content { order: 1; }
-  .glass-panel { padding: 16px; border-radius: 14px; }
-  .logo-title { font-size: 18px; }
-  .logo-sub { font-size: 10px; margin-bottom: 14px; }
-  .section-title { font-size: 12px; }
-  .input-label { font-size: 10px; }
-  .input-field { padding: 10px 12px; font-size: 12px; border-radius: 10px; }
-  .btn { font-size: 12px; padding: 9px 14px; }
-  .quota-number { font-size: 26px; }
-  .quota-text { font-size: 10px; }
-  .quota-card { padding: 14px; }
-  .upload-grid { gap: 12px; }
+.load-logo {
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(28px, 6vw, 52px);
+  font-weight: 900;
+  letter-spacing: 4px;
+  color: var(--white);
+  text-shadow: 0 0 20px var(--red-glow), 0 0 60px var(--red-glow-strong), 0 0 100px rgba(255,10,46,0.15);
+  margin-bottom: 40px;
+  animation: logoPulse 2s ease-in-out infinite;
 }
-@media(max-width: 600px) {
-  .app-container { padding: 8px; gap: 10px; }
-  .glass-panel { padding: 14px; border-radius: 12px; }
-  .logo-title { font-size: 16px; }
-  .logo-sub { font-size: 9px; letter-spacing: 1.5px; margin-bottom: 10px; }
-  .sidebar img[style*="width: 100px"] { width: 56px !important; height: 56px !important; margin-bottom: 10px !important; }
-  .section-title { font-size: 11px; margin-bottom: 12px; }
-  .input-field { padding: 9px 11px; font-size: 11px; }
-  .btn { font-size: 11px; padding: 8px 10px; min-height: 34px; }
-  .quota-number { font-size: 22px; }
-  .quota-text { font-size: 9px; }
-  .quota-card { padding: 12px; margin-bottom: 12px; }
-  .divider { margin: 14px 0; }
-  .dropzone { padding: 22px 12px; border-radius: 12px; }
-  .dz-icon { font-size: 26px !important; }
-  .dz-text { font-size: 11px !important; }
-  .upload-btn { font-size: 12px !important; padding: 13px !important; border-radius: 12px !important; }
-  .top-bar-glow { flex-wrap: wrap; justify-content: center; gap: 8px; padding: 10px; border-radius: 12px; }
-  .btn-premium-top { padding: 6px 10px; font-size: 10px; }
-  .topbar-name { font-size: 11px; max-width: 90px; }
-  .topbar-avatar { width: 26px !important; height: 26px !important; }
-  .topbar-users-count span:first-child { font-size: 22px; }
+@keyframes logoPulse {
+  0%,100% { text-shadow: 0 0 20px var(--red-glow), 0 0 60px var(--red-glow-strong); }
+  50% { text-shadow: 0 0 40px var(--red-glow-strong), 0 0 80px rgba(255,10,46,0.5), 0 0 120px rgba(255,10,46,0.2); }
 }
-
-/* ── PANELS ── */
-.glass-panel {
-  background: linear-gradient(180deg, var(--panel) 0%, var(--panel-2) 100%);
+.load-sub {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 11px;
+  letter-spacing: 6px;
+  color: var(--red-bright);
+  text-transform: uppercase;
+  margin-bottom: 48px;
+  opacity: 0.7;
+}
+.load-bar-wrap {
+  width: min(420px, 80vw);
+  height: 6px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 3px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: 0 0 20px rgba(255,10,46,0.1);
+}
+.load-bar-wrap::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,10,46,0.15), transparent);
+  animation: loadShimmer 2s infinite;
+}
+@keyframes loadShimmer {
+  0% { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+.load-bar {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, var(--red-dim), var(--red), var(--red-hot));
+  border-radius: 3px;
+  box-shadow: 0 0 20px var(--red-glow), 0 0 40px var(--red-glow-strong);
+  transition: width 0.15s linear;
+  position: relative;
+}
+.load-bar::after {
+  content: '';
+  position: absolute; top: 0; right: 0; bottom: 0; width: 60px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+  animation: barTip 1s ease-in-out infinite;
+}
+@keyframes barTip {
+  0%,100% { opacity: 0; transform: translateX(-10px); }
+  50% { opacity: 1; transform: translateX(0); }
+}
+.load-text {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  color: var(--gray);
+  margin-top: 20px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  min-height: 18px;
+}
+.load-glitch {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 10px;
+  color: var(--red-dim);
+  margin-top: 12px;
+  letter-spacing: 3px;
+  opacity: 0;
+  animation: glitchFade 0.3s ease forwards;
+}
+@keyframes glitchFade {
+  to { opacity: 0.5; }
+}
+/* ── HUB PAGE ── */
+.hub-container {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-height: 100vh; padding: 40px 20px; position: relative;
+}
+.hub-badge {
+  display: inline-block; padding: 6px 16px; border-radius: 100px;
+  background: rgba(255,10,46,0.08); border: 1px solid rgba(255,10,46,0.2);
+  color: var(--red-bright); font-size: 11px; font-weight: 700; letter-spacing: 3px;
+  text-transform: uppercase; margin-bottom: 32px;
+  animation: badgeGlow 3s ease-in-out infinite;
+}
+@keyframes badgeGlow {
+  0%,100% { box-shadow: 0 0 10px rgba(255,10,46,0.05); }
+  50% { box-shadow: 0 0 25px rgba(255,10,46,0.15), 0 0 50px rgba(255,10,46,0.05); }
+}
+.hub-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(36px, 8vw, 72px);
+  font-weight: 900;
+  text-align: center;
+  line-height: 1.1;
+  letter-spacing: 2px;
+  background: linear-gradient(180deg, #fff 0%, #aaa 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  margin-bottom: 8px;
+}
+.hub-subtitle {
+  font-family: 'Orbitron', sans-serif;
+  font-size: clamp(11px, 2.5vw, 14px);
+  color: var(--red-bright);
+  letter-spacing: 6px;
+  text-transform: uppercase;
+  text-align: center;
+  margin-bottom: 48px;
+  text-shadow: 0 0 20px var(--red-glow);
+}
+.hub-tools {
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px; width: 100%; max-width: 640px;
+}
+@media (max-width: 560px) {
+  .hub-tools { grid-template-columns: 1fr; }
+}
+.hub-card {
+  background: var(--panel);
   border: 1px solid var(--panel-border);
   border-radius: var(--radius);
-  padding: 22px;
-  box-shadow: var(--glass-shadow);
+  padding: 36px 28px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.35s cubic-bezier(0.4,0,0.2,1);
   position: relative;
   overflow: hidden;
-  transition: border-color 0.25s ease, box-shadow 0.25s ease, transform 0.25s ease;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
-.glass-panel::before {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255,31,77,0.4), transparent);
+.hub-card::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,10,46,0.06), transparent 60%);
+  opacity: 0; transition: opacity 0.35s ease;
+}
+.hub-card:hover::before { opacity: 1; }
+.hub-card:hover {
+  border-color: var(--panel-border-hover);
+  box-shadow: var(--glass-shadow-hover), 0 0 60px rgba(255,10,46,0.08);
+  transform: translateY(-4px);
+}
+.hub-card-icon {
+  font-size: 40px; margin-bottom: 16px;
+  filter: drop-shadow(0 0 15px rgba(255,10,46,0.3));
+  transition: transform 0.35s ease;
+}
+.hub-card:hover .hub-card-icon { transform: scale(1.1); }
+.hub-card-title {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 18px; font-weight: 700;
+  margin-bottom: 8px; position: relative;
+}
+.hub-card-desc {
+  font-size: 13px; color: var(--gray); line-height: 1.5; position: relative;
+}
+.hub-card .coming-soon {
+  position: absolute; top: 12px; right: 12px;
+  font-size: 9px; font-weight: 700; letter-spacing: 1px;
+  padding: 3px 8px; border-radius: 4px;
+  background: rgba(255,10,46,0.12); color: var(--red-bright);
+  border: 1px solid rgba(255,10,46,0.2);
+}
+/* ── APP CONTAINER ── */
+.app-container {
+  display: none;
+  grid-template-columns: 300px 1fr;
+  gap: 20px;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 20px;
+  position: relative;
+  z-index: 1;
+}
+@media (max-width: 1024px) {
+  .app-container { grid-template-columns: 260px 1fr; gap: 16px; padding: 16px; }
+}
+@media (max-width: 860px) {
+  .app-container { grid-template-columns: 1fr; padding: 12px; }
+}
+/* ── SIDEBAR ── */
+.sidebar {
+  display: flex; flex-direction: column; gap: 16px;
+  position: sticky; top: 20px; height: fit-content;
+}
+@media (max-width: 860px) {
+  .sidebar { position: relative; top: 0; }
+}
+.sidebar-header {
+  display: flex; align-items: center; gap: 12px;
+  padding: 16px 20px;
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.sidebar-logo {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 18px; font-weight: 800; letter-spacing: 1px;
+}
+.sidebar-logo span { color: var(--red-bright); }
+.back-btn {
+  margin-left: auto;
+  background: transparent; border: 1px solid var(--panel-border);
+  color: var(--gray); font-size: 11px; padding: 6px 12px; border-radius: 8px;
+  cursor: pointer; transition: all 0.2s ease;
+}
+.back-btn:hover { border-color: var(--red-bright); color: var(--red-bright); background: var(--red-soft); }
+.glass-panel {
+  background: var(--panel);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius);
+  padding: 20px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: var(--glass-shadow);
+  transition: all 0.3s ease;
 }
 .glass-panel:hover {
   border-color: var(--panel-border-hover);
-  box-shadow: 0 12px 48px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,31,77,0.05), 0 1px 0 rgba(255,255,255,0.03) inset;
-}
-
-/* ── HEADER / LOGO ── */
-.logo-title {
-  font-family: 'Outfit', sans-serif; font-size: 24px; font-weight: 800;
-  color: var(--white);
-  margin-bottom: 4px;
-  letter-spacing: -0.5px;
-}
-.logo-title span { color: var(--red); }
-.logo-sub {
-  font-size: 10px; color: var(--gray-2); text-transform: uppercase; letter-spacing: 2.5px;
-  margin-bottom: 22px; font-weight: 600;
+  box-shadow: var(--glass-shadow-hover);
 }
 .section-title {
-  font-size: 13px; font-weight: 800; color: var(--white); margin-bottom: 16px;
-  display: flex; align-items: center; gap: 8px; text-transform: uppercase; letter-spacing: 1.2px;
-}
-.divider {
-  height: 1px; background: linear-gradient(90deg, transparent, rgba(255,31,77,0.25), transparent);
-  margin: 22px 0; border: none;
-}
-
-/* ── INPUTS & BUTTONS ── */
-.input-group { margin-bottom: 14px; }
-.input-label {
-  display: block; font-size: 10px; color: var(--gray); margin-bottom: 6px;
-  text-transform: uppercase; letter-spacing: 1.2px; font-weight: 700;
+  font-family: 'Orbitron', sans-serif;
+  font-size: 11px; font-weight: 700; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--red-bright);
+  margin-bottom: 16px;
+  text-shadow: 0 0 10px var(--red-glow);
 }
 .input-field {
-  width: 100%; background: rgba(0,0,0,0.45); border: 1px solid rgba(255,255,255,0.08);
-  color: var(--white); padding: 12px 14px; border-radius: 10px; font-size: 13px; font-family: inherit;
-  transition: all 0.2s; outline: none;
+  width: 100%;
+  background: rgba(0,0,0,0.4);
+  border: 1px solid rgba(255,255,255,0.06);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  color: var(--white);
+  font-size: 13px;
+  font-family: 'Inter', sans-serif;
+  outline: none;
+  transition: all 0.25s ease;
 }
 .input-field:focus {
-  border-color: var(--red);
-  box-shadow: 0 0 0 3px rgba(255,31,77,0.18), inset 0 1px 2px rgba(0,0,0,0.3);
-  background: rgba(15,5,8,0.7);
+  border-color: var(--red-bright);
+  box-shadow: 0 0 0 3px rgba(255,10,46,0.1), 0 0 20px rgba(255,10,46,0.08);
+  background: rgba(0,0,0,0.5);
 }
 .input-field::placeholder { color: var(--gray-2); }
-select.input-field { appearance: none; cursor: pointer;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239a9aa3' stroke-width='3'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
-  background-repeat: no-repeat; background-position: right 12px center; padding-right: 32px;
-}
+select.input-field { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888899' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 34px; }
+/* ── BUTTONS ── */
 .btn {
-  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-  padding: 10px 16px; border-radius: 10px; font-size: 13px; font-weight: 600;
-  border: none; cursor: pointer; transition: all 0.2s; white-space: nowrap;
-  letter-spacing: 0.3px; font-family: inherit;
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 12px 20px; border-radius: var(--radius-sm);
+  font-size: 13px; font-weight: 700; letter-spacing: 0.3px;
+  cursor: pointer; border: none; outline: none;
+  transition: all 0.25s cubic-bezier(0.4,0,0.2,1);
+  font-family: 'Inter', sans-serif;
+  white-space: nowrap;
 }
-.btn:active { transform: translateY(1px) scale(0.99); }
+.btn:active { transform: scale(0.97); }
 .btn-red-glow {
-  background: linear-gradient(135deg, var(--red), var(--red-dim)); color: #fff;
-  box-shadow: 0 4px 14px var(--red-soft);
+  background: linear-gradient(135deg, var(--red-dim), var(--red));
+  color: var(--white);
+  box-shadow: 0 4px 16px rgba(255,10,46,0.25), 0 0 0 1px rgba(255,10,46,0.3) inset;
 }
 .btn-red-glow:hover {
-  background: linear-gradient(135deg, var(--red-bright), var(--red));
-  transform: translateY(-1px); box-shadow: 0 6px 20px var(--red-glow);
+  background: linear-gradient(135deg, var(--red), var(--red-hot));
+  box-shadow: 0 6px 24px rgba(255,10,46,0.4), 0 0 30px rgba(255,10,46,0.15), 0 0 0 1px rgba(255,10,46,0.4) inset;
+  transform: translateY(-1px);
+}
+.btn-full {
+  background: linear-gradient(135deg, var(--red-dim), var(--red));
+  color: var(--white);
+  box-shadow: 0 4px 20px rgba(255,10,46,0.3), 0 0 0 1px rgba(255,10,46,0.3) inset;
+  width: 100%;
+}
+.btn-full:hover {
+  background: linear-gradient(135deg, var(--red), var(--red-hot));
+  box-shadow: 0 6px 28px rgba(255,10,46,0.45), 0 0 40px rgba(255,10,46,0.15), 0 0 0 1px rgba(255,10,46,0.4) inset;
+  transform: translateY(-1px);
 }
 .btn-outline {
-  background: rgba(255,255,255,0.03); border: 1px solid var(--panel-border); color: var(--white);
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.1);
+  color: var(--gray);
+  padding: 8px 14px; font-size: 12px;
 }
 .btn-outline:hover {
-  background: rgba(255,255,255,0.06); border-color: var(--panel-border-hover);
+  border-color: var(--red-bright); color: var(--red-bright);
+  background: var(--red-soft); box-shadow: 0 0 15px rgba(255,10,46,0.08);
 }
 .btn-danger {
-  background: rgba(255,61,82,0.08); border: 1px solid rgba(255,61,82,0.2); color: var(--danger);
+  background: rgba(255,0,51,0.08);
+  border: 1px solid rgba(255,0,51,0.2);
+  color: #ff3366;
+  padding: 8px 14px; font-size: 12px;
 }
 .btn-danger:hover {
-  background: rgba(255,61,82,0.16); border-color: var(--danger);
+  background: rgba(255,0,51,0.15);
+  border-color: rgba(255,0,51,0.4);
+  box-shadow: 0 0 15px rgba(255,0,51,0.1);
 }
-.btn-sm { padding: 7px 11px; font-size: 11px; border-radius: 8px; }
-.btn-full { width: 100%; }
-
-/* ── QUOTA & LOGIN CARD ── */
-.quota-card {
-  background: linear-gradient(180deg, rgba(255,31,77,0.04), transparent), var(--bg-2);
-  border-radius: 12px; padding: 18px;
-  border: 1px solid var(--panel-border);
-  margin-bottom: 14px; text-align: center;
-  position: relative; overflow: hidden;
-}
-.quota-card::after {
-  content: ''; position: absolute; inset: 0;
-  background: radial-gradient(circle at 50% 0%, rgba(255,31,77,0.12), transparent 60%);
-  pointer-events: none;
-}
-.quota-number {
-  font-size: 30px; font-family: 'Outfit', sans-serif; font-weight: 800;
-  color: #fff; margin: 6px 0; position: relative;
-}
-.quota-text { font-size: 10px; color: var(--gray); text-transform: uppercase; letter-spacing: 1.2px; font-weight: 600; position: relative;}
-.google-btn-wrapper { display: flex; justify-content: center; margin-top: 16px; }
-
-/* ── MODIFIERS ── */
-.slider-container { display: flex; align-items: center; gap: 16px; margin-bottom: 16px; }
-.slider-label {
-  font-size: 10px; color: var(--gray); width: 56px; flex-shrink: 0;
-  text-transform: uppercase; letter-spacing: 1px; font-weight: 700;
-}
-.slider-val {
-  font-size: 12px; font-weight: 700; color: var(--white); width: 48px; text-align: right;
-  background: var(--bg-2); padding: 4px 8px; border-radius: 6px; border: 1px solid var(--panel-border);
-  font-family: 'JetBrains Mono', monospace;
-}
-input[type=range] {
-  flex: 1; -webkit-appearance: none; appearance: none; height: 5px; border-radius: 3px;
-  background: linear-gradient(90deg, var(--red) 0%, var(--red) 50%, var(--panel-border) 50%, var(--panel-border) 100%);
-  outline: none; cursor: pointer;
-}
-input[type=range]::-webkit-slider-thumb {
-  -webkit-appearance: none; width: 18px; height: 18px; border-radius: 50%;
-  background: #fff; border: 3px solid var(--red);
-  cursor: pointer; transition: all 0.15s;
-  box-shadow: 0 2px 8px rgba(255,31,77,0.4);
-}
-input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.15); background: var(--red); border-color: #fff; }
-input[type=range]::-moz-range-thumb {
-  width: 18px; height: 18px; border-radius: 50%; background: #fff; border: 3px solid var(--red);
-  cursor: pointer; box-shadow: 0 2px 8px rgba(255,31,77,0.4);
-}
-.template-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 20px; }
-.rec-box {
-  background: rgba(34,224,122,0.08); border: 1px solid rgba(34,224,122,0.2);
-  color: var(--success); padding: 11px; border-radius: 8px; font-size: 12px;
-  text-align: center; font-weight: 600; margin-top: 14px;
-  font-family: 'JetBrains Mono', monospace;
-}
-
-/* ── UPLOAD AREA ── */
-.main-content { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
-.upload-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-@media(max-width: 1100px) { .upload-grid { grid-template-columns: 1fr; } }
-.dropzone {
-  border: 2px dashed var(--panel-border); border-radius: 12px; padding: 36px 18px;
-  text-align: center; cursor: pointer; transition: all 0.25s ease; position: relative;
-  background: linear-gradient(180deg, rgba(255,255,255,0.015), transparent), var(--bg-2);
-}
-.dropzone:hover, .dropzone.dragover {
-  border-color: var(--red); background: linear-gradient(180deg, rgba(255,31,77,0.06), transparent), var(--bg-2);
-  box-shadow: 0 0 0 4px rgba(255,31,77,0.08) inset;
-}
-.dropzone input { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
-.dz-icon { font-size: 30px; margin-bottom: 10px; display: block; filter: drop-shadow(0 4px 12px rgba(255,31,77,0.3)); }
-.dz-text { font-size: 13px; color: var(--gray); font-weight: 500; }
-.file-list { margin-top: 14px; display: flex; flex-direction: column; gap: 8px; max-height: 260px; overflow-y: auto; padding-right: 4px; }
-.file-item {
-  background: var(--bg-2); border: 1px solid var(--panel-border); border-radius: 10px;
-  padding: 10px 12px; display: flex; align-items: center; gap: 10px; font-size: 12px;
-  transition: all 0.2s;
-}
-.file-item:hover { border-color: var(--panel-border-hover); background: rgba(255,255,255,0.02); }
-.file-item input {
-  flex: 1; background: transparent; border: none; border-bottom: 1px solid var(--panel-border);
-  color: #fff; padding: 6px 4px; font-size: 12px; outline: none; transition: 0.2s;
-}
-.file-item input:focus { border-color: var(--red); }
-.yt-card {
-  display: flex; align-items: center; gap: 12px; padding: 10px; background: var(--bg-2);
-  border: 1px solid var(--panel-border); border-radius: 12px; margin-top: 10px;
-  transition: all 0.2s;
-}
-.yt-card:hover { border-color: rgba(255,31,77,0.3); background: rgba(255,31,77,0.04); }
-.yt-thumb { width: 72px; height: 46px; object-fit: cover; border-radius: 8px; border: 1px solid rgba(255,255,255,0.08); }
-.yt-info { flex: 1; min-width: 0; }
-.yt-title {
-  font-size: 11px; color: var(--gray); white-space: nowrap; overflow: hidden;
-  text-overflow: ellipsis; margin-bottom: 6px; font-weight: 600;
-}
-.audio-preview { width: 100%; height: 45px; margin-top: 14px; border-radius: 10px; display: none; }
-.audio-preview::-webkit-media-controls-panel { background: rgba(20,8,12,0.9); }
-.upload-btn {
-  margin-top: 18px; width: 100%; padding: 15px; font-size: 13px; font-weight: 900;
-  text-transform: uppercase; letter-spacing: 1.8px; border-radius: 12px;
-}
-.bypass-glow {
-  background: linear-gradient(135deg, var(--red), #ff5577); color: #fff; border: none;
-  box-shadow: 0 8px 24px rgba(255,31,77,0.35);
-  position: relative; overflow: hidden;
-}
-.bypass-glow::before {
-  content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
-  background: linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.2) 50%, transparent 70%);
-  animation: shimmer 2.8s infinite;
-}
-@keyframes shimmer {
-  0% { transform: translateX(-100%) rotate(0deg); }
-  100% { transform: translateX(100%) rotate(0deg); }
-}
-.bypass-glow:hover {
-  box-shadow: 0 12px 36px rgba(255,31,77,0.55); transform: translateY(-2px);
-}
-
-/* ── HISTORY TABLE ── */
-.history-panel { margin-top: 4px; }
-.table-responsive { overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 12px; }
-table { width: 100%; border-collapse: collapse; font-size: 12px; text-align: left; min-width: 600px; }
-th {
-  padding: 14px 12px; color: var(--gray); border-bottom: 1px solid var(--panel-border);
-  font-weight: 700; text-transform: uppercase; letter-spacing: 1px; background: var(--bg-2);
-  font-size: 10px;
-}
-td { padding: 14px 12px; border-bottom: 1px solid var(--panel-border); }
-tr:hover td { background: rgba(255,255,255,0.02); }
-.status-badge { padding: 5px 10px; border-radius: 6px; font-weight: 700; font-size: 10px; text-transform: uppercase; letter-spacing: 1px; }
-.bg-green { background: rgba(34,224,122,0.1); color: var(--success); border: 1px solid rgba(34,224,122,0.2); }
-.bg-red { background: rgba(255,61,82,0.1); color: var(--danger); border: 1px solid rgba(255,61,82,0.2); }
-.copy-badge {
-  cursor: pointer; background: var(--panel-border); color: #fff;
-  padding: 5px 10px; border-radius: 6px; border: 1px solid transparent;
-  transition: all 0.2s; font-weight: 600; display: inline-block; font-family: 'JetBrains Mono', monospace;
-}
-.copy-badge:hover { background: var(--red); }
+.btn-sm { padding: 8px 14px; font-size: 12px; }
+.btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
+/* ── SPINNER ── */
 .spinner {
-  width: 16px; height: 16px; border: 2px solid var(--gray-dark);
-  border-top-color: var(--red); border-radius: 50%; animation: spin 0.6s linear infinite;
+  width: 16px; height: 16px;
+  border: 2px solid rgba(255,255,255,0.1);
+  border-top-color: var(--red-bright);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  display: inline-block;
+  box-shadow: 0 0 8px rgba(255,10,46,0.3);
 }
 @keyframes spin { to { transform: rotate(360deg); } }
-.status-bar {
-  padding: 13px; border-radius: 10px; font-size: 12px; font-weight: 600;
-  margin-top: 14px; display: none; text-align: center; letter-spacing: 0.3px;
-  background: var(--bg-2); border: 1px solid var(--panel-border);
-  color: var(--white);
-}
-
-/* ── UPLOAD PROGRESS BAR ── */
-.upload-progress-wrap {
-  text-align: left; padding: 4px 2px;
-}
-.upload-progress-header {
-  display: flex; align-items: center; gap: 10px; margin-bottom: 10px;
-}
-.upload-progress-title {
-  flex: 1; font-size: 13px; font-weight: 700; color: #fff; letter-spacing: 0.3px;
-}
-.upload-progress-pct {
-  font-family: 'JetBrains Mono', monospace; font-size: 14px; font-weight: 800;
-  color: var(--red); min-width: 48px; text-align: right;
-}
-.upload-progress-track {
-  height: 10px; background: var(--bg); border: 1px solid var(--panel-border);
-  border-radius: 6px; overflow: hidden; position: relative;
-}
-.upload-progress-fill {
-  height: 100%; width: 0%; border-radius: 5px;
-  background: linear-gradient(90deg, var(--red-dim), var(--red), var(--red-bright));
-  background-size: 200% 100%;
-  box-shadow: 0 0 12px rgba(255,31,77,0.5);
-  transition: width 0.25s ease;
+/* ── DRAG DROP ── */
+.drop-zone {
+  border: 2px dashed rgba(255,10,46,0.2);
+  border-radius: var(--radius);
+  padding: 36px 24px;
+  text-align: center;
+  background: rgba(255,10,46,0.02);
+  transition: all 0.35s ease;
+  cursor: pointer;
   position: relative;
+  overflow: hidden;
 }
-.upload-progress-fill::after {
+.drop-zone::before {
   content: ''; position: absolute; inset: 0;
-  background: linear-gradient(45deg, rgba(255,255,255,0.18) 25%, transparent 25%, transparent 50%, rgba(255,255,255,0.18) 50%, rgba(255,255,255,0.18) 75%, transparent 75%, transparent);
-  background-size: 24px 24px;
-  animation: progStripes 0.8s linear infinite;
+  background: radial-gradient(circle at center, rgba(255,10,46,0.04), transparent 70%);
+  opacity: 0; transition: opacity 0.35s ease;
 }
-.upload-progress-fill.done {
-  background: linear-gradient(90deg, #16a34a, var(--success));
-  box-shadow: 0 0 12px rgba(34,224,122,0.5);
+.drop-zone:hover::before { opacity: 1; }
+.drop-zone:hover {
+  border-color: var(--red-bright);
+  background: rgba(255,10,46,0.04);
+  box-shadow: 0 0 30px rgba(255,10,46,0.06);
 }
-.upload-progress-fill.done::after { animation: none; opacity: 0.3; }
-.upload-progress-fill.err {
-  background: linear-gradient(90deg, #b91c1c, var(--danger));
-  box-shadow: 0 0 12px rgba(255,61,82,0.5);
+.drop-zone.dragover {
+  border-color: var(--red-bright);
+  background: rgba(255,10,46,0.06);
+  box-shadow: 0 0 40px rgba(255,10,46,0.1);
+  transform: scale(1.01);
 }
-@keyframes progStripes {
-  from { background-position: 0 0; }
-  to { background-position: 24px 0; }
+.drop-zone-icon { font-size: 36px; margin-bottom: 12px; opacity: 0.7; transition: all 0.3s ease; }
+.drop-zone:hover .drop-zone-icon { opacity: 1; transform: scale(1.1); filter: drop-shadow(0 0 10px rgba(255,10,46,0.3)); }
+.drop-zone-text { font-size: 13px; color: var(--gray); font-weight: 500; }
+.drop-zone-hint { font-size: 11px; color: var(--gray-2); margin-top: 6px; }
+/* ── FILE ITEM ── */
+.file-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px;
+  background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.04);
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+  transition: all 0.2s ease;
 }
-.upload-progress-file {
-  font-size: 11px; color: var(--gray); margin-top: 8px;
+.file-item:hover {
+  border-color: rgba(255,10,46,0.15);
+  background: rgba(255,10,46,0.03);
+}
+.file-item input { flex: 1; min-width: 0; }
+/* ── YT CARD ── */
+.yt-card {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 14px;
+  background: rgba(0,0,0,0.3);
+  border: 1px solid rgba(255,255,255,0.04);
+  border-radius: var(--radius-sm);
+  margin-bottom: 8px;
+  transition: all 0.2s ease;
+}
+.yt-card:hover { border-color: rgba(255,10,46,0.15); }
+.yt-thumb { width: 64px; height: 48px; border-radius: 8px; object-fit: cover; flex-shrink: 0; }
+.yt-info { flex: 1; min-width: 0; }
+.yt-title { font-size: 12px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px; }
+/* ── SLIDERS ── */
+.slider-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.slider-label { font-size: 12px; color: var(--gray); font-weight: 600; width: 60px; flex-shrink: 0; }
+input[type="range"] {
+  -webkit-appearance: none; appearance: none; flex: 1; height: 5px;
+  background: rgba(255,255,255,0.06); border-radius: 3px; outline: none;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 18px; height: 18px;
+  background: linear-gradient(135deg, var(--red), var(--red-hot));
+  border-radius: 50%; cursor: pointer;
+  box-shadow: 0 0 10px var(--red-glow), 0 0 20px var(--red-glow-strong);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.2);
+  box-shadow: 0 0 15px var(--red-glow-strong), 0 0 30px rgba(255,10,46,0.4);
+}
+input[type="range"]::-moz-range-thumb {
+  width: 18px; height: 18px; border: none;
+  background: linear-gradient(135deg, var(--red), var(--red-hot));
+  border-radius: 50%; cursor: pointer;
+  box-shadow: 0 0 10px var(--red-glow);
+}
+.slider-val {
   font-family: 'JetBrains Mono', monospace;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  font-size: 12px; font-weight: 700; color: var(--red-bright);
+  width: 44px; text-align: right; flex-shrink: 0;
+  text-shadow: 0 0 8px var(--red-glow);
 }
-.upload-progress-stats {
-  display: flex; justify-content: space-between; margin-top: 6px;
-  font-size: 10px; color: var(--gray-2); font-family: 'JetBrains Mono', monospace;
-  letter-spacing: 0.5px;
+/* ── RECOMMENDATION BOX ── */
+.rec-box {
+  padding: 12px 16px; border-radius: var(--radius-sm);
+  border: 1px solid; font-size: 12px; font-weight: 600;
+  transition: all 0.3s ease;
 }
-.upload-progress-stats b { color: var(--gray); font-weight: 700; }
-.upload-progress-mini {
-  display: flex; gap: 4px; margin-top: 10px; flex-wrap: wrap;
+/* ── TABS ── */
+.tabs { display: flex; gap: 6px; margin-bottom: 20px; flex-wrap: wrap; }
+.tab-btn {
+  padding: 10px 20px; border-radius: var(--radius-sm);
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.05);
+  color: var(--gray); font-size: 13px; font-weight: 600;
+  cursor: pointer; transition: all 0.25s ease;
+  font-family: 'Inter', sans-serif;
 }
-.upload-progress-chip {
-  font-size: 9px; padding: 3px 7px; border-radius: 6px;
-  background: var(--bg); border: 1px solid var(--panel-border);
-  color: var(--gray-2); font-family: 'JetBrains Mono', monospace;
-  letter-spacing: 0.5px; transition: all 0.2s;
+.tab-btn:hover { border-color: rgba(255,10,46,0.2); color: var(--white); background: rgba(255,10,46,0.04); }
+.tab-btn.active {
+  background: linear-gradient(135deg, rgba(255,10,46,0.15), rgba(255,10,46,0.05));
+  border-color: rgba(255,10,46,0.3); color: var(--red-bright);
+  box-shadow: 0 0 20px rgba(255,10,46,0.08);
 }
-.upload-progress-chip.active {
-  border-color: var(--red); color: var(--red); background: rgba(255,31,77,0.08);
-  box-shadow: 0 0 8px rgba(255,31,77,0.2);
+/* ── UPLOAD PROGRESS ── */
+.upload-progress-wrap {
+  background: var(--panel-solid);
+  border: 1px solid rgba(255,10,46,0.15);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5), 0 0 40px rgba(255,10,46,0.04);
+  animation: progAppear 0.4s cubic-bezier(0.4,0,0.2,1);
 }
-.upload-progress-chip.done {
-  border-color: rgba(34,224,122,0.4); color: var(--success); background: rgba(34,224,122,0.08);
-}
-.upload-progress-chip.fail {
-  border-color: rgba(255,61,82,0.4); color: var(--danger); background: rgba(255,61,82,0.08);
-}
-
-/* ── LANDING PAGE ── */
-.landing-page {
-  position: fixed; inset: 0; background: var(--bg); z-index: 9999;
-  display: block;
-  padding: 40px 20px; text-align: center;
-  overflow-y: auto;
-  -webkit-overflow-scrolling: touch;
-}
-.landing-content {
-  background: linear-gradient(180deg, var(--panel) 0%, var(--panel-2) 100%);
-  border: 1px solid var(--panel-border); border-radius: 24px;
-  padding: 48px 36px; max-width: 820px; width: 100%; box-shadow: var(--glass-shadow);
-  animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-  position: relative; overflow: hidden; margin: 0 auto;
-}
-.landing-content::before {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
-  background: linear-gradient(90deg, transparent, var(--red), transparent);
-}
-.landing-title {
-  font-size: 36px; font-family: 'Outfit', sans-serif; font-weight: 800;
-  color: var(--white);
-  margin-bottom: 10px;
-  letter-spacing: -0.5px; line-height: 1.15;
-}
-.landing-title span { color: var(--red); }
-.landing-sub { color: var(--gray); margin-bottom: 36px; font-size: 14px; font-weight: 500; letter-spacing: 1px; }
-.steps-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 36px; text-align: left; }
-@media(max-width: 768px) { .steps-grid { grid-template-columns: 1fr; } .landing-title { font-size: 28px; } .landing-content { padding: 32px 22px; } }
-.step-card {
-  background: var(--bg-2); border: 1px solid var(--panel-border);
-  padding: 22px; border-radius: 14px; transition: all 0.25s ease;
-}
-.step-card:hover { border-color: var(--red); transform: translateY(-3px); box-shadow: 0 8px 24px rgba(255,31,77,0.1); }
-.step-number {
-  font-size: 26px; font-weight: 800; color: var(--red); margin-bottom: 10px;
-  font-family: 'Outfit', sans-serif;
-}
-.step-title { font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 6px; }
-.step-desc { font-size: 12px; color: var(--gray); line-height: 1.6; }
-.btn-start {
-  background: linear-gradient(135deg, var(--white), #e8e8e8); color: var(--bg);
-  border: none; padding: 15px 38px; font-size: 14px; font-weight: 800;
-  border-radius: 10px; cursor: pointer; letter-spacing: 0.3px;
-  transition: all 0.2s; display: inline-flex; align-items: center;
-}
-.btn-start:hover { transform: translateY(-2px); box-shadow: 0 10px 30px rgba(255,255,255,0.15); }
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(30px) scale(0.96); }
+@keyframes progAppear {
+  from { opacity: 0; transform: translateY(10px) scale(0.98); }
   to { opacity: 1; transform: translateY(0) scale(1); }
 }
-
-/* ── TOP BAR ── */
-.top-bar-glow {
-  display: flex; align-items: center; gap: 14px;
-  padding: 12px 16px;
-  background: linear-gradient(180deg, var(--panel), var(--panel-2));
-  border-radius: 12px; border: 1px solid var(--panel-border);
-  position: relative; overflow: hidden; flex-wrap: wrap;
-  box-shadow: var(--glass-shadow);
-}
-.top-bar-glow::before {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
-  background: linear-gradient(90deg, transparent, rgba(255,31,77,0.4), transparent);
-}
-.topbar-users { display: flex; flex-direction: column; gap: 2px; }
-.topbar-users-label { font-size: 9px; color: var(--gray); text-transform: uppercase; letter-spacing: 1px; font-weight: 600; }
-.topbar-users-count { display: flex; align-items: center; gap: 10px; }
-.topbar-users-count span:first-child {
-  font-family: 'Outfit', sans-serif; font-size: 26px; font-weight: 800;
-  color: var(--white);
-  transition: all 0.2s ease; line-height: 1;
-}
-.live-badge {
-  font-size: 9px; font-weight: 900; color: var(--success);
-  background: rgba(34,224,122,0.1); border: 1px solid rgba(34,224,122,0.3);
-  padding: 3px 8px; border-radius: 20px; letter-spacing: 2px;
-  animation: livePulse 2s ease-in-out infinite;
-}
-@keyframes livePulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
-}
-.btn-premium-top {
-  background: linear-gradient(135deg, #f59e0b, #d97706);
-  color: #fff; font-weight: 700; border: none;
-  padding: 9px 14px; border-radius: 8px; cursor: pointer;
-  font-size: 12px; letter-spacing: 0.3px;
-  transition: all 0.2s; white-space: nowrap; flex-shrink: 0;
-}
-.btn-premium-top:hover { background: #d97706; transform: translateY(-1px); box-shadow: 0 6px 18px rgba(245,158,11,0.35); }
-.topbar-profile {
+.upload-progress-header {
   display: flex; align-items: center; gap: 10px;
-  background: var(--bg-2); padding: 4px 12px 4px 4px;
-  border-radius: 20px; border: 1px solid var(--panel-border);
+  margin-bottom: 14px;
+}
+.upload-progress-title {
+  flex: 1; font-size: 13px; font-weight: 700; color: var(--white);
+  letter-spacing: 0.3px;
+}
+.upload-progress-pct {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 20px; font-weight: 800; color: var(--red-bright);
+  text-shadow: 0 0 15px var(--red-glow-strong);
+  min-width: 60px; text-align: right;
+}
+/* KEREN PROGRESS BAR */
+.upload-progress-track {
+  height: 10px;
+  background: rgba(0,0,0,0.5);
+  border-radius: 5px;
+  overflow: hidden;
+  position: relative;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.03);
+}
+.upload-progress-track::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(
+    90deg,
+    transparent 0px,
+    transparent 8px,
+    rgba(0,0,0,0.2) 8px,
+    rgba(0,0,0,0.2) 10px
+  );
+  z-index: 2;
+}
+.upload-progress-fill {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, var(--red-dim), var(--red), var(--red-hot), var(--red));
+  background-size: 200% 100%;
+  border-radius: 5px;
+  position: relative;
+  z-index: 1;
+  transition: width 0.15s linear;
+  box-shadow: 0 0 15px var(--red-glow), 0 0 30px rgba(255,10,46,0.2);
+  animation: progStripes 1.5s linear infinite, progGlow 2s ease-in-out infinite alternate;
+}
+@keyframes progStripes {
+  0% { background-position: 0% 0; }
+  100% { background-position: 200% 0; }
+}
+@keyframes progGlow {
+  0% { box-shadow: 0 0 15px var(--red-glow), 0 0 30px rgba(255,10,46,0.2); }
+  100% { box-shadow: 0 0 25px var(--red-glow-strong), 0 0 50px rgba(255,10,46,0.3), 0 0 80px rgba(255,10,46,0.1); }
+}
+.upload-progress-fill.done {
+  background: linear-gradient(90deg, #004d1a, var(--success)) !important;
+  box-shadow: 0 0 15px rgba(0,230,118,0.3), 0 0 30px rgba(0,230,118,0.15) !important;
+  animation: none !important;
+}
+.upload-progress-fill.err {
+  background: linear-gradient(90deg, #4d0000, var(--danger)) !important;
+  box-shadow: 0 0 15px rgba(255,0,51,0.3), 0 0 30px rgba(255,0,51,0.15) !important;
+  animation: none !important;
+}
+.upload-progress-file {
+  font-size: 12px; color: var(--gray); margin-top: 10px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  font-weight: 500;
+}
+.upload-progress-stats {
+  display: flex; justify-content: space-between;
+  font-size: 11px; color: var(--gray-2); margin-top: 8px;
+  font-family: 'JetBrains Mono', monospace;
+}
+.upload-progress-mini {
+  display: flex; gap: 6px; margin-top: 14px; flex-wrap: wrap;
+}
+.upload-progress-chip {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: var(--gray-2);
+  background: rgba(255,255,255,0.03);
+  border: 1px solid rgba(255,255,255,0.06);
+  transition: all 0.35s cubic-bezier(0.4,0,0.2,1);
+}
+.upload-progress-chip.active {
+  background: linear-gradient(135deg, var(--red-dim), var(--red));
+  border-color: var(--red-bright); color: var(--white);
+  box-shadow: 0 0 15px var(--red-glow), 0 0 25px rgba(255,10,46,0.2);
+  animation: chipPulse 1.5s ease-in-out infinite;
+}
+@keyframes chipPulse {
+  0%,100% { box-shadow: 0 0 15px var(--red-glow), 0 0 25px rgba(255,10,46,0.2); }
+  50% { box-shadow: 0 0 25px var(--red-glow-strong), 0 0 40px rgba(255,10,46,0.3); }
+}
+.upload-progress-chip.done {
+  background: linear-gradient(135deg, #004d1a, var(--success));
+  border-color: var(--success); color: var(--white);
+  box-shadow: 0 0 10px rgba(0,230,118,0.2);
+}
+.upload-progress-chip.fail {
+  background: linear-gradient(135deg, #4d0000, var(--danger));
+  border-color: var(--danger); color: var(--white);
+  box-shadow: 0 0 10px rgba(255,0,51,0.2);
+}
+/* ── STATUS BAR ── */
+.status-bar {
+  padding: 12px 16px; border-radius: var(--radius-sm);
+  font-size: 12px; font-weight: 600;
+  background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.04);
+}
+/* ── HISTORY TABLE ── */
+.table-responsive { overflow-x: auto; border-radius: var(--radius-sm); }
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+ th {
+  background: rgba(255,10,46,0.06);
+  color: var(--red-bright);
+  font-weight: 700;
+  text-align: left;
+  padding: 12px 14px;
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border-bottom: 1px solid rgba(255,10,46,0.1);
+}
+td { padding: 12px 14px; border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: middle; }
+tr:hover td { background: rgba(255,10,46,0.02); }
+.status-badge {
+  display: inline-block; padding: 4px 10px; border-radius: 6px;
+  font-size: 10px; font-weight: 700; letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+.bg-green { background: rgba(0,230,118,0.1); color: var(--success); border: 1px solid rgba(0,230,118,0.2); }
+.bg-red { background: rgba(255,0,51,0.1); color: #ff3366; border: 1px solid rgba(255,0,51,0.2); }
+.copy-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 10px; border-radius: 6px;
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+  font-size: 11px; font-family: 'JetBrains Mono', monospace;
+  cursor: pointer; transition: all 0.2s ease; color: var(--white);
+}
+.copy-badge:hover { border-color: var(--red-bright); background: var(--red-soft); color: var(--red-bright); }
+/* ── ROBLOX PROFILE ── */
+.profile-card {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px;
+  background: rgba(0,0,0,0.3);
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255,255,255,0.04);
+}
+.profile-avatar { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 2px solid rgba(255,10,46,0.2); box-shadow: 0 0 15px rgba(255,10,46,0.1); }
+.profile-info { flex: 1; min-width: 0; }
+.profile-name { font-size: 14px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.profile-type { font-size: 11px; color: var(--gray); }
+/* ── AUDIO PREVIEW ── */
+audio { width: 100%; border-radius: var(--radius-sm); margin-top: 12px; }
+audio::-webkit-media-controls-panel { background: var(--panel-2); }
+audio::-webkit-media-controls-current-time-display,
+audio::-webkit-media-controls-time-remaining-display { color: var(--white); font-family: 'JetBrains Mono', monospace; }
+/* ── LIMIT INFO ── */
+.limit-info { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+.limit-info b { font-family: 'Orbitron', sans-serif; font-size: 14px; }
+/* ── SPRITE PREVIEW ── */
+#spritePreviewArea img {
+  max-width: 100%; border: 1px solid var(--panel-border);
+  border-radius: var(--radius-sm); background: #000;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+}
+/* ── TEMPLATE CHIPS ── */
+.template-chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+.template-chip {
+  padding: 6px 14px; border-radius: 100px;
+  background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+  color: var(--gray); font-size: 11px; font-weight: 600;
+  cursor: pointer; transition: all 0.2s ease;
+}
+.template-chip:hover { border-color: rgba(255,10,46,0.2); color: var(--white); background: rgba(255,10,46,0.04); }
+.template-chip.active {
+  background: linear-gradient(135deg, rgba(255,10,46,0.15), rgba(255,10,46,0.05));
+  border-color: rgba(255,10,46,0.3); color: var(--red-bright);
+  box-shadow: 0 0 15px rgba(255,10,46,0.08);
+}
+/* ── TOGGLE BYPASS ── */
+.bypass-toggle {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 16px;
+  background: rgba(255,10,46,0.04);
+  border: 1px solid rgba(255,10,46,0.1);
+  border-radius: var(--radius-sm);
+  margin-bottom: 16px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+.bypass-toggle:hover {
+  border-color: rgba(255,10,46,0.2);
+  background: rgba(255,10,46,0.06);
+}
+.bypass-toggle-left { display: flex; align-items: center; gap: 10px; }
+.bypass-toggle-icon { font-size: 18px; }
+.bypass-toggle-text { font-size: 13px; font-weight: 700; }
+.bypass-toggle-desc { font-size: 11px; color: var(--gray); }
+.bypass-toggle-switch {
+  width: 44px; height: 24px; border-radius: 12px;
+  background: var(--gray-dark); position: relative;
+  transition: background 0.3s ease;
   flex-shrink: 0;
 }
-.topbar-avatar { width: 30px; height: 30px; border-radius: 50%; }
-.topbar-name { font-weight: 600; font-size: 12px; color: #fff; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-@media (max-width: 600px) {
-  .topbar-users-count span:first-child { font-size: 20px; }
-  .topbar-name { max-width: 80px; }
+.bypass-toggle-switch::after {
+  content: ''; position: absolute; top: 2px; left: 2px;
+  width: 20px; height: 20px; border-radius: 50%;
+  background: var(--white); box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
 }
-#premiumModal {
-  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.85);
-  z-index: 99999; align-items: center; justify-content: center; padding: 20px;
-  backdrop-filter: blur(6px);
+.bypass-toggle.active .bypass-toggle-switch { background: var(--red); box-shadow: 0 0 15px var(--red-glow); }
+.bypass-toggle.active .bypass-toggle-switch::after { transform: translateX(20px); }
+/* ── MOBILE RESPONSIVE ── */
+@media (max-width: 860px) {
+  .hub-title { font-size: 32px; }
+  .hub-subtitle { font-size: 10px; letter-spacing: 3px; }
+  .hub-card { padding: 28px 20px; }
+  .file-item { flex-wrap: wrap; }
+  .file-item > div:first-child { width: 100% !important; white-space: normal !important; margin-bottom: 6px; }
+  .yt-card { flex-wrap: wrap; }
+  .yt-thumb { width: 100%; height: auto; aspect-ratio: 16/9; }
+  .tabs { gap: 4px; }
+  .tab-btn { padding: 8px 14px; font-size: 12px; }
+  .slider-row { flex-wrap: wrap; }
+  .slider-label { width: 100%; margin-bottom: 4px; }
+  .upload-progress-pct { font-size: 16px; }
+  .btn { padding: 10px 16px; font-size: 12px; }
 }
-.premium-content {
-  background: linear-gradient(180deg, var(--panel), var(--panel-2)); border: 1px solid rgba(245,158,11,0.4); border-radius: 18px;
-  padding: 36px; max-width: 450px; width: 100%; text-align: center;
-  position: relative; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.7);
-  animation: fadeIn 0.3s ease;
+@media (max-width: 480px) {
+  .hub-title { font-size: 26px; }
+  .hub-card-title { font-size: 15px; }
+  .sidebar-header { padding: 12px 14px; }
+  .sidebar-logo { font-size: 14px; }
+  .glass-panel { padding: 14px; }
+  .drop-zone { padding: 24px 16px; }
+  .drop-zone-icon { font-size: 28px; }
+  .upload-progress-wrap { padding: 14px; }
+  .upload-progress-chip { width: 24px; height: 24px; font-size: 10px; }
+  .template-chips { gap: 6px; }
+  .template-chip { padding: 5px 10px; font-size: 10px; }
 }
-.premium-content::before {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
-  background: linear-gradient(90deg, transparent, #ffd700, transparent);
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,10,46,0.2); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,10,46,0.35); }
+/* ── ANIMATIONS ── */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
 }
-
-/* ── HUB PAGE ── */
-#hubPage .glitch-wrap { color: var(--red); }
-
-::-webkit-scrollbar { width: 8px; height: 8px; }
-::-webkit-scrollbar-track { background: rgba(0,0,0,0.3); border-radius: 4px; }
-::-webkit-scrollbar-thumb { background: rgba(255,31,77,0.35); border-radius: 4px; border: 1px solid rgba(255,255,255,0.05); }
-::-webkit-scrollbar-thumb:hover { background: rgba(255,31,77,0.6); }
-
-@media (max-width: 600px) {
-  ::-webkit-scrollbar { display: none; }
-  body { scrollbar-width: none; }
-}
+.fade-in { animation: fadeIn 0.5s cubic-bezier(0.4,0,0.2,1) forwards; }
 </style>
-<base target="_blank">
 </head>
 <body>
-<div class="bg-animation"></div>
+<!-- Scanline overlay -->
+<div class="scanlines"></div>
+<!-- Dynamic backgrounds -->
+<div class="bg-pulse"></div>
 <div class="bg-grid"></div>
-
-<!-- ── LANDING PAGE ── -->
-<div class="landing-page" id="landingPage">
-  <div class="landing-content">
-    <img src="https://cdn.discordapp.com/attachments/1522140461081432126/1545132976227090582/ChatGPT_Image_Jul_20_2026_03_50_07_AM.png?ex=6a9b08b8&is=6a99b738&hm=c8eac40969dde5aa797a96bc42bbe0d0b78afa49f760ff982c4efcdbf67d646e" style="width:110px; height:110px; border-radius:50%; border:3px solid var(--red); box-shadow: 0 0 40px rgba(255,31,77,0.5); margin-bottom:24px; object-fit:cover;">
-    <h1 class="landing-title">Selamat Datang di <span>MCHLERN</span> TOOLS</h1>
-    <p class="landing-sub">Sistem Bypass Audio Roblox Paling Canggih & Otomatis</p>
-
-    {% if not discord_user %}
-    {% set url_error = request.args.get('error','') %}
-    {% if url_error == 'not_in_server' %}
-    <div style="background:rgba(255,31,77,0.15);border:1px solid rgba(255,31,77,0.4);border-radius:12px;padding:16px;margin-bottom:24px;color:#fff;font-size:14px;box-shadow:0 0 20px rgba(255,31,77,0.2);">
-      ❌ Kamu belum bergabung di Server Discord kami!<br>
-      <a href="https://discord.gg/YOUR_INVITE_CODE" target="_blank" style="color:#ff5577;font-weight:800; display:inline-block; margin-top:8px;">👉 Klik di sini untuk Join Server</a>
+<div class="bg-vignette"></div>
+<!-- LOADING SCREEN -->
+<div class="loading-screen" id="loadingScreen">
+  <div class="load-logo">MCHLERN</div>
+  <div class="load-sub">Roblox Audio Uploader PRO</div>
+  <div class="load-bar-wrap">
+    <div class="load-bar" id="loadBar"></div>
+  </div>
+  <div class="load-text" id="loadText">INITIALIZING...</div>
+  <div class="load-glitch" id="loadGlitch" style="display:none;"></div>
+</div>
+<!-- HUB PAGE -->
+<div class="hub-container" id="hubPage">
+  <div class="hub-badge">v3.0 PRO</div>
+  <div class="hub-title">MCHLERN<br>TOOLS</div>
+  <div class="hub-subtitle">Roblox Audio Uploader PRO</div>
+  <div class="hub-tools">
+    <div class="hub-card" onclick="switchTool('audio')">
+      <div class="hub-card-icon">🎵</div>
+      <div class="hub-card-title">Audio Uploader</div>
+      <div class="hub-card-desc">Upload audio ke Roblox dengan bypass & normal mode. Support file lokal & YouTube.</div>
     </div>
-    {% elif url_error %}
-    <div style="background:rgba(255,31,77,0.1);border:1px solid rgba(255,31,77,0.3);border-radius:12px;padding:16px;margin-bottom:24px;color:#fff;font-size:14px;">
-      ⚠️ Terjadi kesalahan saat login Discord. Coba lagi.
+    <div class="hub-card" onclick="switchTool('sprite')">
+      <div class="hub-card-icon">🖼️</div>
+      <div class="hub-card-title">Spritesheet Generator</div>
+      <div class="hub-card-desc">Generate spritesheet dari file video atau YouTube untuk decal Roblox.</div>
     </div>
-    {% endif %}
-    {% endif %}
-
-    <div class="steps-grid">
-      <div class="step-card">
-        <div class="step-number">🔐</div>
-        <div class="step-title">1. Login Discord</div>
-        <div class="step-desc">Kamu wajib login dengan akun Discord dan bergabung di server kami untuk akses gratis.</div>
-      </div>
-      <div class="step-card">
-        <div class="step-number">🎛️</div>
-        <div class="step-title">2. Pilih Mode Upload</div>
-        <div class="step-desc">Gunakan <b>Bypass Upload</b> untuk lolos dari filter Roblox, atau <b>Normal</b> untuk audio original.</div>
-      </div>
-      <div class="step-card">
-        <div class="step-number">🚀</div>
-        <div class="step-title">3. Upload & Selesai</div>
-        <div class="step-desc">Tinggal drag & drop file. ID Roblox otomatis muncul dan siap digunakan di dalam game!</div>
-      </div>
-    </div>
-
-    <div style="background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(255,50,50,0.05)); border: 1px solid rgba(255,215,0,0.3); border-radius: 16px; padding: 24px; margin-bottom: 36px; text-align: left; box-shadow: 0 10px 30px rgba(255,215,0,0.05);">
-      <h3 style="color: #f59e0b; margin-bottom: 16px; font-family: 'Outfit', sans-serif; font-size: 22px;">👑 PREMIUM ACCESS</h3>
-      <ul style="color: #e0e0e0; font-size: 14px; line-height: 1.8; list-style-type: none;">
-        <li style="margin-bottom: 8px;">✅ <b style="color:#fff;">Unlimited Bypass:</b> Tidak ada batasan 10x upload per hari! Bypass sepuasnya tanpa batas.</li>
-        <li style="margin-bottom: 8px;">✅ <b style="color:#fff;">Server Prioritas:</b> Proses render audio menggunakan FFmpeg jauh lebih cepat.</li>
-        <li style="margin-bottom: 12px;">✅ <b style="color:#fff;">Tanpa Ribet:</b> Langsung pakai tanpa perlu ganti-ganti akun Google.</li>
-        <li style="padding-top: 12px; border-top: 1px dashed rgba(255,215,0,0.3); font-weight: 900; color: #ffd700; font-size: 15px;">💰 Harga: Rp 30.000 / Minggu atau Rp 50.000 / Bulan</li>
-      </ul>
-    </div>
-
-    {% if discord_user %}
-    <div style="display:flex;align-items:center;justify-content:center;gap:16px;background:rgba(255,31,77,0.1);border:1px solid rgba(255,31,77,0.3);border-radius:16px;padding:16px 24px;margin-bottom:24px;box-shadow:inset 0 0 20px rgba(255,31,77,0.05);">
-      <img src="{{ discord_avatar }}" style="width:48px;height:48px;border-radius:50%;border:2px solid var(--red); box-shadow: 0 0 15px rgba(255,31,77,0.4);">
-      <div style="text-align:left">
-        <div style="font-weight:800;font-size:15px;color:#fff;">{{ discord_user }}</div>
-        <div style="font-size:12px;color:var(--success);font-weight:700;margin-top:2px;">✅ Terverifikasi Discord Member</div>
-      </div>
-      <a href="/logout" style="margin-left:auto;font-size:12px;color:#fff;text-decoration:none;border:1px solid rgba(255,31,77,0.5);background:rgba(255,31,77,0.2);padding:8px 16px;border-radius:8px;font-weight:700;transition:all 0.2s;">Logout</a>
-    </div>
-    <button class="btn-start" onclick="document.getElementById('landingPage').style.display='none'">🚀 Masuk ke Panel</button>
-    {% else %}
-    <a href="/login/discord" class="btn-start" style="text-decoration:none;display:inline-flex;align-items:center;">
-      <svg width="22" height="22" viewBox="0 0 127.14 96.36" fill="white" style="margin-right:10px"><path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,46,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,46,96.12,53,91.08,65.69,84.69,65.69Z"/></svg>
-      Login dengan Discord
-    </a>
-    {% endif %}
   </div>
 </div>
-
-<!-- ── LOADING SCREEN ── -->
-<div id="loadingScreen" style="
-  position:fixed; inset:0; z-index:99999;
-  background:#000000;
-  display:flex; flex-direction:column;
-  align-items:center; justify-content:center;
-  gap:24px;
-">
-  <div style="position:relative; width:100px; height:100px;">
-    <div style="
-      position:absolute; inset:0; border-radius:50%;
-      border:3px solid transparent;
-      border-top-color:#ff1f4d;
-      animation:spin 0.5s linear infinite;
-    "></div>
-    <div style="
-      position:absolute; inset:6px; border-radius:50%;
-      border:2px solid transparent;
-      border-bottom-color:#b81538;
-      animation:spin 1s linear infinite reverse;
-    "></div>
-    <img src="https://cdn.discordapp.com/attachments/1522140461081432126/1545132976227090582/ChatGPT_Image_Jul_20_2026_03_50_07_AM.png?ex=6a9b08b8&is=6a99b738&hm=c8eac40969dde5aa797a96bc42bbe0d0b78afa49f760ff982c4efcdbf67d646e"
-      style="position:absolute; inset:12px; border-radius:50%; object-fit:cover; width:76px; height:76px; filter: grayscale(100%) contrast(200%) sepia(100%) hue-rotate(-50deg) saturate(500%);"
-    >
-  </div>
-  <div style="text-align:center;">
-    <div style="font-family:'Outfit',sans-serif; font-size:28px; font-weight:900; color:#fff; letter-spacing:-1px;">
-      <span style="color:#ff1f4d;">MCHLERN</span> TOOLS
+<!-- MAIN APP -->
+<div class="app-container" id="mainApp">
+  <!-- SIDEBAR -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">MCHL<span style="color:var(--red-bright)">ERN</span></div>
+      <button class="back-btn" onclick="switchTool('hub')">← Kembali</button>
     </div>
-    <div style="font-size:11px; color:#666666; text-transform:uppercase; letter-spacing:3px; margin-top:4px;">SYSTEM BOOT SEQUENCE</div>
-  </div>
-  <div style="width:200px; height:2px; background:#222; overflow:hidden;">
-    <div id="loadBar" style="height:100%; width:0%; background:#ff1f4d; transition:width 0.1s linear;"></div>
-  </div>
-  <div id="loadText" style="font-size:11px; color:#888888; font-weight:600; letter-spacing:1px; font-family: monospace;">INITIALIZING...</div>
-</div>
-<style>
-  @keyframes spin { to { transform:rotate(360deg); } }
-
-  @keyframes glitch1 {
-    0%,100% { clip-path: inset(0 0 95% 0); transform: translate(-4px, 0); }
-    20%      { clip-path: inset(30% 0 50% 0); transform: translate(4px, 0); }
-    40%      { clip-path: inset(60% 0 20% 0); transform: translate(-3px, 0); }
-    60%      { clip-path: inset(80% 0 5% 0);  transform: translate(3px, 0); }
-    80%      { clip-path: inset(10% 0 70% 0); transform: translate(-2px, 0); }
-  }
-  @keyframes glitch2 {
-    0%,100% { clip-path: inset(80% 0 5% 0);  transform: translate(4px, 0); }
-    20%      { clip-path: inset(10% 0 70% 0); transform: translate(-4px, 0); }
-    40%      { clip-path: inset(0 0 95% 0);   transform: translate(3px, 0); }
-    60%      { clip-path: inset(30% 0 50% 0); transform: translate(-3px, 0); }
-    80%      { clip-path: inset(60% 0 20% 0); transform: translate(2px, 0); }
-  }
-  @keyframes glitchFlicker {
-    0%,90%,100% { opacity:1; }
-    92%          { opacity:0.4; }
-    95%          { opacity:1; }
-    97%          { opacity:0.2; }
-  }
-  .glitch-wrap {
-    position: relative;
-    display: inline-block;
-    animation: glitchFlicker 4s infinite;
-  }
-  .glitch-wrap::before,
-  .glitch-wrap::after {
-    content: attr(data-text);
-    position: absolute;
-    left: 0; top: 0;
-    width: 100%;
-    color: inherit;
-    font: inherit;
-    pointer-events: none;
-  }
-  .glitch-wrap::before {
-    color: #ff1f4d;
-    animation: glitch1 3s infinite steps(1);
-  }
-  .glitch-wrap::after {
-    color: #ffffff;
-    animation: glitch2 3.5s infinite steps(1);
-  }
-</style>
-
-<!-- ── HUB PAGE ── -->
-<div id="hubPage" style="display:flex; flex-direction:column; align-items:center; justify-content:center; min-height:100vh; padding: 20px;">
-  <div style="text-align:center; margin-bottom: 40px;">
-    <div style="font-family:'Outfit',sans-serif; font-size:42px; font-weight:900; color:#fff; letter-spacing:-2px;">
-      <span class="glitch-wrap" data-text="MCHLERN" style="color:#ff1f4d;">MCHLERN</span> TOOLS HUB
-    </div>
-    <div style="font-size:12px; color:#666; text-transform:uppercase; letter-spacing:4px; margin-top:8px;">Pilih Tool yang Ingin Digunakan</div>
-  </div>
-
-  <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:24px; max-width: 700px; width: 100%;">
-
-    <div onclick="switchTool('audio')" style="background:linear-gradient(180deg,var(--panel),var(--panel-2)); border:1px solid var(--panel-border); border-radius:16px; padding:32px; text-align:center; cursor:pointer; transition:all 0.3s;" onmouseover="this.style.borderColor='#ff1f4d';this.style.transform='translateY(-4px)';this.style.boxShadow='0 12px 32px rgba(255,31,77,0.15)'" onmouseout="this.style.borderColor='var(--panel-border)';this.style.transform='';this.style.boxShadow=''">
-      <div style="font-size:48px; margin-bottom:16px;">🎧</div>
-      <h3 style="color:#fff; font-size:20px; font-weight:800; margin-bottom:8px; font-family:'Outfit',sans-serif;">BYPASS AUDIO TOOLS</h3>
-      <p style="color:#888; font-size:12px; line-height:1.6;">Upload & Bypass filter audio Roblox. Dilengkapi dengan auto pitch, speed, dan volume adjustment.</p>
-    </div>
-
-    <div onclick="switchTool('sprite')" style="background:linear-gradient(180deg,var(--panel),var(--panel-2)); border:1px solid var(--panel-border); border-radius:16px; padding:32px; text-align:center; cursor:pointer; transition:all 0.3s;" onmouseover="this.style.borderColor='#ff1f4d';this.style.transform='translateY(-4px)';this.style.boxShadow='0 12px 32px rgba(255,31,77,0.15)'" onmouseout="this.style.borderColor='var(--panel-border)';this.style.transform='';this.style.boxShadow=''">
-      <div style="font-size:48px; margin-bottom:16px;">🎞️</div>
-      <h3 style="color:#fff; font-size:20px; font-weight:800; margin-bottom:8px; font-family:'Outfit',sans-serif;">SPRITESHEET TOOLS</h3>
-      <p style="color:#888; font-size:12px; line-height:1.6;">Ubah GIF & YouTube Video jadi Spritesheet (max 56 frames). Upload langsung sebagai Decal.</p>
-    </div>
-
-  </div>
-</div>
-
-<div class="app-container" id="mainApp" style="display:none;">
-  <!-- ── SIDEBAR ── -->
-  <div class="sidebar">
-    <div class="glass-panel" style="margin-bottom:16px; text-align:center;">
-      <img src="https://cdn.discordapp.com/attachments/1522140461081432126/1545132976227090582/ChatGPT_Image_Jul_20_2026_03_50_07_AM.png?ex=6a9b08b8&is=6a99b738&hm=c8eac40969dde5aa797a96bc42bbe0d0b78afa49f760ff982c4efcdbf67d646e"
-        style="width:80px; height:80px; border-radius:50%; border:3px solid var(--red); margin-bottom:12px; box-shadow:0 0 30px rgba(255,31,77,0.25); object-fit:cover; filter: grayscale(100%) contrast(150%) sepia(100%) hue-rotate(-50deg) saturate(300%);">
-      <div class="logo-title"><span class="glitch-wrap" data-text="MCHLERN" style="color:#ff1f4d;">MCHLERN</span> TOOLS</div>
-      <div class="logo-sub">Roblox Uploader Pro V2</div>
-
-      <div class="quota-card">
-        <div class="quota-text">Sisa Limit Harian</div>
-        <div class="quota-number" id="limitCount">2/2</div>
-        <div class="quota-text" id="loginStatus" style="margin-top:4px">Guest Mode</div>
-      </div>
-    </div>
-
-    <!-- Akun Roblox -->
-    <div class="glass-panel" style="margin-bottom:16px;">
-      <div class="section-title">👤 Akun Roblox</div>
-      <div class="input-group">
-        <span class="input-label">API Key</span>
-        <input type="password" class="input-field" id="apiKey" placeholder="Paste Open Cloud Key">
-      </div>
-      <div style="display:flex; gap:8px;">
-        <div class="input-group" style="flex:1">
-          <span class="input-label">Tipe</span>
-          <select class="input-field" id="creatorType">
-            <option value="User">User</option>
-            <option value="Group">Group</option>
-          </select>
-        </div>
-        <div class="input-group" style="flex:2">
-          <span class="input-label">Creator ID</span>
-          <input type="text" class="input-field" id="creatorId" placeholder="ID Angka">
+    <div class="glass-panel">
+      <div class="section-title">🔐 Akun Roblox</div>
+      <input type="password" class="input-field" id="apiKey" placeholder="API Key" style="margin-bottom:10px;">
+      <input type="text" class="input-field" id="creatorId" placeholder="Creator ID" style="margin-bottom:10px;">
+      <select class="input-field" id="creatorType" style="margin-bottom:12px;">
+        <option value="User">User</option>
+        <option value="Group">Group</option>
+      </select>
+      <button class="btn btn-red-glow" style="width:100%; margin-bottom:10px;" onclick="checkAccount()" id="btnCheckAcc">🔍 Konek Akun</button>
+      <button class="btn btn-outline" style="width:100%;" onclick="saveAccount()">💾 Simpan Akun</button>
+      <div class="profile-card" id="robloxProfile" style="display:none; margin-top:14px;">
+        <img src="" class="profile-avatar" id="robloxAvatar">
+        <div class="profile-info">
+          <div class="profile-name" id="robloxName">-</div>
+          <div class="profile-type">Terverifikasi</div>
         </div>
       </div>
-
-      <div id="robloxProfile" style="display:none; align-items:center; gap:10px; margin-bottom:10px; padding:10px; background:rgba(0,0,0,0.8); border-radius:10px; border:1px solid #333;">
-        <img id="robloxAvatar" src="" style="width:36px; height:36px; border-radius:50%; border:2px solid var(--red);">
-        <div style="text-align:left; flex:1; overflow:hidden;">
-          <div id="robloxName" style="font-weight:800; font-size:13px; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">Username</div>
-          <div style="font-size:10px; color:var(--success); font-weight:700; margin-top:2px;">✅ Terkoneksi</div>
-        </div>
+    </div>
+    <div class="glass-panel">
+      <div class="section-title">📊 Limit Upload</div>
+      <div class="limit-info">
+        <span>Sisa:</span>
+        <b id="limitCount" style="color:var(--white);">—</b>
       </div>
-
-      <div style="display:flex; gap:8px;">
-        <button class="btn btn-red-glow btn-full" onclick="checkAccount()" id="btnCheckAcc">🔍 Konek</button>
-        <button class="btn btn-outline btn-full" onclick="saveAccount()">💾 Simpan</button>
+      <div style="margin-top:8px; font-size:11px; color:var(--gray);" id="loginStatus">Memuat...</div>
+      <div style="margin-top:12px;">
+        <div id="g_id_onload" data-client_id="YOUR_GOOGLE_CLIENT_ID" data-callback="handleCredentialResponse" data-auto_prompt="false"></div>
+        <div class="g_id_signin" data-type="standard" data-size="medium" data-theme="filled_black" data-text="signin_with" data-shape="pill" data-logo_alignment="left" data-width="250"></div>
       </div>
+    </div>
+    <div class="glass-panel" id="bypassPanel" style="display:none;">
+      <div class="section-title">⚡ Bypass Settings</div>
+      <div class="slider-row"><span class="slider-label">Speed</span><input type="range" id="speedSlider" min="0.5" max="2" step="0.01" value="1" oninput="onSlide('speed',this.value)"><span class="slider-val" id="speedVal">1.00</span></div>
+      <div class="slider-row"><span class="slider-label">Pitch</span><input type="range" id="pitchSlider" min="0.5" max="2" step="0.01" value="1" oninput="onSlide('pitch',this.value)"><span class="slider-val" id="pitchVal">1.00</span></div>
+      <div class="slider-row"><span class="slider-label">Volume</span><input type="range" id="volSlider" min="0.1" max="2" step="0.01" value="1" oninput="onSlide('vol',this.value)"><span class="slider-val" id="volVal">1.00</span></div>
+      <div class="template-chips">
+        <div class="template-chip" onclick="applyTemplate(1.05)">+5%</div>
+        <div class="template-chip" onclick="applyTemplate(1.10)">+10%</div>
+        <div class="template-chip" onclick="applyTemplate(1.25)">+25%</div>
+        <div class="template-chip" onclick="applyTemplate(1.50)">+50%</div>
+      </div>
+      <div class="rec-box" id="recLabel" style="border-color:rgba(0,230,118,0.2); color:var(--success); background:rgba(0,230,118,0.05);">Rec. PlaybackSpeed: 1.00</div>
     </div>
   </div>
-
-  <!-- ── MAIN CONTENT (AUDIO) ── -->
-  <div class="main-content" id="audioContent" style="display:none;">
-    <button class="btn btn-outline" style="margin-bottom:16px;" onclick="switchTool('hub')">⬅ Keluar ke Hub</button>
-
-    <!-- ── TOP BAR ── -->
-    <div class="top-bar-glow">
-      <div class="topbar-users">
-        <div class="topbar-users-label">👥 Total Pengguna</div>
-        <div class="topbar-users-count">
-          <span id="totalUsersCount">{{ total_users if total_users else '0' }}</span>
-          <span class="live-badge">● LIVE</span>
-        </div>
+  <!-- CONTENT -->
+  <div class="content" id="contentArea">
+    <!-- AUDIO CONTENT -->
+    <div id="audioContent">
+      <div class="tabs">
+        <button class="tab-btn active" id="tabMain" onclick="switchTab('main')">🎵 Upload Audio</button>
+        <button class="tab-btn" id="tabBypass" onclick="switchTab('bypass')">⚡ Mode Bypass</button>
       </div>
-      <div style="flex:1"></div>
-      <!-- Google Login -->
-      <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
-        <span style="font-size:9px; color:var(--success); font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">Login Google = Limit 10x!</span>
-        <div style="transform:scale(0.8); transform-origin:center; height:32px; display:flex; align-items:center; overflow:hidden; margin-top:2px;">
-          <div id="g_id_onload" data-client_id="943425114608-1iljg6276qr9ehtplp4u0878bvftumn8.apps.googleusercontent.com" data-callback="handleCredentialResponse"></div>
-          <div class="g_id_signin" data-type="standard" data-theme="outline" data-text="sign_in_with" data-shape="rectangular" data-logo_alignment="left"></div>
-        </div>
-      </div>
-      <button onclick="document.getElementById('premiumModal').style.display='flex'" class="btn-premium-top">💎 Premium</button>
-      <div class="topbar-profile">
-        <img src="{{ discord_avatar if discord_avatar else 'https://cdn.discordapp.com/embed/avatars/0.png' }}" class="topbar-avatar">
-        <span class="topbar-name">{{ discord_user if discord_user else 'Guest' }}</span>
-      </div>
-    </div>
-
-    <!-- PREMIUM MODAL -->
-    <div id="premiumModal" onclick="if(event.target===this)this.style.display='none'">
-      <div class="premium-content">
-        <h2 style="color:#f59e0b; margin-bottom:12px; font-family:'Outfit',sans-serif; font-weight:800; font-size:28px;">👑 PREMIUM ACCESS</h2>
-        <p style="color:var(--gray); font-size:14px; margin-bottom:24px; line-height:1.6;">Dapatkan akses bypass tanpa batas filter Roblox dengan berlangganan premium sekarang!</p>
-        <div style="background:rgba(0,0,0,0.6); border:1px solid rgba(255,215,0,0.3); border-radius:14px; padding:20px; margin-bottom:16px; text-align:left; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.borderColor='#ffd700'" onmouseout="this.style.borderColor='rgba(255,215,0,0.3)'">
-          <div style="font-weight:900; color:#fff; font-size:18px; margin-bottom:4px;">Rp 30.000</div>
-          <div style="font-size:13px; color:#ffd700; font-weight:700;">Unlimited Bypass (1 Minggu)</div>
-        </div>
-        <div style="background:rgba(0,0,0,0.6); border:1px solid rgba(255,215,0,0.3); border-radius:14px; padding:20px; margin-bottom:30px; text-align:left; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.borderColor='#ffd700'" onmouseout="this.style.borderColor='rgba(255,215,0,0.3)'">
-          <div style="font-weight:900; color:#fff; font-size:18px; margin-bottom:4px;">Rp 50.000</div>
-          <div style="font-size:13px; color:#ffd700; font-weight:700;">Unlimited Bypass (1 Bulan)</div>
-        </div>
-        <div style="display:flex; gap:16px; justify-content:center;">
-          <button onclick="document.getElementById('premiumModal').style.display='none'" style="background:transparent; border:2px solid rgba(255,255,255,0.2); color:#fff; padding:14px 28px; border-radius:12px; cursor:pointer; font-weight:800;">Tutup</button>
-          <a href="https://discord.com/users/1309112913331748915" target="_blank" style="background:linear-gradient(135deg,#ffd700,#ff8c00); color:#000; padding:14px 28px; border-radius:12px; text-decoration:none; font-weight:900;">Pesan via Discord</a>
-        </div>
-      </div>
-    </div>
-
-    <!-- ── BYPASS SETTINGS ── -->
-    <div class="glass-panel" style="margin-bottom:16px;">
-      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; flex-wrap:wrap; gap:8px;">
-        <div class="section-title" style="margin:0;"><span class="glitch-wrap" data-text="🎛️ Bypass Settings">🎛️ Bypass Settings</span></div>
-        <div style="display:flex; gap:6px; flex-wrap:wrap;">
-          <button class="btn btn-outline btn-sm" onclick="applyTemplate(1.5)">1.5x</button>
-          <button class="btn btn-outline btn-sm" onclick="applyTemplate(1.6)">1.6x</button>
-          <button class="btn btn-outline btn-sm" onclick="applyTemplate(2.3)">2.3x</button>
-          <button class="btn btn-outline btn-sm" onclick="applyTemplate(2.5)">2.5x</button>
-          <button class="btn btn-danger btn-sm" onclick="resetBypass()">🔄 Reset</button>
-        </div>
-      </div>
-      <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">
-        <div class="slider-container" style="flex-direction:column; align-items:stretch;">
-          <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
-            <span class="slider-label">Speed</span>
-            <span class="slider-val" id="speedVal">1.00</span>
+      <div id="mainTabPanel">
+        <div class="glass-panel" style="margin-bottom:16px;">
+          <div class="section-title">📁 Upload File Audio</div>
+          <div class="drop-zone" id="dzMain" onclick="document.getElementById('fileMain').click()" ondragover="onDragOver(event,'main')" ondragleave="onDragLeave('main')" ondrop="onDrop(event,'main')">
+            <div class="drop-zone-icon">📂</div>
+            <div class="drop-zone-text">Drag & drop file audio di sini</div>
+            <div class="drop-zone-hint">atau klik untuk browse (MP3, WAV, OGG)</div>
+            <input type="file" id="fileMain" style="display:none;" accept="audio/*" multiple onchange="onFileSelect(this,'main')">
           </div>
-          <input type="range" id="speedSlider" min="0.5" max="3.0" step="0.01" value="1.0" oninput="onSlide('speed',this.value)">
-        </div>
-        <div class="slider-container" style="flex-direction:column; align-items:stretch;">
-          <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
-            <span class="slider-label">Pitch</span>
-            <span class="slider-val" id="pitchVal">1.00</span>
+          <div id="listMain" style="margin-top:12px;"></div>
+          <div style="display:flex; gap:10px; margin-top:16px; flex-wrap:wrap;">
+            <button class="btn btn-full" style="flex:1; min-width:140px;" id="upNormal" onclick="normalUpload()">🚀 Upload Normal</button>
+            <button class="btn btn-outline" style="flex:1; min-width:140px;" onclick="resetBypass();startUpload('bypass')">⚡ Upload Bypass</button>
           </div>
-          <input type="range" id="pitchSlider" min="0.5" max="3.0" step="0.01" value="1.0" oninput="onSlide('pitch',this.value)">
         </div>
-        <div class="slider-container" style="flex-direction:column; align-items:stretch;">
-          <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
-            <span class="slider-label">Volume</span>
-            <span class="slider-val" id="volVal">1.00</span>
+        <div class="glass-panel" style="margin-bottom:16px;">
+          <div class="section-title">▶️ YouTube</div>
+          <div style="display:flex; gap:10px; margin-bottom:12px; flex-wrap:wrap;">
+            <input type="text" class="input-field" id="ytMain" placeholder="Paste link YouTube..." style="flex:1; min-width:200px;">
+            <button class="btn btn-red-glow" onclick="fetchYT('main')" id="btnYtMain">Fetch</button>
           </div>
-          <input type="range" id="volSlider" min="0.1" max="3.0" step="0.01" value="1.0" oninput="onSlide('vol',this.value)">
+          <div id="ytQueueMain"></div>
+        </div>
+        <div class="glass-panel" style="margin-bottom:16px;">
+          <div class="section-title">🔊 Preview</div>
+          <audio id="prevMain" controls style="display:none;"></audio>
+        </div>
+        <div class="status-bar" id="statusMain" style="display:none; margin-bottom:16px;"></div>
+      </div>
+      <div id="bypassTabPanel" style="display:none;">
+        <div class="glass-panel" style="margin-bottom:16px;">
+          <div style="padding:40px 20px; text-align:center;">
+            <div style="font-size:48px; margin-bottom:16px; filter:drop-shadow(0 0 20px var(--red-glow));">⚡</div>
+            <div style="font-family:'Orbitron',sans-serif; font-size:18px; font-weight:700; margin-bottom:8px;">Mode Bypass</div>
+            <div style="font-size:13px; color:var(--gray); margin-bottom:24px;">Modifikasi audio sebelum upload untuk menghindari deteksi copyright.</div>
+            <button class="btn btn-full" style="max-width:300px; margin:0 auto; display:block;" onclick="document.getElementById('tabMain').click(); document.getElementById('bypassPanel').style.display='block';">Aktifkan Bypass Settings</button>
+          </div>
         </div>
       </div>
-      <div class="rec-box" id="recLabel" style="margin-top:10px; margin-bottom:0;">Rec. PlaybackSpeed: 1.00</div>
-    </div>
-
-    <!-- ── SINGLE UPLOAD PANEL ── -->
-    <div class="glass-panel" style="margin-bottom:16px;">
-      <div class="section-title" style="margin-bottom:6px;">🎵 Upload Audio</div>
-      <p style="font-size:12px; color:var(--gray); margin-bottom:16px; font-weight:500;">Drag &amp; drop atau paste link dari berbagai platform</p>
-
-      <!-- Dropzone -->
-      <div class="dropzone" id="dzMain" ondragover="onDragOver(event,'main')" ondragleave="onDragLeave('main')" ondrop="onDrop(event,'main')">
-        <input type="file" multiple accept=".mp3,.ogg" onchange="onFileSelect(this,'main')">
-        <span class="dz-icon">🎵</span>
-        <span class="dz-text">Drag &amp; drop .mp3/.ogg atau klik untuk pilih file</span>
-      </div>
-      <div class="file-list" id="listMain"></div>
-
-      <!-- URL Fetch -->
-      <div style="margin-top:16px;">
-        <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px;">
-          <span style="font-size:10px;padding:3px 8px;border-radius:20px;background:rgba(255,0,0,0.15);border:1px solid rgba(255,0,0,0.3);color:#ff4444;font-weight:700;">▶ YouTube</span>
-          <span style="font-size:10px;padding:3px 8px;border-radius:20px;background:rgba(30,215,96,0.12);border:1px solid rgba(30,215,96,0.3);color:#1ed760;font-weight:700;">♫ Spotify</span>
-          <span style="font-size:10px;padding:3px 8px;border-radius:20px;background:rgba(0,242,234,0.12);border:1px solid rgba(0,242,234,0.3);color:#00f2ea;font-weight:700;">♪ TikTok</span>
-          <span style="font-size:10px;padding:3px 8px;border-radius:20px;background:rgba(255,0,0,0.15);border:1px solid rgba(255,0,0,0.3);color:#ff6b6b;font-weight:700;">🎵 YT Music</span>
+      <div class="glass-panel history-panel">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
+          <div class="section-title" style="margin:0;">📜 History Upload</div>
+          <div style="display:flex; gap:10px;">
+            <button class="btn btn-outline btn-sm" onclick="copyAllIds()">📋 Copy All IDs</button>
+            <button class="btn btn-danger btn-sm" onclick="clearHistory()">🗑 Clear</button>
+          </div>
         </div>
-        <div style="display:flex; gap:10px;">
-          <input type="text" class="input-field" id="ytMain" placeholder="Paste link YouTube / Spotify / TikTok / YT Music...">
-          <button class="btn btn-outline" onclick="fetchYT('main')" id="btnYtMain">Fetch</button>
+        <div class="table-responsive">
+          <table>
+            <thead><tr><th>Waktu</th><th>Judul</th><th>Mode</th><th>Status</th><th>Asset ID</th></tr></thead>
+            <tbody id="historyTbody">
+              <tr><td colspan="5" style="text-align:center; padding:30px; color:var(--gray);">Belum ada aktivitas upload.</td></tr>
+            </tbody>
+          </table>
         </div>
-      </div>
-      <div id="ytQueueMain"></div>
-
-      <!-- Status + Preview -->
-      <div class="status-bar" id="statusMain"></div>
-      <audio controls class="audio-preview" id="prevMain"></audio>
-
-      <!-- Upload Buttons -->
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:16px;">
-        <button class="btn btn-full upload-btn bypass-glow" onclick="startUpload('bypass')" id="upBypass">🎛 Bypass Upload</button>
-        <button class="btn btn-outline btn-full upload-btn" onclick="normalUpload()" id="upNormal">📄 Normal Upload</button>
       </div>
     </div>
-
-    <!-- History Panel -->
-    <div class="glass-panel history-panel">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
-        <div class="section-title" style="margin:0;">📜 History Upload</div>
-        <div style="display:flex; gap:10px;">
-          <button class="btn btn-outline btn-sm" onclick="copyAllIds()">📋 Copy All IDs</button>
-          <button class="btn btn-danger btn-sm" onclick="clearHistory()">🗑 Clear</button>
+    <!-- SPRITE CONTENT -->
+    <div id="spriteContent" style="display:none;">
+      <div class="glass-panel" style="margin-bottom:16px;">
+        <div class="section-title">🖼️ Spritesheet Generator</div>
+        <div class="drop-zone" id="dzSprite" onclick="document.getElementById('fileSprite').click()" ondragover="onDragOver(event,'sprite')" ondragleave="onDragLeave('sprite')" ondrop="onDropSprite(event)">
+          <div class="drop-zone-icon">🎬</div>
+          <div class="drop-zone-text">Drop video file di sini</div>
+          <div class="drop-zone-hint">MP4, WEBM, MOV — Max 50MB</div>
+          <input type="file" id="fileSprite" style="display:none;" accept="video/*" onchange="onFileSelectSprite(this)">
         </div>
+        <div id="listSprite" style="margin-top:12px;"></div>
       </div>
-      <div class="table-responsive">
-        <table>
-          <thead>
-            <tr>
-              <th>Waktu</th>
-              <th>Judul</th>
-              <th>Mode</th>
-              <th>Status</th>
-              <th>Asset ID</th>
-            </tr>
-          </thead>
-          <tbody id="historyTbody">
-            <tr><td colspan="5" style="text-align:center; padding:30px; color:var(--gray);">Belum ada aktivitas upload.</td></tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
-  </div> <!-- End of audioContent -->
-
-  <!-- ── MAIN CONTENT (SPRITESHEET) ── -->
-  <div class="main-content" id="spriteContent" style="display:none;">
-    <button class="btn btn-outline" style="margin-bottom:16px;" onclick="switchTool('hub')">⬅ Keluar ke Hub</button>
-
-    <!-- Top Bar for Sprite — sama dengan Audio -->
-    <div class="top-bar-glow">
-      <div class="topbar-users">
-        <div class="topbar-users-label">👥 Total Pengguna</div>
-        <div class="topbar-users-count">
-          <span id="totalUsersCountSprite">{{ total_users if total_users else '0' }}</span>
-          <span class="live-badge">● LIVE</span>
-        </div>
-      </div>
-      <div style="flex:1"></div>
-      <!-- Google Login -->
-      <div style="display:flex; flex-direction:column; align-items:center; gap:2px;">
-        <span style="font-size:9px; color:var(--success); font-weight:700; text-transform:uppercase; letter-spacing:0.5px;">Login Google = Limit 10x!</span>
-        <div style="transform:scale(0.8); transform-origin:center; height:32px; display:flex; align-items:center; overflow:hidden; margin-top:2px;">
-          <div id="g_id_onload_sprite" data-client_id="943425114608-1iljg6276qr9ehtplp4u0878bvftumn8.apps.googleusercontent.com" data-callback="handleCredentialResponse"></div>
-          <div class="g_id_signin" data-type="standard" data-theme="outline" data-text="sign_in_with" data-shape="rectangular" data-logo_alignment="left"></div>
-        </div>
-      </div>
-      <button onclick="document.getElementById('premiumModal').style.display='flex'" class="btn-premium-top">💎 Premium</button>
-      <div class="topbar-profile">
-        <img src="{{ discord_avatar if discord_avatar else 'https://cdn.discordapp.com/embed/avatars/0.png' }}" class="topbar-avatar">
-        <span class="topbar-name">{{ discord_user if discord_user else 'Guest' }}</span>
-      </div>
-    </div>
-
-    <!-- Spritesheet Generator Panel -->
-    <div class="glass-panel" style="margin-bottom:16px;">
-      <div class="section-title" style="margin-bottom:6px;"><span class="glitch-wrap" data-text="🎞️ Generate Spritesheet (128x128)">🎞️ Generate Spritesheet (128x128)</span></div>
-      <p style="font-size:12px; color:var(--gray); margin-bottom:16px; font-weight:500;">
-        Max 56 Frame (Grid 7 Kolom x 8 Baris). File GIF atau Video max 9 detik.
-      </p>
-
-      <div class="dropzone" id="dzSprite" ondragover="onDragOver(event,'sprite')" ondragleave="onDragLeave('sprite')" ondrop="onDropSprite(event)">
-        <input type="file" accept="image/gif,video/mp4,video/webm" onchange="onFileSelectSprite(this)">
-        <span class="dz-icon">🎞️</span>
-        <span class="dz-text">Drag & drop .gif/.mp4 atau klik pilih file</span>
-      </div>
-      <div class="file-list" id="listSprite"></div>
-
-      <div style="margin-top:16px;">
-        <div style="font-size:11px; font-weight:700; margin-bottom:6px; color:#ff1f4d;">ATAU AMBIL DARI YOUTUBE (Max 9 Detik)</div>
-        <div style="display:flex; gap:10px; margin-bottom: 8px;">
+      <div class="glass-panel" style="margin-bottom:16px;">
+        <div class="section-title">▶️ YouTube to Spritesheet</div>
+        <div style="margin-bottom:12px;">
           <input type="text" class="input-field" id="ytSprite" placeholder="Paste link YouTube video...">
         </div>
         <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
           <input type="number" class="input-field" id="ytStart" placeholder="Start (detik)" style="width:120px;" min="0" step="0.1">
-          <span style="color:#666;">-</span>
+          <span style="color:var(--gray-2);">-</span>
           <input type="number" class="input-field" id="ytEnd" placeholder="End (detik)" style="width:120px;" min="0" step="0.1">
           <button class="btn btn-red-glow" onclick="fetchYTSprite()" id="btnYtSprite">Generate & Preview</button>
         </div>
       </div>
-
       <div id="spritePreviewArea" style="display:none; margin-top:24px; text-align:center;">
         <div style="font-size:12px; font-weight:700; margin-bottom:8px; color:var(--success);">✅ Preview Spritesheet</div>
-        <img id="imgSpritePreview" src="" style="max-width:100%; border:1px solid #333; border-radius:8px; background:#000;">
-        <div style="display:flex; gap:10px; margin-top:16px;">
+        <img id="imgSpritePreview" src="" alt="Spritesheet Preview">
+        <div style="display:flex; gap:10px; margin-top:16px; justify-content:center;">
           <button class="btn btn-full upload-btn" onclick="uploadSprite()" id="btnUploadSprite">🚀 Upload ke Roblox (Decal)</button>
         </div>
       </div>
-      <div class="status-bar" id="statusSprite" style="margin-top:16px;"></div>
-    </div>
-
-    <!-- History Panel Spritesheet -->
-    <div class="glass-panel history-panel">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
-        <div class="section-title" style="margin:0;">📜 History Spritesheet</div>
-        <div style="display:flex; gap:10px;">
-          <button class="btn btn-outline btn-sm" onclick="copyAllIdsSprite()">📋 Copy All IDs</button>
-          <button class="btn btn-danger btn-sm" onclick="clearHistorySprite()">🗑 Clear</button>
+      <div class="status-bar" id="statusSprite" style="margin-top:16px; display:none;"></div>
+      <div class="glass-panel history-panel" style="margin-top:24px;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
+          <div class="section-title" style="margin:0;">📜 History Spritesheet</div>
+          <div style="display:flex; gap:10px;">
+            <button class="btn btn-outline btn-sm" onclick="copyAllIdsSprite()">📋 Copy All IDs</button>
+            <button class="btn btn-danger btn-sm" onclick="clearHistorySprite()">🗑 Clear</button>
+          </div>
         </div>
-      </div>
-      <div class="table-responsive">
-        <table>
-          <thead>
-            <tr>
-              <th>Waktu</th>
-              <th>Judul</th>
-              <th>Status</th>
-              <th>Decal ID</th>
-            </tr>
-          </thead>
-          <tbody id="historyTbodySprite">
-            <tr><td colspan="4" style="text-align:center; padding:30px; color:var(--gray);">Belum ada aktivitas.</td></tr>
-          </tbody>
-        </table>
+        <div class="table-responsive">
+          <table>
+            <thead><tr><th>Waktu</th><th>Judul</th><th>Status</th><th>Decal ID</th></tr></thead>
+            <tbody id="historyTbodySprite">
+              <tr><td colspan="4" style="text-align:center; padding:30px; color:var(--gray);">Belum ada aktivitas.</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
-</div> <!-- End of app-container -->
-
+</div>
 <script>
-// ── TOOL SWITCHER ──
-function switchTool(tool) {
-  if (tool === 'hub') {
-    document.getElementById('hubPage').style.display = 'flex';
-    document.getElementById('mainApp').style.display = 'none';
-  } else {
-    // Show loading 10s as requested when entering a tool
-    showLoading(10000, () => {
-      document.getElementById('hubPage').style.display = 'none';
-      document.getElementById('mainApp').style.display = 'grid'; // because app-container is a grid
-
-      if (tool === 'audio') {
-        document.getElementById('audioContent').style.display = 'block';
-        document.getElementById('spriteContent').style.display = 'none';
-      } else if (tool === 'sprite') {
-        document.getElementById('audioContent').style.display = 'none';
-        document.getElementById('spriteContent').style.display = 'block';
-        renderHistorySprite();
-      }
-    });
-  }
-}
-
-// ── LOADING SCREEN ────────────────────────────────────────────────────────────
-function showLoading(durationMs, callback) {
-  const ls = document.getElementById('loadingScreen');
-  const bar = document.getElementById('loadBar');
-  const txt = document.getElementById('loadText');
-
-  ls.style.display = 'flex';
-  ls.style.opacity = '1';
-  ls.style.transition = 'none';
-  bar.style.width = '0%';
-
-  const msgs = ['INITIALIZING...','ESTABLISHING SECURE CONNECTION...','BYPASSING FIREWALL...','READY!'];
-  let p = 0;
-  const intervalTime = 100;
-  const increment = 100 / (durationMs / intervalTime);
-
-  const iv = setInterval(() => {
-    p += increment + (Math.random() * 2); // slight random jump
-    if(p > 100) p = 100;
-    bar.style.width = p + '%';
-
-    if(p < 30) txt.textContent = msgs[0];
-    else if(p < 60) txt.textContent = msgs[1];
-    else if(p < 95) txt.textContent = msgs[2];
-    else txt.textContent = msgs[3];
-
-    if(p >= 100) {
-      clearInterval(iv);
-      setTimeout(() => {
-        ls.style.transition = 'opacity 0.6s ease';
-        ls.style.opacity = '0';
-        setTimeout(() => {
-          ls.style.display = 'none';
-          if(callback) callback();
-        }, 600);
-      }, 300);
-    }
-  }, intervalTime);
-}
-
-window.addEventListener('DOMContentLoaded', () => {
-  // Hide hub while loading, show after boot
-  const hub = document.getElementById('hubPage');
-  if(hub) hub.style.display = 'none';
-  showLoading(10000, () => {
-    if(hub) hub.style.display = 'flex';
-  });
-});
-
-
-const state = {
-  main:{files:[], yt:[]},
-  sprite:{file:null, title:"", generatedUrl:null},
-  history:JSON.parse(localStorage.getItem('mchl_hist')||'[]'),
-  historySprite:JSON.parse(localStorage.getItem('mchl_hist_sprite')||'[]')
-};
-
-// ── SPRITESHEET FUNCTIONS ──
-function onDropSprite(e) { e.preventDefault(); onDragLeave('sprite'); handleSpriteFile(e.dataTransfer.files[0]); }
-function onFileSelectSprite(inp) { handleSpriteFile(inp.files[0]); inp.value=''; }
-
-function handleSpriteFile(f) {
-  if(!f) return;
-  state.sprite.file = f;
-  state.sprite.title = f.name.replace(/\.[^.]+$/,'');
-  document.getElementById('listSprite').innerHTML = `
-    <div class="file-item" style="display:flex; justify-content:space-between; align-items:center;">
-      <span style="font-weight:700;">${f.name}</span>
-      <button class="btn btn-red-glow" onclick="generateSpriteLocal()">Generate</button>
-    </div>
-  `;
-}
-
-async function generateSpriteLocal() {
-  if(!state.sprite.file) return;
-  const st = document.getElementById('statusSprite');
-  st.innerHTML = '<span class="spinner" style="display:inline-block;vertical-align:middle;margin-right:8px;"></span> Generating Spritesheet dari file lokal...';
-
-  const fd = new FormData();
-  fd.append('file', state.sprite.file);
-  try {
-    const r = await fetch('/api/generate-spritesheet', {method:'POST', body:fd});
-    const d = await r.json();
-    if(d.error) throw new Error(d.error);
-
-    state.sprite.generatedUrl = d.url;
-    document.getElementById('imgSpritePreview').src = d.url;
-    document.getElementById('spritePreviewArea').style.display = 'block';
-    st.innerHTML = '<span style="color:var(--success)">✅ Spritesheet berhasil dibuat!</span>';
-  } catch(e) {
-    st.innerHTML = `<span style="color:#ff0000;">❌ Gagal: ${e.message}</span>`;
-  }
-}
-
-async function fetchYTSprite() {
-  const url = document.getElementById('ytSprite').value;
-  const start = document.getElementById('ytStart').value || '0';
-  const end = document.getElementById('ytEnd').value || '9';
-  if(!url) { alert('Isi link YouTube dulu!'); return; }
-
-  const btn = document.getElementById('btnYtSprite');
-  const st = document.getElementById('statusSprite');
-  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
-  st.innerHTML = '<span class="spinner" style="display:inline-block;vertical-align:middle;margin-right:8px;"></span> Mengunduh & Generate dari YouTube... (Bisa memakan waktu)';
-
-  const fd = new FormData();
-  fd.append('url', url);
-  fd.append('start', start);
-  fd.append('end', end);
-
-  try {
-    const r = await fetch('/api/generate-spritesheet', {method:'POST', body:fd});
-    const d = await r.json();
-    if(d.error) throw new Error(d.error);
-
-    state.sprite.title = "YT_Spritesheet";
-    state.sprite.generatedUrl = d.url;
-    document.getElementById('imgSpritePreview').src = d.url;
-    document.getElementById('spritePreviewArea').style.display = 'block';
-    st.innerHTML = '<span style="color:var(--success)">✅ Spritesheet dari YouTube berhasil dibuat!</span>';
-  } catch(e) {
-    st.innerHTML = `<span style="color:#ff0000;">❌ Gagal: ${e.message}</span>`;
-  } finally {
-    btn.disabled = false; btn.innerHTML = 'Generate & Preview';
-  }
-}
-
-async function uploadSprite() {
-  if(!state.sprite.generatedUrl) return;
-  const ak = document.getElementById('apiKey').value;
-  const ci = document.getElementById('creatorId').value;
-  const ct = document.getElementById('creatorType').value;
-  const token = window.googleToken || '';
-
-  if(!ak||!ci) { alert('Isi API Key & Creator ID di menu Kiri!'); return; }
-
-  const btn = document.getElementById('btnUploadSprite');
-  const st = document.getElementById('statusSprite');
-  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Uploading...';
-
-  // Karena generated file ada di server temp_audio, lebih baik kita kirim nama filenya ke backend
-  // Atau lebih gampang, frontend download url tsb sbg blob, lalu kirim FormData file seperti upload audio
-  try {
-    st.innerHTML = '<span class="spinner" style="display:inline-block;vertical-align:middle;margin-right:8px;"></span> Mengirim data ke Roblox...';
-
-    // Download image dari server ke memori browser untuk diupload ulang via FormData
-    const imgRes = await fetch(state.sprite.generatedUrl);
-    const blob = await imgRes.blob();
-
-    const fd = new FormData();
-    fd.append('api_key', ak); fd.append('creator_id', ci); fd.append('creator_type', ct);
-    fd.append('title', state.sprite.title || "Spritesheet");
-    fd.append('file', blob, 'spritesheet.png');
-    fd.append('asset_type', 'Decal');
-    fd.append('google_token', token);
-
-    const r = await fetch('/api/upload', {method:'POST', body:fd});
-    const d = await r.json();
-
-    if(d.limit_exceeded) {
-      await updateLimitDisplay();
-      alert('LIMIT TERCAPAI! ' + d.error);
-      throw new Error(d.error);
-    }
-
-    addHistorySprite({
-      time: d.time||new Date().toLocaleString(), title: state.sprite.title||"Spritesheet",
-      id: d.asset_id||'-', status: d.success?'Success':(d.error||'Fail')
-    });
-
-    if(d.success) {
-      st.innerHTML = `<span style="color:var(--success)">✅ Upload selesai! Asset ID: ${d.asset_id}</span>`;
-    } else {
-      st.innerHTML = `<span style="color:#ff0000;">❌ Gagal Upload: ${d.error}</span>`;
-    }
-    await updateLimitDisplay();
-  } catch(e) {
-    addHistorySprite({time: new Date().toLocaleString(), title: state.sprite.title, id: '-', status: 'Error'});
-    st.innerHTML = `<span style="color:#ff0000;">❌ Error: ${e.message}</span>`;
-  } finally {
-    btn.disabled = false; btn.innerHTML = '🚀 Upload ke Roblox (Decal)';
-  }
-}
-
-function addHistorySprite(h) {
-  state.historySprite.unshift(h);
-  localStorage.setItem('mchl_hist_sprite', JSON.stringify(state.historySprite.slice(0,100)));
-  renderHistorySprite();
-}
-
-function renderHistorySprite() {
-  const t = document.getElementById('historyTbodySprite');
-  if(!t) return;
-  if(!state.historySprite.length) { t.innerHTML='<tr><td colspan="4" style="text-align:center; padding:30px; color:var(--gray);">Belum ada aktivitas.</td></tr>'; return; }
-  t.innerHTML = state.historySprite.map(h => `
-    <tr>
-      <td style="color:var(--gray); font-weight: 500;">${h.time}</td>
-      <td style="font-weight: 600;">${h.title}</td>
-      <td><span class="status-badge ${h.status==='Success'?'bg-green':'bg-red'}">${h.status==='Success'?'SUCCESS':h.status.slice(0,20)}</span></td>
-      <td>
-        ${h.id!=='-' ? `<span class="copy-badge" onclick="navigator.clipboard.writeText('${h.id}');alert('Copied!')">${h.id} 📋</span>` : '-'}
-      </td>
-    </tr>
-  `).join('');
-}
-
-function copyAllIdsSprite() {
-  const ids = state.historySprite.filter(x=>x.id!=='-').map(x=>x.id);
-  if(ids.length) { navigator.clipboard.writeText(ids.join('\n')); alert(ids.length+' IDs copied!'); }
-}
-function clearHistorySprite() { state.historySprite=[]; localStorage.removeItem('mchl_hist_sprite'); renderHistorySprite(); }
-
-// Normal upload = reset sliders to 1.0 then upload
-function normalUpload() {
-
-  resetBypass();
-  startUpload('normal');
-}
-
-function loadAccount() {
-  const saved = JSON.parse(localStorage.getItem('mchlern_account') || 'null');
-  if(saved) {
-    document.getElementById('apiKey').value = saved.api_key || '';
-    document.getElementById('creatorId').value = saved.creator_id || '';
-    document.getElementById('creatorType').value = saved.creator_type || 'User';
-    if(saved.name && saved.thumb) {
-      document.getElementById('robloxName').textContent = saved.name;
-      document.getElementById('robloxAvatar').src = saved.thumb;
-      document.getElementById('robloxProfile').style.display = 'flex';
-    }
-  }
-}
-function saveAccount() {
-  localStorage.setItem('mchlern_account', JSON.stringify({
-    api_key: document.getElementById('apiKey').value,
-    creator_id: document.getElementById('creatorId').value,
-    creator_type: document.getElementById('creatorType').value,
-    name: document.getElementById('robloxName').textContent,
-    thumb: document.getElementById('robloxAvatar').src
-  }));
-  alert('Akun Roblox berhasil disimpan di browser!');
-}
-
-async function checkAccount() {
-  const ak = document.getElementById('apiKey').value;
-  const ci = document.getElementById('creatorId').value;
-  const ct = document.getElementById('creatorType').value;
-  if(!ak || !ci) { alert('Isi API Key & Creator ID dulu!'); return; }
-  const btn = document.getElementById('btnCheckAcc');
-  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
-  try {
-    const r = await fetch('/api/check-account', {
-      method: 'POST', headers: {'Content-Type': 'application/json'},
-      body: JSON.stringify({api_key: ak, creator_id: ci, creator_type: ct})
-    });
-    const d = await r.json();
-    if(d.error) throw new Error(d.error);
-    document.getElementById('robloxName').textContent = d.name;
-    document.getElementById('robloxAvatar').src = d.thumbnail;
-    document.getElementById('robloxProfile').style.display = 'flex';
-    saveAccount();
-  } catch(e) {
-    alert(e.message);
-    document.getElementById('robloxProfile').style.display = 'none';
-  } finally {
-    btn.disabled = false; btn.innerHTML = '🔍 Konek Akun';
-  }
-}
-
-function onSlide(type, val) {
-  val = parseFloat(val).toFixed(2);
-  document.getElementById(type+'Val').textContent = val;
-  updateRec();
-}
-function applyTemplate(v) {
-  ['speed','pitch'].forEach(t => {
-    document.getElementById(t+'Slider').value = v;
-    document.getElementById(t+'Val').textContent = v.toFixed(2);
-  });
-  updateRec();
-}
-function resetBypass() {
-  ['speed','pitch','vol'].forEach(t => {
-    const slider = document.getElementById(t+'Slider');
-    slider.value = 1.0;
-    document.getElementById(t+'Val').textContent = '1.00';
-  });
-  updateRec();
-}
-function updateRec() {
-  const s = parseFloat(document.getElementById('speedSlider').value);
-  const p = parseFloat(document.getElementById('pitchSlider').value);
-  const rec = (1/s).toFixed(2);
-  const mm = Math.abs(s-p)>0.01;
-  const el = document.getElementById('recLabel');
-  el.textContent = `Rec. PlaybackSpeed: ${rec} ${mm?'⚠':''}`;
-  el.style.color = mm ? 'var(--white)' : 'var(--success)';
-  if (mm) { el.style.background = 'rgba(255,31,77,0.1)'; el.style.borderColor = 'var(--red)'; el.style.boxShadow = '0 0 15px rgba(255,31,77,0.2)'; }
-  else { el.style.background = 'rgba(34,224,122,0.1)'; el.style.borderColor = 'rgba(34,224,122,0.3)'; el.style.boxShadow = '0 0 20px rgba(34,224,122,0.1)'; }
-}
-
-function onDragOver(e, m) { e.preventDefault(); document.getElementById('dz'+cap(m)).classList.add('dragover'); }
-function onDragLeave(m) { document.getElementById('dz'+cap(m)).classList.remove('dragover'); }
-function onDrop(e, m) { e.preventDefault(); onDragLeave(m); addFiles(e.dataTransfer.files, m); }
-function onFileSelect(inp, m) { addFiles(inp.files, m); inp.value=''; }
-function cap(s) { return s[0].toUpperCase() + s.slice(1); }
-
-function addFiles(files, m) {
-  Array.from(files).forEach(f => {
-    const id = 'f'+Date.now()+Math.floor(Math.random()*1000);
-    state[m].files.push({id, file:f, title:f.name.replace(/\.[^.]+$/,'')});
-    const div = document.createElement('div'); div.className = 'file-item'; div.id = id;
-    div.innerHTML = `
-      <div style="overflow:hidden;text-overflow:ellipsis;width:90px;white-space:nowrap;font-weight:600;">${f.name}</div>
-      <input type="text" id="i_${id}" value="${f.name.replace(/\.[^.]+$/,'').slice(0,40)}" placeholder="Judul" maxlength="40">
-      <button class="btn btn-red-glow" style="padding:6px 10px; font-size: 11px;" onclick="previewLocal('${id}','${m}')">▶</button>
-      <button class="btn btn-danger" style="padding:6px 10px; font-size: 11px;" onclick="removeFile('${id}','${m}')">✕</button>
-    `;
-    document.getElementById('list'+cap(m)).appendChild(div);
-  });
-}
-function removeFile(id, m) { state[m].files = state[m].files.filter(x=>x.id!==id); document.getElementById(id).remove(); }
-
-async function fetchYT(m) {
-  const url = document.getElementById('yt'+cap(m)).value; if(!url) return;
-  const btn = document.getElementById('btnYt'+cap(m)); btn.disabled=true; btn.innerHTML='<span class="spinner"></span>';
-  try {
-    const r = await fetch('/api/fetch-yt',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({url})});
-    const d = await r.json();
-    if(d.error) throw new Error(d.error);
-    const id = 'y'+Date.now();
-    state[m].yt.push({id, ...d});
-    const div = document.createElement('div'); div.className = 'yt-card'; div.id = id;
-    div.innerHTML = `
-      <img src="${d.thumbnail}" class="yt-thumb">
-      <div class="yt-info">
-        <div class="yt-title">${d.title}</div>
-        <input type="text" class="input-field" style="padding:8px;font-size:11px;" id="i_${id}" value="${d.title.slice(0,40)}" maxlength="40">
-      </div>
-      <button class="btn btn-red-glow" style="padding:6px 10px; font-size: 11px;" onclick="previewYT('${d.file}','${m}')">▶</button>
-      <button class="btn btn-danger" style="padding:6px 10px; font-size: 11px;" onclick="removeYT('${id}','${m}')">✕</button>
-    `;
-    document.getElementById('ytQueue'+cap(m)).appendChild(div);
-    document.getElementById('yt'+cap(m)).value = '';
-  } catch(e) { alert(e.message); }
-  finally { btn.disabled=false; btn.innerHTML='Fetch'; }
-}
-function removeYT(id, m) { state[m].yt = state[m].yt.filter(x=>x.id!==id); document.getElementById(id).remove(); }
-
-async function previewLocal(id, m) {
-  const f = state[m].files.find(x=>x.id===id); if(f) doPreview(m, null, f.file);
-}
-async function previewYT(ytFile, m) { doPreview(m, ytFile, null); }
-
-async function doPreview(m, ytFile, file) {
-  const p = document.getElementById('prev'+cap(m));
-  const fd = new FormData();
-  fd.append('speed', document.getElementById('speedSlider').value);
-  fd.append('pitch', document.getElementById('pitchSlider').value);
-  fd.append('vol', document.getElementById('volSlider').value);
-  if(ytFile) fd.append('yt_file', ytFile); else fd.append('file', file);
-  try {
-    const r = await fetch('/api/preview',{method:'POST',body:fd});
-    const d = await r.json();
-    if(d.error) throw new Error(d.error);
-    p.src = d.preview_url+'?t='+Date.now();
-    p.style.display = 'block';
-    p.play();
-  } catch(e) { alert(e.message); }
-}
-
-async function startUpload(m) {
-  // m is either 'bypass' or 'normal'
-  const ak = document.getElementById('apiKey').value;
-  const ci = document.getElementById('creatorId').value;
-  const ct = document.getElementById('creatorType').value;
-  const token = window.googleToken || '';
-  if(!ak||!ci) { alert('Isi API Key & Creator ID di kiri!'); return; }
-
-  // Use state.main since there is only one file queue now
-  const tasks = [
-    ...state.main.files.map(x=>({type:'local', file:x.file, title:document.getElementById('i_'+x.id).value})),
-    ...state.main.yt.map(x=>({type:'yt', yt_file:x.file, title:document.getElementById('i_'+x.id).value}))
-  ];
-  if(!tasks.length) return;
-
-  if (tasks.length > 10) {
-    alert(`Maksimal upload 10 lagu per sekali jalan biar server tidak berat!\nKamu memasukkan ${tasks.length} lagu.`);
-    return;
-  }
-
-  const btn = document.getElementById(m==='bypass' ? 'upBypass' : 'upNormal');
-  const btnOther = document.getElementById(m==='bypass' ? 'upNormal' : 'upBypass');
-  btn.disabled=true; btnOther.disabled=true;
-
-  const st = document.getElementById('statusMain'); st.style.display='block';
-  // Build progress UI
-  const chipsHtml = tasks.map((t,i)=>`<span class="upload-progress-chip" id="chip_${i}">${i+1}</span>`).join('');
-  st.innerHTML = `
-    <div class="upload-progress-wrap">
-      <div class="upload-progress-header">
-        <span class="spinner"></span>
-        <span class="upload-progress-title" id="progTitle">Menyiapkan...</span>
-        <span class="upload-progress-pct" id="progPct">0%</span>
-      </div>
-      <div class="upload-progress-track">
-        <div class="upload-progress-fill" id="progFill"></div>
-      </div>
-      <div class="upload-progress-file" id="progFile">—</div>
-      <div class="upload-progress-stats">
-        <span><b id="progSent">0 B</b> / <b id="progTotal">0 B</b></span>
-        <span><b id="progSpeed">0 B/s</b></span>
-      </div>
-      <div class="upload-progress-mini" id="progChips">${chipsHtml}</div>
-    </div>
-  `;
-  const elTitle = document.getElementById('progTitle');
-  const elPct = document.getElementById('progPct');
-  const elFill = document.getElementById('progFill');
-  const elFile = document.getElementById('progFile');
-  const elSent = document.getElementById('progSent');
-  const elTotal = document.getElementById('progTotal');
-  const elSpeed = document.getElementById('progSpeed');
-  const fmtBytes = (b)=>{ if(!b) return '0 B'; if(b<1024) return b+' B'; if(b<1048576) return (b/1024).toFixed(1)+' KB'; return (b/1048576).toFixed(2)+' MB'; };
-  const setChip = (i, state) => { const c = document.getElementById('chip_'+i); if(c){ c.classList.remove('active','done','fail'); if(state) c.classList.add(state); } };
-
-  for(let i=0; i<tasks.length; i++) {
-    const t = tasks[i];
-    setChip(i, 'active');
-    elTitle.textContent = `Mengupload ${i+1}/${tasks.length}`;
-    elFile.textContent = t.title || (t.type==='local' ? t.file.name : 'yt audio');
-    elFill.classList.remove('done','err');
-    elFill.style.width = '0%';
-    elPct.textContent = '0%';
-    elSent.textContent = '0 B'; elTotal.textContent = '0 B'; elSpeed.textContent = '0 B/s';
-
-    const fd = new FormData();
-    fd.append('api_key', ak); fd.append('creator_id', ci); fd.append('creator_type', ct);
-    fd.append('title', t.title); fd.append('bypass', m==='bypass'?'true':'false');
-    fd.append('speed', document.getElementById('speedSlider').value);
-    fd.append('pitch', document.getElementById('pitchSlider').value);
-    fd.append('vol', document.getElementById('volSlider').value);
-    if(t.type==='local') fd.append('file', t.file); else fd.append('yt_file', t.yt_file);
-    fd.append('google_token', token);
-
-    let lastT = Date.now(), lastLoaded = 0;
-    try {
-      const d = await new Promise((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open('POST', '/api/upload');
-        xhr.upload.onprogress = (e) => {
-          if(e.lengthComputable) {
-            const pct = Math.round((e.loaded / e.total) * 100);
-            elFill.style.width = pct + '%';
-            elPct.textContent = pct + '%';
-            elSent.textContent = fmtBytes(e.loaded);
-            elTotal.textContent = fmtBytes(e.total);
-            const dt = (Date.now() - lastT) / 1000;
-            if(dt > 0.3) {
-              elSpeed.textContent = fmtBytes((e.loaded - lastLoaded) / dt) + '/s';
-              lastT = Date.now(); lastLoaded = e.loaded;
-            }
-          }
-        };
-        xhr.onload = () => { try { resolve(JSON.parse(xhr.responseText)); } catch(e){ reject(new Error('Invalid response')); } };
-        xhr.onerror = () => reject(new Error('Network Error'));
-        xhr.send(fd);
-      });
-      if(d.limit_exceeded) {
-        elFill.classList.add('err'); setChip(i, 'fail');
-        await updateLimitDisplay();
-        alert('LIMIT TERCAPAI! ' + d.error); break;
-      }
-      elFill.classList.add('done');
-      setChip(i, d.success ? 'done' : 'fail');
-      addHistory({
-        time: d.time||new Date().toLocaleString(), title: t.title, mode: m.toUpperCase(),
-        id: d.asset_id||'-', status: d.success?'Success':(d.error||'Fail'), blocked: d.blocked||false
-      });
-      await updateLimitDisplay();
-    } catch(e) {
-      elFill.classList.add('err'); setChip(i, 'fail');
-      addHistory({time: new Date().toLocaleString(), title: t.title, mode: m.toUpperCase(), id: '-', status: 'Network Error', blocked: false});
-    }
-    await new Promise(r => setTimeout(r, 350));
-  }
-  st.style.display='none'; btn.disabled=false; btnOther.disabled=false;
-  document.getElementById('listMain').innerHTML=''; document.getElementById('ytQueueMain').innerHTML='';
-  state.main.files=[]; state.main.yt=[];
-}
-
-function addHistory(h) {
-  state.history.unshift(h);
-  localStorage.setItem('mchl_hist', JSON.stringify(state.history.slice(0,100)));
-  renderHistory();
-}
-function renderHistory() {
-  const t = document.getElementById('historyTbody');
-  if(!state.history.length) { t.innerHTML='<tr><td colspan="5" style="text-align:center; padding: 30px; color: var(--gray);">Belum ada aktivitas upload.</td></tr>'; return; }
-  t.innerHTML = state.history.map(h => `
-    <tr>
-      <td style="color:var(--gray); font-weight: 500;">${h.time}</td>
-      <td style="font-weight: 600;">${h.title}</td>
-      <td><span class="status-badge" style="background:rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color:#fff;">${h.mode.toUpperCase()}</span></td>
-      <td><span class="status-badge ${h.blocked?'bg-red':(h.status==='Success'?'bg-green':'')}">${h.blocked?'BLOCKED':(h.status==='Success'?'SUCCESS':h.status.slice(0,20))}</span></td>
-      <td>
-        ${h.id!=='-' ? `<span class="copy-badge" onclick="navigator.clipboard.writeText('${h.id}');alert('Copied!')">${h.id} 📋</span>` : '-'}
-      </td>
-    </tr>
-  `).join('');
-}
-function copyAllIds() {
-  const ids = state.history.filter(x=>x.id!=='-').map(x=>x.id);
-  if(ids.length) { navigator.clipboard.writeText(ids.join('\n')); alert(ids.length+' IDs copied!'); }
-}
-function clearHistory() { state.history=[]; localStorage.removeItem('mchl_hist'); renderHistory(); }
-
-window.onload = () => { loadAccount(); renderHistory(); };
-
-function handleCredentialResponse(response) {
-  window.googleToken = response.credential;
-  updateLimitDisplay();
-}
-async function updateLimitDisplay() {
-  try {
-    const r = await fetch('/api/limits', {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({token: window.googleToken || null})
-    });
-    const d = await r.json();
-
-    const countEl = document.getElementById('limitCount');
-    const statusEl = document.getElementById('loginStatus');
-
-    if(d.is_premium) {
-      // PREMIUM — tampilkan sisa waktu
-      countEl.textContent = '∞ / ∞';
-      countEl.style.color = '#f59e0b';
-
-      if(d.premium_expiry) {
-        window._premiumExpiry = d.premium_expiry;
-        startPremiumCountdown(statusEl, d.premium_expiry);
-      } else {
-        statusEl.textContent = '👑 Premium Active';
-        statusEl.style.color = '#f59e0b';
-      }
-    } else {
-      // NON-PREMIUM: tampilkan sisa limit
-      if(window._premiumCountdownTimer) {
-        clearInterval(window._premiumCountdownTimer);
-        window._premiumCountdownTimer = null;
-      }
-      const remaining = d.remaining;
-      const maxVal = d.max;
-      countEl.textContent = `${remaining}/${maxVal}`;
-      countEl.style.color = remaining === 0 ? '#ef4444' : '#fff';
-
-      if(d.is_google) {
-        statusEl.textContent = '✅ Login Google (10x/hari)';
-        statusEl.style.color = 'var(--success)';
-      } else if(d.is_discord) {
-        statusEl.textContent = '🎮 Login Discord (2x/hari)';
-        statusEl.style.color = '#5865F2';
-      } else {
-        statusEl.textContent = '👤 Guest Mode (2x/hari)';
-        statusEl.style.color = 'var(--gray)';
-      }
-    }
-  } catch(e) {
-    console.error('Gagal fetch limits:', e);
-  }
-}
-
-function startPremiumCountdown(el, expiryStr) {
-  // Hentikan timer lama kalau ada
-  if(window._premiumCountdownTimer) clearInterval(window._premiumCountdownTimer);
-
-  function tick() {
-    const expiry = new Date(expiryStr);
-    const now = new Date();
-    const diff = expiry - now;
-
-    if(diff <= 0) {
-      el.textContent = '👑 Premium Expired';
-      el.style.color = '#ef4444';
-      clearInterval(window._premiumCountdownTimer);
-      updateLimitDisplay(); // refresh status
-      return;
-    }
-
-    const days    = Math.floor(diff / (1000 * 60 * 60 * 24));
-    const hours   = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-    let timeStr = '';
-    if(days > 0)    timeStr = `${days}h ${hours}j ${minutes}m`;
-    else if(hours > 0) timeStr = `${hours}j ${minutes}m ${seconds}d`;
-    else             timeStr = `${minutes}m ${seconds}d`;
-
-    el.innerHTML = `👑 Premium · <span style="color:#f59e0b;font-weight:900;">${timeStr}</span>`;
-    el.style.color = '#fafafa';
-  }
-
-  tick();
-  window._premiumCountdownTimer = setInterval(tick, 1000);
-}
-
-// Panggil saat halaman load
-updateLimitDisplay();
-// Auto-refresh limit setiap 30 detik
-setInterval(updateLimitDisplay, 30000);
-
-// ── REALTIME TOTAL USERS ─────────────────────────────────────────────────────
-let _lastTotalUsers = parseInt((document.getElementById('totalUsersCount')||{textContent:'0'}).textContent) || 0;
-
-function animateCount(el, from, to) {
-  if (from === to) return;
-  const duration = 800;
-  const start = performance.now();
-  function step(now) {
-    const progress = Math.min((now - start) / duration, 1);
-    const ease = 1 - Math.pow(1 - progress, 3);
-    el.textContent = Math.round(from + (to - from) * ease);
-    if (progress < 1) requestAnimationFrame(step);
-    else el.textContent = to;
-  }
-  requestAnimationFrame(step);
-}
-
-async function pollTotalUsers() {
-  try {
-    const r = await fetch('/api/total-users');
-    const d = await r.json();
-    // Update all total user elements (hub page may have different IDs)
-    ['totalUsersCount', 'totalUsersCountSprite'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el && d.total !== _lastTotalUsers) {
-        animateCount(el, _lastTotalUsers, d.total);
-      }
-    });
-    if (d.total !== _lastTotalUsers) _lastTotalUsers = d.total;
-  } catch(e) {}
-}
-
-// Poll setiap 10 detik
-pollTotalUsers();
-setInterval(pollTotalUsers, 10000);
-
-// ── renderFiles / renderYT helpers (called from startUpload cleanup) ──
-function renderFiles(m) {
-  const el = document.getElementById('list'+cap(m));
-  if(el) el.innerHTML = '';
-}
-function renderYT(m) {
-  const el = document.getElementById('ytQueue'+cap(m));
-  if(el) el.innerHTML = '';
-}
-
-</script>
-</body>
-</html>
