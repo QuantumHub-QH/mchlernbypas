@@ -7,7 +7,141 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@700;900&display=swap" rel="stylesheet">
-<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="https://accounts.google.com/gsi/client" async defer>
+// ==================== FREE ASSETS ====================
+let freeAssetsList = [];
+
+async function openFreeAssets() {
+  document.getElementById('hubPage').style.display = 'none';
+  document.getElementById('mainApp').style.display = 'none';
+  document.getElementById('freeAssetsModal').style.display = 'flex';
+  
+  try {
+    let res = await fetch('/api/free-assets');
+    freeAssetsList = await res.json();
+    renderFreeAssets();
+  } catch(e) { console.error(e); }
+}
+
+function closeFreeAssets() {
+  document.getElementById('freeAssetsModal').style.display = 'none';
+  document.getElementById('hubPage').style.display = 'block';
+}
+
+function renderFreeAssets() {
+  let grid = document.getElementById('freeAssetsGrid');
+  grid.innerHTML = '';
+  
+  if(freeAssetsList.length === 0) {
+    grid.innerHTML = '<div style="color:#888; grid-column:1/-1; text-align:center;">Tidak ada aset gratis saat ini.</div>';
+    return;
+  }
+  
+  freeAssetsList.forEach(asset => {
+    let card = document.createElement('div');
+    card.style = 'background:#111; border:1px solid #333; border-radius:12px; padding:15px; position:relative; display:flex; flex-direction:column; gap:10px;';
+    
+    card.innerHTML = `
+      <div style="font-weight:900; font-size:16px; color:#00e5ff; text-transform:uppercase;">${asset.title}</div>
+      <div style="font-size:12px; color:#aaa; flex:1;">${asset.description}</div>
+      <div id="asset_rating_${asset.id}" style="color:#ffcc00; font-size:12px; font-weight:bold;">Loading rating...</div>
+      <div style="display:flex; gap:10px; margin-top:10px;">
+        <a href="${asset.file_url}" target="_blank" style="flex:1; background:#00e5ff; color:#000; text-align:center; padding:8px; border-radius:5px; font-weight:bold; text-decoration:none; font-size:12px;">DOWNLOAD</a>
+        <button onclick="openComments('asset', ${asset.id})" style="flex:1; background:#333; color:#fff; border:none; padding:8px; border-radius:5px; font-weight:bold; cursor:pointer; font-size:12px;">💬 KOMENTAR</button>
+      </div>
+    `;
+    grid.appendChild(card);
+    
+    fetch(`/api/comments/asset/${asset.id}`).then(r=>r.json()).then(data => {
+      let stars = "★".repeat(Math.round(data.average)) + "☆".repeat(5-Math.round(data.average));
+      let el = document.getElementById(`asset_rating_${asset.id}`);
+      if(el) el.innerHTML = `${stars} (${data.comments.length})`;
+    });
+  });
+}
+
+// ==================== COMMENTS ====================
+let currentCommentTarget = {type:null, id:null};
+
+function openComments(type, id) {
+  currentCommentTarget = {type, id};
+  document.getElementById('commentsOverlay').style.display = 'flex';
+  loadComments();
+}
+
+function closeComments() {
+  document.getElementById('commentsOverlay').style.display = 'none';
+}
+
+async function loadComments() {
+  let list = document.getElementById('commentsList');
+  list.innerHTML = '<div style="color:#888; text-align:center; padding:20px;">Loading...</div>';
+  
+  try {
+    let url = currentCommentTarget.type === 'product' ? `/api/comments/product/${currentCommentTarget.id}` : `/api/comments/asset/${currentCommentTarget.id}`;
+    let res = await fetch(url);
+    let data = await res.json();
+    
+    list.innerHTML = '';
+    if(data.comments.length === 0) {
+      list.innerHTML = '<div style="color:#888; text-align:center; padding:20px;">Belum ada komentar.</div>';
+    } else {
+      data.comments.forEach(c => {
+        let stars = "★".repeat(c.rating) + "☆".repeat(5-c.rating);
+        let div = document.createElement('div');
+        div.style = 'background:rgba(255,255,255,0.05); padding:10px; border-radius:8px; margin-bottom:10px; border:1px solid #222;';
+        div.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+            <div style="font-weight:bold; color:#fff; font-size:12px;">${c.username}</div>
+            <div style="color:#ffcc00; font-size:10px;">${stars}</div>
+          </div>
+          <div style="font-size:11px; color:#aaa; margin-bottom:5px;">${c.content}</div>
+          <div style="font-size:9px; color:#555;">${c.created_at}</div>
+        `;
+        list.appendChild(div);
+      });
+    }
+  } catch(e) { console.error(e); }
+}
+
+async function submitComment() {
+  let username = document.getElementById('commentUsername').value.trim() || 'Anonim';
+  let content = document.getElementById('commentContent').value.trim();
+  let rating = document.getElementById('commentRating').value;
+  
+  if(!content) { alert('Isi komentar dulu!'); return; }
+  
+  let payload = {
+    username, content, rating: parseInt(rating),
+    product_id: currentCommentTarget.type === 'product' ? currentCommentTarget.id : null,
+    asset_id: currentCommentTarget.type === 'asset' ? currentCommentTarget.id : null
+  };
+  
+  try {
+    let res = await fetch('/api/comments/add', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload)
+    });
+    let data = await res.json();
+    if(data.success) {
+      document.getElementById('commentContent').value = '';
+      loadComments();
+      if(currentCommentTarget.type === 'product' && document.getElementById('storeModal').style.display !== 'none') {
+        let currentTab = document.querySelector('.store-tab.active-tab');
+        if (currentTab) {
+            let cat = currentTab.textContent === 'Semua' ? 'all' : currentTab.textContent;
+            filterStore(cat, currentTab);
+        }
+      }
+      if(currentCommentTarget.type === 'asset' && document.getElementById('freeAssetsModal').style.display !== 'none') {
+        renderFreeAssets();
+      }
+    }
+  } catch(e) { console.error(e); }
+}
+
+</script>
 <style>
 * { box-sizing:border-box; margin:0; padding:0; -webkit-tap-highlight-color: transparent; }
 :root {
@@ -684,6 +818,16 @@ tr:hover td { background: rgba(255,255,255,0.02); }
       <p style="color:#555; font-size:11px; line-height:1.7;">Beli album Roblox siap pakai. Funkot, DJ, Galau, BKB, Jawa, Sunda.</p>
       <div style="margin-top:16px; display:inline-block; background:#ff0000; color:#fff; padding:8px 20px; border-radius:20px; font-size:11px; font-weight:800; letter-spacing:1px;">LIHAT ALBUM →</div>
     </div>
+    <!-- Free Assets -->
+    <div onclick="openFreeAssets()" style="background:#0a0a0a; border:1px solid #1a1a1a; border-radius:20px; padding:36px 28px; text-align:center; cursor:pointer; transition:all 0.3s; position:relative; overflow:hidden;"
+      onmouseover="this.style.borderColor='#00e5ff'; this.style.boxShadow='0 0 40px rgba(0,229,255,0.15)'; this.style.transform='translateY(-4px)';"
+      onmouseout="this.style.borderColor='#1a1a1a'; this.style.boxShadow='none'; this.style.transform='translateY(0)';">
+      <div style="font-size:52px; margin-bottom:16px; line-height:1;">🎁</div>
+      <h3 style="color:#fff; font-size:18px; font-weight:900; margin-bottom:8px; font-family:'Outfit',sans-serif; text-transform:uppercase; letter-spacing:1px;">FREE<br>ASSETS</h3>
+      <p style="color:#555; font-size:11px; line-height:1.7;">Download aset gratis (suara, efek, dll) yang dibagikan oleh admin.</p>
+      <div style="margin-top:16px; display:inline-block; background:#00e5ff; color:#000; padding:8px 20px; border-radius:20px; font-size:11px; font-weight:800; letter-spacing:1px;">AMBIL ASET →</div>
+    </div>
+
 
   </div>
 </div>
@@ -1680,15 +1824,28 @@ function renderStore() {
       <div class="store-card-body">
         <div class="store-card-cat">${p.category}</div>
         <div class="store-card-title">${p.title}</div>
+        <div id="product_rating_${p.id}" style="color:#ffcc00; font-size:12px; font-weight:bold; margin-top:4px;">Loading rating...</div>
         ${p.description ? `<div style="font-size:11px; color:#aaa; margin:6px 0; line-height:1.4; display:-webkit-box; -webkit-line-clamp:3; -webkit-box-orient:vertical; overflow:hidden; text-overflow:ellipsis;">${p.description}</div>` : ''}
         <div style="flex:1"></div>
-        <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-top:10px;">
+        <button onclick="openComments('product', ${p.id})" style="width:100%; background:#222; color:#fff; border:1px solid #444; padding:8px; border-radius:5px; font-weight:bold; cursor:pointer; font-size:11px; margin-bottom:10px; margin-top:8px;">💬 BACA / TAMBAH KOMENTAR</button>
+        <div style="display:flex; justify-content:space-between; align-items:flex-end;">
           <div class="store-card-price">${p.price}</div>
         </div>
         <a href="https://discord.com/users/1309112913331748915" target="_blank" class="store-card-btn">ORDER DISCORD →</a>
       </div>
     </div>
   `).join('');
+
+  filtered.forEach(p => {
+    fetch(`/api/comments/product/${p.id}`)
+      .then(r => r.json())
+      .then(data => {
+        let stars = "★".repeat(Math.round(data.average)) + "☆".repeat(5-Math.round(data.average));
+        let el = document.getElementById(`product_rating_${p.id}`);
+        if(el) el.innerHTML = `${stars} (${data.comments.length} ulasan)`;
+      })
+      .catch(e => console.error(e));
+  });
 }
 
 // ── COMMENTS / FLOATING ────────────────────────────────────────────────────
@@ -1766,6 +1923,140 @@ function setProgressBar(statusId, pct, label) {
   `;
 }
 
+
+// ==================== FREE ASSETS ====================
+let freeAssetsList = [];
+
+async function openFreeAssets() {
+  document.getElementById('hubPage').style.display = 'none';
+  document.getElementById('mainApp').style.display = 'none';
+  document.getElementById('freeAssetsModal').style.display = 'flex';
+  
+  try {
+    let res = await fetch('/api/free-assets');
+    freeAssetsList = await res.json();
+    renderFreeAssets();
+  } catch(e) { console.error(e); }
+}
+
+function closeFreeAssets() {
+  document.getElementById('freeAssetsModal').style.display = 'none';
+  document.getElementById('hubPage').style.display = 'block';
+}
+
+function renderFreeAssets() {
+  let grid = document.getElementById('freeAssetsGrid');
+  grid.innerHTML = '';
+  
+  if(freeAssetsList.length === 0) {
+    grid.innerHTML = '<div style="color:#888; grid-column:1/-1; text-align:center;">Tidak ada aset gratis saat ini.</div>';
+    return;
+  }
+  
+  freeAssetsList.forEach(asset => {
+    let card = document.createElement('div');
+    card.style = 'background:#111; border:1px solid #333; border-radius:12px; padding:15px; position:relative; display:flex; flex-direction:column; gap:10px;';
+    
+    card.innerHTML = `
+      <div style="font-weight:900; font-size:16px; color:#00e5ff; text-transform:uppercase;">${asset.title}</div>
+      <div style="font-size:12px; color:#aaa; flex:1;">${asset.description}</div>
+      <div id="asset_rating_${asset.id}" style="color:#ffcc00; font-size:12px; font-weight:bold;">Loading rating...</div>
+      <div style="display:flex; gap:10px; margin-top:10px;">
+        <a href="${asset.file_url}" target="_blank" style="flex:1; background:#00e5ff; color:#000; text-align:center; padding:8px; border-radius:5px; font-weight:bold; text-decoration:none; font-size:12px;">DOWNLOAD</a>
+        <button onclick="openComments('asset', ${asset.id})" style="flex:1; background:#333; color:#fff; border:none; padding:8px; border-radius:5px; font-weight:bold; cursor:pointer; font-size:12px;">💬 KOMENTAR</button>
+      </div>
+    `;
+    grid.appendChild(card);
+    
+    fetch(`/api/comments/asset/${asset.id}`).then(r=>r.json()).then(data => {
+      let stars = "★".repeat(Math.round(data.average)) + "☆".repeat(5-Math.round(data.average));
+      let el = document.getElementById(`asset_rating_${asset.id}`);
+      if(el) el.innerHTML = `${stars} (${data.comments.length})`;
+    });
+  });
+}
+
+// ==================== COMMENTS ====================
+let currentCommentTarget = {type:null, id:null};
+
+function openComments(type, id) {
+  currentCommentTarget = {type, id};
+  document.getElementById('commentsOverlay').style.display = 'flex';
+  loadComments();
+}
+
+function closeComments() {
+  document.getElementById('commentsOverlay').style.display = 'none';
+}
+
+async function loadComments() {
+  let list = document.getElementById('commentsList');
+  list.innerHTML = '<div style="color:#888; text-align:center; padding:20px;">Loading...</div>';
+  
+  try {
+    let url = currentCommentTarget.type === 'product' ? `/api/comments/product/${currentCommentTarget.id}` : `/api/comments/asset/${currentCommentTarget.id}`;
+    let res = await fetch(url);
+    let data = await res.json();
+    
+    list.innerHTML = '';
+    if(data.comments.length === 0) {
+      list.innerHTML = '<div style="color:#888; text-align:center; padding:20px;">Belum ada komentar.</div>';
+    } else {
+      data.comments.forEach(c => {
+        let stars = "★".repeat(c.rating) + "☆".repeat(5-c.rating);
+        let div = document.createElement('div');
+        div.style = 'background:rgba(255,255,255,0.05); padding:10px; border-radius:8px; margin-bottom:10px; border:1px solid #222;';
+        div.innerHTML = `
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;">
+            <div style="font-weight:bold; color:#fff; font-size:12px;">${c.username}</div>
+            <div style="color:#ffcc00; font-size:10px;">${stars}</div>
+          </div>
+          <div style="font-size:11px; color:#aaa; margin-bottom:5px;">${c.content}</div>
+          <div style="font-size:9px; color:#555;">${c.created_at}</div>
+        `;
+        list.appendChild(div);
+      });
+    }
+  } catch(e) { console.error(e); }
+}
+
+async function submitComment() {
+  let username = document.getElementById('commentUsername').value.trim() || 'Anonim';
+  let content = document.getElementById('commentContent').value.trim();
+  let rating = document.getElementById('commentRating').value;
+  
+  if(!content) { alert('Isi komentar dulu!'); return; }
+  
+  let payload = {
+    username, content, rating: parseInt(rating),
+    product_id: currentCommentTarget.type === 'product' ? currentCommentTarget.id : null,
+    asset_id: currentCommentTarget.type === 'asset' ? currentCommentTarget.id : null
+  };
+  
+  try {
+    let res = await fetch('/api/comments/add', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(payload)
+    });
+    let data = await res.json();
+    if(data.success) {
+      document.getElementById('commentContent').value = '';
+      loadComments();
+      if(currentCommentTarget.type === 'product' && document.getElementById('storeModal').style.display !== 'none') {
+        let currentTab = document.querySelector('.store-tab.active-tab');
+        if (currentTab) {
+            let cat = currentTab.textContent === 'Semua' ? 'all' : currentTab.textContent;
+            filterStore(cat, currentTab);
+        }
+      }
+      if(currentCommentTarget.type === 'asset' && document.getElementById('freeAssetsModal').style.display !== 'none') {
+        renderFreeAssets();
+      }
+    }
+  } catch(e) { console.error(e); }
+}
+
 </script>
 
 <!-- ══ GLOBAL OVERLAYS (always visible, outside all tool sections) ══ -->
@@ -1815,6 +2106,50 @@ function setProgressBar(statusId, pct, label) {
     </div>
     <textarea id="commentText" rows="3" placeholder="Tulis komentar..." style="width:100%; background:#111; border:1px solid #333; color:#fff; border-radius:8px; padding:8px; font-size:12px; resize:none; box-sizing:border-box;"></textarea>
     <button onclick="submitComment()" style="margin-top:8px; width:100%; background:#ff0000; color:#fff; border:none; border-radius:8px; padding:10px; font-weight:800; cursor:pointer; font-size:12px;">Kirim ✉️</button>
+  </div>
+</div>
+
+
+<!-- FREE ASSETS MODAL -->
+<div id="freeAssetsModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(5,5,10,0.95); z-index:9999; flex-direction:column; padding:20px; box-sizing:border-box;">
+  <div style="max-width:900px; margin:0 auto; width:100%; position:relative; display:flex; flex-direction:column; height:100%;">
+    <!-- Header -->
+    <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid #333; padding-bottom:15px; margin-bottom:20px;">
+      <div>
+        <h2 style="color:#00e5ff; margin:0; font-weight:900; letter-spacing:1px; font-size:24px;">🎁 FREE ASSETS</h2>
+        <div style="color:#888; font-size:12px;">Aset gratis untuk komunitas</div>
+      </div>
+      <button onclick="closeFreeAssets()" style="background:transparent; border:1px solid #333; color:#fff; padding:8px 16px; border-radius:20px; cursor:pointer; font-weight:bold;">✖ KEMBALI</button>
+    </div>
+    <!-- Grid -->
+    <div id="freeAssetsGrid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(250px, 1fr)); gap:15px; overflow-y:auto; padding-bottom:40px;">
+    </div>
+  </div>
+</div>
+
+<!-- COMMENTS OVERLAY MODAL -->
+<div id="commentsOverlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10000; justify-content:center; align-items:center; backdrop-filter:blur(5px);">
+  <div style="background:#0a0a0a; border:1px solid #333; border-radius:16px; width:90%; max-width:400px; display:flex; flex-direction:column; overflow:hidden;">
+    <div style="background:#111; padding:15px; border-bottom:1px solid #222; display:flex; justify-content:space-between; align-items:center;">
+      <h3 style="margin:0; color:#fff; font-size:16px;">💬 Komentar & Rating</h3>
+      <button onclick="closeComments()" style="background:transparent; border:none; color:#888; font-size:20px; cursor:pointer;">✖</button>
+    </div>
+    <div id="commentsList" style="padding:15px; max-height:300px; overflow-y:auto; background:#05050a;">
+    </div>
+    <div style="padding:15px; background:#111; border-top:1px solid #222;">
+      <input type="text" id="commentUsername" placeholder="Nama Anda..." style="width:100%; padding:8px; border-radius:5px; border:1px solid #333; background:#000; color:#fff; margin-bottom:10px; font-size:12px; box-sizing:border-box;">
+      <textarea id="commentContent" placeholder="Tulis komentar..." rows="2" style="width:100%; padding:8px; border-radius:5px; border:1px solid #333; background:#000; color:#fff; margin-bottom:10px; font-size:12px; font-family:sans-serif; box-sizing:border-box; resize:none;"></textarea>
+      <div style="display:flex; gap:10px;">
+        <select id="commentRating" style="padding:8px; border-radius:5px; border:1px solid #333; background:#000; color:#ffcc00; font-size:12px; font-weight:bold;">
+          <option value="5">⭐⭐⭐⭐⭐ 5</option>
+          <option value="4">⭐⭐⭐⭐ 4</option>
+          <option value="3">⭐⭐⭐ 3</option>
+          <option value="2">⭐⭐ 2</option>
+          <option value="1">⭐ 1</option>
+        </select>
+        <button onclick="submitComment()" style="flex:1; background:#00e676; color:#000; font-weight:bold; border:none; border-radius:5px; cursor:pointer; font-size:12px;">KIRIM KOMENTAR</button>
+      </div>
+    </div>
   </div>
 </div>
 
