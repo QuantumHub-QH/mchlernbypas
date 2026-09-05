@@ -65,7 +65,9 @@ def init_db():
                     avatar TEXT,
                     content TEXT,
                     rating INTEGER,
-                    created_at TEXT
+                    created_at TEXT,
+                    product_id INTEGER,
+                    asset_id INTEGER
                  )''')
     c.execute('''CREATE TABLE IF NOT EXISTS products (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -83,6 +85,14 @@ def init_db():
         c.execute("ALTER TABLE products ADD COLUMN description TEXT")
     except sqlite3.OperationalError:
         pass
+    c.execute('''CREATE TABLE IF NOT EXISTS free_assets (
+                    id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    title TEXT,
+                    description TEXT,
+                    file_url TEXT,
+                    filename TEXT,
+                    created_at TEXT
+                 )''')
     conn.commit()
     conn.close()
 
@@ -726,9 +736,71 @@ def upload():
 STORE_DIR = os.path.join(DATA_DIR, "store_images")
 os.makedirs(STORE_DIR, exist_ok=True)
 
+ASSETS_DIR = os.path.join(DATA_DIR, "free_assets")
+os.makedirs(ASSETS_DIR, exist_ok=True)
+
 @app.route("/store_img/<filename>")
 def serve_store_img(filename):
     return send_file(os.path.join(STORE_DIR, filename))
+
+@app.route("/free_asset/<filename>")
+def serve_free_asset(filename):
+    return send_file(os.path.join(ASSETS_DIR, filename), as_attachment=True)
+
+
+@app.route("/api/comments/product/<int:product_id>", methods=["GET"])
+def api_product_comments(product_id):
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("SELECT id, username, avatar, content, rating, created_at FROM comments WHERE product_id=? ORDER BY id DESC", (product_id,))
+    rows = c.fetchall()
+    c.execute("SELECT AVG(rating) FROM comments WHERE product_id=?", (product_id,))
+    avg = c.fetchone()[0] or 0
+    conn.close()
+    return jsonify({"comments": [{"id":r[0], "username":r[1], "avatar":r[2], "content":r[3], "rating":r[4], "created_at":r[5]} for r in rows], "average": round(avg, 1)})
+
+@app.route("/api/comments/asset/<int:asset_id>", methods=["GET"])
+def api_asset_comments(asset_id):
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("SELECT id, username, avatar, content, rating, created_at FROM comments WHERE asset_id=? ORDER BY id DESC", (asset_id,))
+    rows = c.fetchall()
+    c.execute("SELECT AVG(rating) FROM comments WHERE asset_id=?", (asset_id,))
+    avg = c.fetchone()[0] or 0
+    conn.close()
+    return jsonify({"comments": [{"id":r[0], "username":r[1], "avatar":r[2], "content":r[3], "rating":r[4], "created_at":r[5]} for r in rows], "average": round(avg, 1)})
+
+@app.route("/api/comments/add", methods=["POST"])
+def api_add_comment():
+    data = request.json
+    username = data.get("username", "Anonim")
+    avatar = data.get("avatar", "")
+    content = data.get("content", "")
+    rating = data.get("rating", 5)
+    product_id = data.get("product_id")
+    asset_id = data.get("asset_id")
+    
+    if not content:
+        return jsonify({"success": False, "error": "Komentar kosong"}), 400
+        
+    from datetime import datetime
+    created_at = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("INSERT INTO comments (username, avatar, content, rating, created_at, product_id, asset_id) VALUES (?, ?, ?, ?, ?, ?, ?)",
+              (username, avatar, content, rating, created_at, product_id, asset_id))
+    conn.commit()
+    conn.close()
+    return jsonify({"success": True})
+
+@app.route("/api/free-assets", methods=["GET"])
+def api_free_assets():
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("SELECT id, title, description, file_url, filename, created_at FROM free_assets ORDER BY id DESC")
+    rows = c.fetchall()
+    conn.close()
+    return jsonify([{"id": r[0], "title": r[1], "description": r[2] or "", "file_url": r[3], "filename": r[4], "created_at": r[5]} for r in rows])
 
 @app.route("/admin-panel-rahasia", methods=["GET", "POST"])
 def admin_panel():
@@ -786,6 +858,31 @@ def admin_panel():
             conn.commit()
             conn.close()
             return redirect("/admin-panel-rahasia")
+        
+        elif request.form.get("action") == "add_free_asset":
+            title = request.form.get("title").strip()
+            desc = request.form.get("description", "").strip()
+            if "file" in request.files:
+                f = request.files["file"]
+                if f.filename:
+                    import time
+                    fname = f"{int(time.time())}_{f.filename}"
+                    f.save(os.path.join(ASSETS_DIR, fname))
+                    file_url = f"/free_asset/{fname}"
+                    conn = sqlite3.connect(DB_PATH)
+                    c = conn.cursor()
+                    c.execute("INSERT INTO free_assets (title, description, file_url, filename) VALUES (?, ?, ?, ?)", (title, desc, file_url, fname))
+                    conn.commit()
+                    conn.close()
+            return redirect("/admin-panel-rahasia")
+        elif request.form.get("action") == "delete_free_asset":
+            asset_id = request.form.get("asset_id")
+            conn = sqlite3.connect(DB_PATH)
+            c = conn.cursor()
+            c.execute("DELETE FROM free_assets WHERE id=?", (asset_id,))
+            conn.commit()
+            conn.close()
+            return redirect("/admin-panel-rahasia")
         elif request.form.get("action") == "add_category":
             cat_name = request.form.get("category_name").strip().upper()
             if cat_name:
@@ -826,6 +923,8 @@ def admin_panel():
     products = c.fetchall()
     c.execute("SELECT id, name FROM categories ORDER BY name ASC")
     categories = c.fetchall()
+    c.execute("SELECT id, title, description, file_url, filename FROM free_assets ORDER BY id DESC")
+    free_assets = c.fetchall()
     conn.close()
     
     html = f"""
@@ -889,15 +988,15 @@ def admin_panel():
                 <form method="POST" enctype="multipart/form-data" style="display:flex; flex-direction:column; gap:10px; margin-bottom:20px;">
                     <input type="hidden" name="action" value="add_product">
                     <input type="text" name="title" placeholder="Nama Produk" required style="padding:10px; border-radius:5px; border:1px solid #555; background:#000; color:#fff;">
-                    <select name="category" style="padding:10px; border-radius:5px; border:1px solid #555; background:#000; color:#fff;">
-                        <option value="ALBUM FUNKOT">ALBUM FUNKOT</option>
-                        <option value="ALBUM DJ">ALBUM DJ</option>
-                        <option value="ALBUM GALAU">ALBUM GALAU</option>
-                        <option value="ALBUM BKB">ALBUM BKB</option>
-                        <option value="ALBUM JAWA">ALBUM JAWA</option>
-                        <option value="ALBUM SUNDA">ALBUM SUNDA</option>
+                    <select name="category" required style="padding:10px; border-radius:5px; border:1px solid #555; background:#000; color:#fff;">
+                        <option value="">-- Pilih Kategori --</option>
+"
+    for cat in categories:
+        html += f'<option value="{cat[1]}">{cat[1]}</option>'
+    html += """
                     </select>
                     <input type="text" name="price" placeholder="Harga (contoh: Rp 50.000)" required style="padding:10px; border-radius:5px; border:1px solid #555; background:#000; color:#fff;">
+                    <textarea name="description" placeholder="Deskripsi Produk..." rows="3" style="padding:10px; border-radius:5px; border:1px solid #555; background:#000; color:#fff; font-family:sans-serif;"></textarea>
                     <input type="file" name="image" accept="image/*" required style="padding:10px; border-radius:5px; border:1px solid #555; background:#000; color:#fff;">
                     <button type="submit" style="background:#f59e0b; color:#000; font-weight:bold; padding:10px 20px; border:none; border-radius:5px; cursor:pointer;">Tambah Produk</button>
                 </form>
@@ -927,6 +1026,75 @@ def admin_panel():
                     </table>
                 </div>
             </div>
+            
+            <!-- CATEGORIES SECTION -->
+            <div style="flex:1; min-width:400px; background:rgba(255,255,255,0.05); padding:20px; border-radius:12px; border:1px solid #333;">
+                <h3 style="margin-top:0; color:#a855f7;">Tambah Kategori Produk</h3>
+                <form method="POST" style="display:flex; gap:10px; align-items:center; margin-bottom:20px;">
+                    <input type="hidden" name="action" value="add_category">
+                    <input type="text" name="category_name" placeholder="Nama Kategori (contoh: ALBUM DJ)" required style="padding:10px; border-radius:5px; border:1px solid #555; background:#000; color:#fff; width:250px;">
+                    <button type="submit" style="background:#a855f7; color:#fff; font-weight:bold; padding:10px 20px; border:none; border-radius:5px; cursor:pointer;">Tambah</button>
+                </form>
+                
+                <h3 style="margin-top:0;">Daftar Kategori</h3>
+                <div style="max-height:200px; overflow-y:auto;">
+                    <table style="width:100%; border-collapse:collapse; text-align:left;">
+                        <tr style="border-bottom:1px solid #333;"><th style="padding:10px;">ID</th><th style="padding:10px;">Nama Kategori</th><th style="padding:10px;">Aksi</th></tr>
+"
+    for c in categories:
+        html += f"""
+                        <tr style="border-bottom:1px solid #222;">
+                            <td style="padding:10px;">{c[0]}</td>
+                            <td style="padding:10px;">{c[1]}</td>
+                            <td style="padding:10px;">
+                                <form method="POST" style="margin:0;">
+                                    <input type="hidden" name="action" value="delete_category">
+                                    <input type="hidden" name="category_id" value="{c[0]}">
+                                    <button style="background:#ff3366; color:#fff; border:none; padding:5px 10px; border-radius:3px; cursor:pointer;">Hapus</button>
+                                </form>
+                            </td>
+                        </tr>
+        """
+    html += """
+                    </table>
+                </div>
+            </div>
+
+            <!-- FREE ASSETS SECTION -->
+            <div style="flex:1; min-width:400px; background:rgba(255,255,255,0.05); padding:20px; border-radius:12px; border:1px solid #333;">
+                <h3 style="margin-top:0; color:#06b6d4;">Tambah Free Asset</h3>
+                <form method="POST" enctype="multipart/form-data" style="display:flex; flex-direction:column; gap:10px; margin-bottom:20px;">
+                    <input type="hidden" name="action" value="add_free_asset">
+                    <input type="text" name="title" placeholder="Nama Asset (contoh: Efek Suara Tembakan)" required style="padding:10px; border-radius:5px; border:1px solid #555; background:#000; color:#fff;">
+                    <textarea name="description" placeholder="Deskripsi Asset..." rows="3" style="padding:10px; border-radius:5px; border:1px solid #555; background:#000; color:#fff; font-family:sans-serif;"></textarea>
+                    <input type="file" name="file" required style="padding:10px; border-radius:5px; border:1px solid #555; background:#000; color:#fff;">
+                    <button type="submit" style="background:#06b6d4; color:#000; font-weight:bold; padding:10px 20px; border:none; border-radius:5px; cursor:pointer;">Upload Asset</button>
+                </form>
+                
+                <h3 style="margin-top:0;">Daftar Free Assets</h3>
+                <div style="max-height:400px; overflow-y:auto;">
+                    <table style="width:100%; border-collapse:collapse; text-align:left;">
+                        <tr style="border-bottom:1px solid #333;"><th style="padding:10px;">Judul</th><th style="padding:10px;">File</th><th style="padding:10px;">Aksi</th></tr>
+"
+    for fa in free_assets:
+        html += f"""
+                        <tr style="border-bottom:1px solid #222;">
+                            <td style="padding:10px; font-weight:bold;">{fa[1]}</td>
+                            <td style="padding:10px; font-size:12px; color:#888;">{fa[4]}</td>
+                            <td style="padding:10px;">
+                                <form method="POST" style="margin:0;">
+                                    <input type="hidden" name="action" value="delete_free_asset">
+                                    <input type="hidden" name="asset_id" value="{fa[0]}">
+                                    <button style="background:#ff3366; color:#fff; border:none; padding:5px 10px; border-radius:3px; cursor:pointer;">Hapus</button>
+                                </form>
+                            </td>
+                        </tr>
+        """
+    html += """
+                    </table>
+                </div>
+            </div>
+            
         </div>
     </body>
     """
